@@ -1,5 +1,7 @@
 CREATE DATABASE TestDatabase
 
+GO
+
 USE TestDatabase
 
 CREATE TABLE Users (
