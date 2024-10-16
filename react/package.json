@@ -1,0 +1,129 @@
+{
+  "name": "@coreui/coreui-free-react-admin-template",
+  "version": "3.2.1",
+  "description": "CoreUI React Open Source Bootstrap 4 Admin Template",
+  "author": {
+    "name": "CoreUI",
+    "url": "https://coreui.io",
+    "github": "https://github.com/coreui",
+    "twitter": "https://twitter.com/core_ui"
+  },
+  "contributors": [
+    {
+      "name": "CoreUI Team",
+      "url": "https://github.com/orgs/coreui/people"
+    }
+  ],
+  "homepage": ".",
+  "copyright": "Copyright 2017-2020 creativeLabs Łukasz Holeczek",
+  "license": "MIT",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:coreui/coreui-free-react-admin-template.git"
+  },
+  "dependencies": {
+    "@amcharts/amcharts4": "^4.10.33",
+    "@coreui/chartjs": "^2.0.0",
+    "@coreui/coreui": "^3.4.0",
+    "@coreui/icons": "^2.0.1",
+    "@coreui/icons-react": "^1.1.0",
+    "@coreui/react": "^3.4.6",
+    "@coreui/react-chartjs": "^1.1.0",
+    "@coreui/utils": "^1.3.1",
+    "@coreui/vue": "^3.2.9",
+    "@fortawesome/fontawesome-free": "^6.6.0",
+    "@fortawesome/fontawesome-svg-core": "^1.2.36",
+    "@fortawesome/free-brands-svg-icons": "^5.15.4",
+    "@fortawesome/free-regular-svg-icons": "^5.15.4",
+    "@fortawesome/free-solid-svg-icons": "^5.15.4",
+    "@fortawesome/react-fontawesome": "^0.1.15",
+    "@fullcalendar/daygrid": "^5.9.0",
+    "@fullcalendar/interaction": "^5.9.0",
+    "@fullcalendar/react": "^5.9.0",
+    "@fullcalendar/timegrid": "^5.9.0",
+    "@react-native-community/netinfo": "^6.0.0",
+    "@tinymce/tinymce-react": "^3.13.1",
+    "@wojtekmaj/enzyme-adapter-react-17": "^0.6.0",
+    "axios": "^0.21.4",
+    "chart.js": "^4.4.2",
+    "classnames": "^2.3.1",
+    "core-js": "^3.10.1",
+    "coreui": "^0.4.2-alpha2",
+    "dependencies": "0.0.1",
+    "devextreme": "^21.2.4",
+    "devextreme-react": "^21.2.4",
+    "enzyme": "^3.11.0",
+    "exceljs": "^4.3.0",
+    "file-saver-es": "^2.0.5",
+    "jspdf": "^2.5.0",
+    "jspdf-autotable": "^3.5.23",
+    "loaders.css": "^0.1.2",
+    "node-snap7": "^1.0.6",
+    "process": "^0.11.10",
+    "prop-types": "^15.7.2",
+    "react": "^17.0.2",
+    "react-alert": "^7.0.3",
+    "react-app-polyfill": "^2.0.0",
+    "react-chartjs-2": "^5.2.0",
+    "react-confirm": "^0.1.24",
+    "react-detect-offline": "^2.4.4",
+    "react-dom": "^17.0.2",
+    "react-dropzone": "^14.2.3",
+    "react-dropzone-uploader": "^2.11.0",
+    "react-form-wizard-component": "^0.1.7",
+    "react-internet-status": "^1.2.2",
+    "react-loaders": "^3.0.1",
+    "react-multiple-select-dropdown-lite": "^2.0.5",
+    "react-multiselect-checkboxes": "^0.1.1",
+    "react-native-modal": "^11.10.0",
+    "react-redux": "^7.2.3",
+    "react-responsive-masonry": "^2.2.0",
+    "react-router-dom": "^5.3.4",
+    "react-select": "^4.3.1",
+    "react-timeline-scribble": "^1.0.14",
+    "react-to-print": "^2.14.7",
+    "redux": "^4.0.5",
+    "s7client": "^1.1.0",
+    "sass": "^1.32.8",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.13.14",
+    "auto-changelog": "~2.2.1",
+    "react-scripts": "^4.0.3"
+  },
+  "scripts": {
+    "start": "react-scripts --openssl-legacy-provider start",
+    "build": "react-scripts --openssl-legacy-provider build",
+    "test": "react-scripts test",
+    "test:cov": "npm test -- --coverage --watchAll=false",
+    "test:debug": "react-scripts --inspect-brk test --runInBand",
+    "eject": "react-scripts eject",
+    "changelog": "auto-changelog --starting-version 3.0.0 --commit-limit false --hide-credit"
+  },
+  "bugs": {
+    "url": "https://github.com/coreui/coreui-free-react-admin-template/issues"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 10",
+    "not op_mini all"
+  ],
+  "jest": {
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx}",
+      "!**/*index.js",
+      "!src/serviceWorker.js",
+      "!src/polyfill.js"
+    ]
+  },
+  "engines": {
+    "node": ">=10",
+    "npm": ">=6"
+  }
+}

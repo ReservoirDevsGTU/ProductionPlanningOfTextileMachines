@@ -1,0 +1,121 @@
+.talep-ekle-buton-css {
+    color: rgb(0, 128, 255); /* Yazı rengi mavi */
+    background-color: transparent; /* Arka plan transparan */
+    border: 1px solid rgb(0, 128, 255); /* Mavi çerçeve */
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s; /* Geçiş efekti */
+  }
+  
+  .talep-ekle-buton-css:hover {
+    background-color: rgb(0, 55, 255); /* Hover üzerinde arka plan mavi */
+    color: white; /* Yazı rengi beyaz */
+  }
+  
+  .talep-ekle-buton-css:active {
+    background-color: rgb(0, 55, 255); /* Butona basıldığında koyu mavi */
+    color: white; /* Yazı beyaz */
+  }
+  
+
+  .tablo {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+  }
+  
+  .tablo th, .tablo td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .tablo th {
+    background-color: #f2f2f2;
+  }
+  
+  .duzenle-butonlari {
+    margin-right: 5px;
+    padding: 8px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .duzenle-butonlari-duzenle {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .duzenle-butonlari-sil {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  .duzenle-butonlari-yazdir {
+    background-color: #ffc107;
+    color: white;
+  }
+  
+  .duzenle-butonlari:hover {
+    opacity: 0.8;
+  }
+  
+
+ 
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 400px;
+}
+
+.modal-body {
+  background-color: #f8d7da;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.modal-button {
+  padding: 10px 20px;
+  margin: 5px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.modal-button.cancel {
+  background-color: #6c757d;
+  color: white;
+}
+
+.modal-button.delete {
+  background-color: #dc3545;
+  color: white;
+}
+
+.modal-button:hover {
+  opacity: 0.9;
+}
