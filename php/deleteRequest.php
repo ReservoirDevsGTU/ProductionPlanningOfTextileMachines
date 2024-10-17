@@ -18,9 +18,9 @@ header('Content-Type: application/json');
 include 'connect.php';
 
 # Check if 'request_id' is provided in the GET parameters
-if (isset($_GET['request_id'])) {
+if (isset($_POST['request_id'])) {
     # Convert 'request_id' to an integer for safety
-    $requestId = intval($_GET['request_id']);
+    $requestId = intval($_POST['request_id']);
     sqlsrv_begin_transaction($conn);
 
     // Mark the PurchaseRequests record as deleted by setting IsDeleted = 1
