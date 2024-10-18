@@ -5,6 +5,11 @@ import { useHistory } from 'react-router-dom';
 import '../css/SatinAlmaTalepleri.css'; 
 import TalepEkleme from './TalepEkleme'; // Talep ekleme bileşeni
 import axios from 'axios';
+import baseURL from "./baseURL.js"; //add this file yourself in this directory like following:
+                                    /*
+                                        const baseURL = "your php server url";
+                                        export default baseURL;
+                                    */
 
 const SatinAlmaTalepleri = () => {
   const [showModal, setShowModal] = useState(false); // Modalın görünürlüğünü kontrol eden state
@@ -33,7 +38,7 @@ const SatinAlmaTalepleri = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/requestListing.php');
+        const response = await axios.get(baseURL + '/requestListing.php');
         setTableData(response.data);
       }
       catch(e) {}

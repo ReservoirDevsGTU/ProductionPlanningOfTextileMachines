@@ -1,8 +1,6 @@
 <?php
 include 'connect.php';
 
-$conn = connectSQL();
-
 $sql = "INSERT INTO PurchaseRequests(RequestID, RequestDeadline, RequestedBy, CreatedBy, CreationDate, RequestStatus, IsDeleted)
         OUTPUT INSERTED.RequestID
         VALUES((SELECT ISNULL(MAX(RequestID)+1,1) FROM PurchaseRequests), ?, ?, ?, GETDATE(), 1, 0)";
