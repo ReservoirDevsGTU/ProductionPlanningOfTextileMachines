@@ -1,21 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import '../css/TalepEkleme.css';
 import { useHistory } from 'react-router-dom';
+import axios from 'axios';
+import baseURL from './baseURL.js';
 
-const TalepEkleme = () => {
+const TalepEkleme = ({exitFunc}) => {
   const [selectedMaterials, setSelectedMaterials] = useState([]); // Seçilen malzemeleri tutar
   const [selectedButton, setSelectedButton] = useState('secili'); // Varsayılan olarak "Seçili Malzemeler" seçili
-  const [allMaterials] = useState([ // Tüm malzemeler
-    { id: 1, name: "XXX", stock: 10, unit: "Adet" },
-    { id: 2, name: "XXY", stock: 100, unit: "Metre" },
-    { id: 3, name: "XYY", stock: 55, unit: "Litre" },
-  ]);
+  const [allMaterials, setAllMaterials] = useState([]);
+  const [users, setUsers] = useState([]);
   
   const history = useHistory(); // Geçmişi kullanmak için hook
 
   // Geri butonuna basıldığında önceki sayfaya dön
   const handleGoBack = () => {
-    history.goBack();
+    exitFunc();
   };
 
   // Buton seçimlerini ayarla
@@ -62,6 +61,18 @@ const TalepEkleme = () => {
       alert("Lütfen tüm gerekli alanları doldurun!");
       return;
     }
+    axios.post(baseURL + '/addRequest.php', {
+        RequestDeadline: requestDetails.date,
+        RequestedBy: requestDetails.requester,
+        CreatedBy: requestDetails.requester,
+        RequestDescription: requestDetails.description,
+        ManufacturingUnitID: 1,
+        IsDraft: true,
+        Materials: selectedMaterials.map((m) => ({
+            MaterialID: m.id,
+            RequestedAmount: m.quantity
+        }))
+    });
     console.log("Form Submitted: ", requestDetails, selectedMaterials);
   };
 
@@ -71,15 +82,35 @@ const TalepEkleme = () => {
       alert("Lütfen tüm gerekli alanları doldurun!");
       return;
     }
+    axios.post(baseURL + '/addRequest.php', {
+        RequestDeadline: requestDetails.date,
+        RequestedBy: requestDetails.requester,
+        CreatedBy: requestDetails.requester,
+        RequestDescription: requestDetails.description,
+        ManufacturingUnitID: 1,
+        IsDraft: false,
+        Materials: selectedMaterials.map((m) => ({
+            MaterialID: m.id,
+            RequestedAmount: m.quantity
+        }))
+    });
     console.log("Onaya Gönderildi: ", requestDetails, selectedMaterials);
     alert("Talebiniz onaya gönderildi.");
   };
 
-  const users = [ // Kullanıcı listesi
-    { id: 1, name: "Kullanıcı 1" },
-    { id: 2, name: "Kullanıcı 2" },
-    { id: 3, name: "Kullanıcı 3" },
-  ];
+  const fetchData = async () => {
+    try {
+      const response = await axios.get(baseURL + '/listAllMaterials.php');
+      setAllMaterials(response.data);
+      const response1 = await axios.get(baseURL + '/listUsers.php');
+      setUsers(response1.data);
+    }
+    catch(e) {}
+  }
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   // Görüntülenecek malzeme listesini belirle
   const displayedMaterials = selectedButton === 'secili' ? selectedMaterials : allMaterials;
@@ -118,7 +149,7 @@ const TalepEkleme = () => {
           >
             <option value="">Seçiniz</option>
             {users.map((user) => (
-              <option key={user.id} value={user.name}>
+              <option key={user.id} value={user.id}>
                 {user.name}
               </option>
             ))}
@@ -167,8 +198,8 @@ const TalepEkleme = () => {
             <tr key={material.id}>
               <td>{material.id}</td>
               <td>{material.name}</td>
-              <td>{material.stock}</td>
-              <td>{material.unit}</td>
+              <td>{material.quantity}</td>
+              <td>{material.unitID}</td>
               <td>
                 {selectedButton === 'secili' && (
                   <input

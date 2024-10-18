@@ -23,6 +23,10 @@ const SatinAlmaTalepleri = () => {
     setShowTalepEkleme(true); // Talep ekleme sayfasını göster
   };
 
+  const exitTalepEkleme = () => {
+    setShowTalepEkleme(false);
+  }
+
   // Silme işlemini başlatmak için modalı aç
   const handleDeleteClick = (item) => {
     setSelectedItem(item); // Silinecek öğeyi belirle
@@ -100,7 +104,7 @@ const SatinAlmaTalepleri = () => {
           </table>
         </div>
       ) : (
-        <TalepEkleme /> // Talep ekleme formu gösteriliyor
+        <TalepEkleme exitFunc={exitTalepEkleme} /> // Talep ekleme formu gösteriliyor
       )}
 
       {/* Silme Onay Modalı */}

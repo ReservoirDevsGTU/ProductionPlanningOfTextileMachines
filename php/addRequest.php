@@ -3,14 +3,15 @@ include 'connect.php';
 
 $sql = "INSERT INTO PurchaseRequests(RequestID, RequestDeadline, RequestedBy, CreatedBy, CreationDate, RequestStatus, IsDeleted)
         OUTPUT INSERTED.RequestID
-        VALUES((SELECT ISNULL(MAX(RequestID)+1,1) FROM PurchaseRequests), ?, ?, ?, GETDATE(), 1, 0)";
+        VALUES((SELECT ISNULL(MAX(RequestID)+1,1) FROM PurchaseRequests), ?, ?, ?, GETDATE(), ?, 0)";
 
 $input = json_decode(file_get_contents("php://input"), true);
 
 $stmt = sqlsrv_query($conn, $sql, array(
-    $_POST["RequestDeadline"],
-    $_POST["RequestedBy"],
-    $_POST["CreatedBy"]
+    $input["RequestDeadline"],
+    $input["RequestedBy"],
+    $input["CreatedBy"],
+    $input["IsDraft"] ? 0 : 1
     ));
 
 if($stmt !== false) {
@@ -20,8 +21,8 @@ if($stmt !== false) {
         VALUES((SELECT ISNULL(MAX(RequestInfoID)+1,1) FROM PurchaseRequestInfos), ?, ?, ?, 1, 0)";
     $stmt1 = sqlsrv_query($conn, $sql1, array(
         $id,
-        $_POST["RequestDescription"],
-        $_POST["ManufacturingUnitID"]
+        $input["RequestDescription"],
+        $input["ManufacturingUnitID"]
         ));
     sqlsrv_free_stmt($stmt1);
     $sql2 = "INSERT INTO PurchaseRequestDetails(RequestDetailID, RequestID, MaterialID, RequestedAmount, OfferedAmount, OrderedAmount, ProvidedAmount, MaterialStatus, IsDeleted)
