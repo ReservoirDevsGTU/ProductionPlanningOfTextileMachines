@@ -29,20 +29,23 @@ const SatinAlmaTalepleri = () => {
     setShowModal(true); // Modalı aç
   };
 
+  const fetchData = async () => {
+    try {
+      const response = await axios.get(baseURL + '/requestListing.php');
+      setTableData(response.data);
+    }
+    catch(e) {}
+  }
+
   // Silme işlemini onayla
   const confirmDelete = () => {
     console.log(`Silinecek ID: ${selectedItem.RequestID}`);
+    axios.post(baseURL + '/deleteRequest.php', new URLSearchParams({request_id: selectedItem.RequestID}));
     setShowModal(false); // Modalı kapat
+    fetchData();
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(baseURL + '/requestListing.php');
-        setTableData(response.data);
-      }
-      catch(e) {}
-    }
     fetchData();
   }, []);
 
