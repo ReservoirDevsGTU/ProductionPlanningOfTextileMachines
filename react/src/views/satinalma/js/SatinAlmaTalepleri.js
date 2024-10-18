@@ -1,43 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrashAlt, faPrint } from '@fortawesome/free-solid-svg-icons';
 import { useHistory } from 'react-router-dom';
 import '../css/SatinAlmaTalepleri.css'; 
 import TalepEkleme from './TalepEkleme'; // Talep ekleme bileşeni
+import axios from 'axios';
 
 const SatinAlmaTalepleri = () => {
   const [showModal, setShowModal] = useState(false); // Modalın görünürlüğünü kontrol eden state
   const [showTalepEkleme, setShowTalepEkleme] = useState(false); // Talep ekleme görünürlüğü
   const [selectedItem, setSelectedItem] = useState(null); // Silinecek item'in id'si
+  const [tableData, setTableData] = useState([]);
   const history = useHistory(); // Yönlendirme için kullanılan hook
-
-  // Backend'den gelecek veri (statik örnek)
-  const data = [
-    {
-      id: 1,
-      talepNo: '3131',
-      terminTarihi: '11/11/2024',
-      talepEden: 'Mehmet Emin',
-      aciklama: 'evet',
-      durum: 'Onay Bekliyor',
-    },
-    {
-      id: 2,
-      talepNo: '3132',
-      terminTarihi: '12/12/2024',
-      talepEden: 'Batuhan',
-      aciklama: 'tamam',
-      durum: 'Onaylandı',
-    },
-    {
-      id: 3,
-      talepNo: '3133',
-      terminTarihi: '10/10/2024',
-      talepEden: 'Çağrı',
-      aciklama: 'olmadı',
-      durum: 'Ret',
-    },
-  ];
 
   // Talep ekleme formunu açma
   const handleTalepEkleClick = () => {
@@ -55,6 +29,17 @@ const SatinAlmaTalepleri = () => {
     console.log(`Silinecek ID: ${selectedItem.id}`);
     setShowModal(false); // Modalı kapat
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('http://localhost:8000/requestListing.php');
+        setTableData(response.data);
+      }
+      catch(e) {}
+    }
+    fetchData();
+  }, []);
 
   return (
     <div>
@@ -80,7 +65,7 @@ const SatinAlmaTalepleri = () => {
               </tr>
             </thead>
             <tbody>
-              {data.map((item) => (
+              {tableData.map((item) => (
                 <tr key={item.id}>
                   <td>
                     <button className="duzenle-butonlari duzenle-butonlari-duzenle">
@@ -96,11 +81,11 @@ const SatinAlmaTalepleri = () => {
                       <FontAwesomeIcon icon={faPrint} />
                     </button>
                   </td>
-                  <td>{item.talepNo}</td>
-                  <td>{item.terminTarihi}</td>
-                  <td>{item.talepEden}</td>
-                  <td>{item.aciklama}</td>
-                  <td>{item.durum}</td>
+                  <td>{item.RequestID}</td>
+                  <td>{item.RequestDeadline}</td>
+                  <td>{item.RequestedBy}</td>
+                  <td>{item.RequestDescription}</td>
+                  <td>{item.RequestStatus}</td>
                 </tr>
               ))}
             </tbody>

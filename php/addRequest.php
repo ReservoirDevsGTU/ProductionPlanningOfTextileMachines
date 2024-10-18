@@ -10,9 +10,9 @@ $sql = "INSERT INTO PurchaseRequests(RequestID, RequestDeadline, RequestedBy, Cr
 $input = json_decode(file_get_contents("php://input"), true);
 
 $stmt = sqlsrv_query($conn, $sql, array(
-    $input["RequestDeadline"],
-    $input["RequestedBy"],
-    $input["CreatedBy"]
+    $_POST["RequestDeadline"],
+    $_POST["RequestedBy"],
+    $_POST["CreatedBy"]
     ));
 
 if($stmt !== false) {
@@ -22,8 +22,8 @@ if($stmt !== false) {
         VALUES((SELECT ISNULL(MAX(RequestInfoID)+1,1) FROM PurchaseRequestInfos), ?, ?, ?, 1, 0)";
     $stmt1 = sqlsrv_query($conn, $sql1, array(
         $id,
-        $input["RequestDescription"],
-        $input["ManufacturingUnitID"]
+        $_POST["RequestDescription"],
+        $_POST["ManufacturingUnitID"]
         ));
     sqlsrv_free_stmt($stmt1);
     $sql2 = "INSERT INTO PurchaseRequestDetails(RequestDetailID, RequestID, MaterialID, RequestedAmount, OfferedAmount, OrderedAmount, ProvidedAmount, MaterialStatus, IsDeleted)
