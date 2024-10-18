@@ -3,8 +3,6 @@ header('Content-Type: application/json');
 
 include 'connect.php';
 
-$conn = connectSQL();
-
 $sql = "SELECT
         PurchaseRequests.RequestID,
         PurchaseRequests.RequestDeadline,
