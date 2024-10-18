@@ -1,0 +1,164 @@
+.talep-container {
+    width: 80%;
+    margin: 0 auto;
+    margin-top: 2%;
+    margin-bottom: 20%;
+    position: relative; /* Container içinde sabit pozisyonlamaya izin verir */
+  }
+  
+  .form-group {
+    margin-top: 2%;
+    margin-bottom: 15px;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  
+  input[type="text"],
+  input[type="date"],
+  textarea {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  textarea {
+    height: 100px;
+  }
+  
+ 
+  
+  .material-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .material-table th,
+  .material-table td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: left;
+  }
+  
+  .material-table th {
+    background-color: #f4f4f4;
+  }
+  
+  .material-table input[type="number"] {
+    width: 80px;
+  }
+  
+  .material-table button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  
+  .material-table button:hover {
+    background-color: #c82333;
+  }
+
+  .material-table + h3 {
+    margin-top: 40px; 
+  }
+
+   /* Sağ üst köşeye sabitlenen buton grubu */
+   .fixed-button-group {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+  }
+  
+  /* Buton tasarımı */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+  
+.btn-kaydet{
+    background-color: #0056b3;
+}
+.btn-kaydet:hover {
+    background-color: #0056b3;
+}
+/* Onaya Gönder butonunun farklı renk olması */
+.btn-onaya-gonder {
+    background-color: #28a745;
+}
+
+.btn-onaya-gonder:hover {
+    background-color: #218838;
+}
+
+.btn-group{
+    margin: 20px 0;
+}
+
+
+.btn-secili-malzemeler,
+.btn-tum-malzemeler {
+    padding: 10px 20px;
+    border: 1px solid transparent; /* Kenarlık başlangıçta şeffaf */
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-right: 10px;
+    transition: all 0.3s ease; /* Geçiş animasyonu */
+}
+
+/* Seçili Malzemeler butonu */
+.btn-secili-malzemeler {
+    background-color: white; /* Beyaz arka plan */
+    color: black; /* Siyah metin */
+}
+
+/* Tüm Malzemeler butonu */
+.btn-tum-malzemeler {
+    background-color: white; /* Beyaz arka plan */
+    color: black; /* Siyah metin */
+}
+
+/* Seçili butonun durumu */
+.btn-secili-malzemeler.active,
+.btn-tum-malzemeler.active {
+    background-color: black; /* Koyu arka plan */
+    color: white; /* Beyaz metin */
+}
+
+/* Butonların hover durumu */
+.btn-secili-malzemeler:hover,
+.btn-tum-malzemeler:hover {
+    opacity: 0.9; /* Hoverda opaklık değişimi */
+}
+
+/* Geri butonu stili */
+.btn-back {
+  display: inline-block;      
+  font-size: 10px;            
+  padding: 10px 20px;        
+  background-color: black;   
+  color: white;              
+  border: none;              
+  border-radius: 5px;        
+  cursor: pointer;            
+  margin-bottom: 20px;       
+}
+
+.btn-back:hover {
+  background-color: #333;     
+}
