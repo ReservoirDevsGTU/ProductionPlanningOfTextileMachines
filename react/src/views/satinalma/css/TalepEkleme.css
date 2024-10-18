@@ -1,164 +1,187 @@
 .talep-container {
-    width: 80%;
-    margin: 0 auto;
-    margin-top: 2%;
-    margin-bottom: 20%;
-    position: relative; /* Container içinde sabit pozisyonlamaya izin verir */
-  }
-  
-  .form-group {
-    margin-top: 2%;
-    margin-bottom: 15px;
-  }
-  
-  label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-  }
-  
-  input[type="text"],
-  input[type="date"],
-  textarea {
-    width: 100%;
-    padding: 8px;
-    margin-top: 5px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-  
-  textarea {
-    height: 100px;
-  }
-  
- 
-  
-  .material-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-  }
-  
-  .material-table th,
-  .material-table td {
-    padding: 10px;
-    border: 1px solid #ccc;
-    text-align: left;
-  }
-  
-  .material-table th {
-    background-color: #f4f4f4;
-  }
-  
-  .material-table input[type="number"] {
-    width: 80px;
-  }
-  
-  .material-table button {
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    cursor: pointer;
-  }
-  
-  .material-table button:hover {
-    background-color: #c82333;
-  }
+  width: 80%;
+  margin: 2% auto 20%; /* Üstte 2%, altta 20% boşluk */
+  position: relative; /* Sabit pozisyonlama için gerekli */
+}
 
-  .material-table + h3 {
-    margin-top: 40px; 
-  }
+.termin-requester {
+  display: flex;
+  justify-content: space-between; /* Elemanları yan yana yerleştirir */
+  align-items: flex-end; /* Üst kenarları hizalar */
+}
 
-   /* Sağ üst köşeye sabitlenen buton grubu */
-   .fixed-button-group {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    display: flex;
-    gap: 10px;
-  }
-  
-  /* Buton tasarımı */
+.form-group {
+  margin: 0;
+  width: 50%; /* Her bir alanın genişliğini %50 yap */
+}
+
+.requester-container {
+  width: 40%; /* Seçici alanın genişliği */
+  padding-bottom: 8px;
+}
+
+/* Seçim kutusu stili */
+.requester-container select {
+  height: 45px; /* Dropdown yüksekliği */
+  width: 100%; /* Genişlik %100 */
+  padding: 8px; /* İçerik için boşluk */
+  border: 1px solid #ccc; /* Kenarlık rengi */
+  border-radius: 4px; /* Köşeleri yuvarlat */
+}
+
+label {
+  display: block; /* Etiketler blok olarak gösterilecek */
+  margin-bottom: 5px;
+  font-weight: bold; /* Kalın yazı */
+}
+
+input[type="text"],
+input[type="date"],
+textarea {
+  width: 100%; /* Genişlik %100 */
+  padding: 8px; /* İçerik için boşluk */
+  margin: 5px 0 10px; /* Üstte 5px, altta 10px boşluk */
+  border: 1px solid #ccc; /* Kenarlık rengi */
+  border-radius: 4px; /* Köşeleri yuvarlat */
+}
+
+textarea {
+  height: 100px; /* Metin kutusunun yüksekliği */
+}
+
+.material-table {
+  width: 100%; /* Tablonun genişliği */
+  border-collapse: collapse; /* Kenarları birleştir */
+  margin-top: 20px; /* Üstte boşluk */
+}
+
+.material-table th,
+.material-table td {
+  padding: 10px; /* Hücre içi boşluk */
+  border: 1px solid #ccc; /* Kenarlık rengi */
+  text-align: left; /* Metin soldan hizalı */
+}
+
+.material-table th {
+  background-color: #f4f4f4; /* Başlık arka plan rengi */
+}
+
+.material-table input[type="number"] {
+  width: 80px; /* Miktar girişi genişliği */
+}
+
+.material-table button {
+  background-color: #dc3545; /* Sil butonu arka plan rengi */
+  color: white; /* Metin rengi */
+  border: none; /* Kenar yok */
+  padding: 5px 10px; /* İçerik boşluğu */
+  cursor: pointer; /* Fare imleci değişimi */
+}
+
+.material-table button:hover {
+  background-color: #c82333; /* Hover durumunda arka plan rengi */
+}
+
+.material-table + h3 {
+  margin-top: 40px; /* H3 için üstte boşluk */
+}
+
+/* Buton tasarımı */
 .btn {
-    padding: 10px 20px;
-    border: none;
-    color: white;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-right: 10px;
-}
-  
-.btn-kaydet{
-    background-color: #0056b3;
-}
-.btn-kaydet:hover {
-    background-color: #0056b3;
-}
-/* Onaya Gönder butonunun farklı renk olması */
-.btn-onaya-gonder {
-    background-color: #28a745;
+  padding: 10px 20px; /* İçerik boşluğu */
+  border: none; /* Kenar yok */
+  color: white; /* Metin rengi */
+  border-radius: 4px; /* Köşeleri yuvarlat */
+  cursor: pointer; /* Fare imleci değişimi */
+  margin-right: 10px; /* Sağda boşluk */
 }
 
-.btn-onaya-gonder:hover {
-    background-color: #218838;
+.btn-group {
+  margin: 20px 0; /* Üstte ve altta boşluk */
 }
-
-.btn-group{
-    margin: 20px 0;
-}
-
 
 .btn-secili-malzemeler,
 .btn-tum-malzemeler {
-    padding: 10px 20px;
-    border: 1px solid transparent; /* Kenarlık başlangıçta şeffaf */
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    margin-right: 10px;
-    transition: all 0.3s ease; /* Geçiş animasyonu */
+  padding: 10px 20px; /* İçerik boşluğu */
+  border: 1px solid transparent; /* Başlangıçta şeffaf kenarlık */
+  border-radius: 4px; /* Köşeleri yuvarlat */
+  cursor: pointer; /* Fare imleci değişimi */
+  font-weight: bold; /* Kalın yazı */
+  margin-right: 10px; /* Sağda boşluk */
+  transition: all 0.3s ease; /* Geçiş animasyonu */
 }
 
-/* Seçili Malzemeler butonu */
+/* Seçili ve tüm malzemeler butonları arka plan rengi */
 .btn-secili-malzemeler {
-    background-color: white; /* Beyaz arka plan */
-    color: black; /* Siyah metin */
+  background-color: white; /* Beyaz arka plan */
+  color: black; /* Siyah metin */
 }
 
-/* Tüm Malzemeler butonu */
 .btn-tum-malzemeler {
-    background-color: white; /* Beyaz arka plan */
-    color: black; /* Siyah metin */
+  background-color: white; /* Beyaz arka plan */
+  color: black; /* Siyah metin */
 }
 
-/* Seçili butonun durumu */
+/* Butonların aktif durumu */
 .btn-secili-malzemeler.active,
 .btn-tum-malzemeler.active {
-    background-color: black; /* Koyu arka plan */
-    color: white; /* Beyaz metin */
+  background-color: black; /* Koyu arka plan */
+  color: white; /* Beyaz metin */
 }
 
 /* Butonların hover durumu */
 .btn-secili-malzemeler:hover,
 .btn-tum-malzemeler:hover {
-    opacity: 0.9; /* Hoverda opaklık değişimi */
+  opacity: 0.9; /* Hoverda opaklık değişimi */
 }
 
 /* Geri butonu stili */
 .btn-back {
-  display: inline-block;      
-  font-size: 10px;            
-  padding: 10px 20px;        
-  background-color: black;   
-  color: white;              
-  border: none;              
-  border-radius: 5px;        
-  cursor: pointer;            
-  margin-bottom: 20px;       
+  font-size: 10px; /* Yazı boyutu */
+  padding: 10px 20px; /* İçerik boşluğu */
+  background-color: black; /* Arka plan rengi */
+  color: white; /* Metin rengi */
+  border: none; /* Kenar yok */
+  border-radius: 5px; /* Köşeleri yuvarlat */
+  cursor: pointer; /* Fare imleci değişimi */
+  margin-bottom: 20px; /* Altta boşluk */
+  float: left; /* Solda hizala */
 }
 
 .btn-back:hover {
-  background-color: #333;     
+  background-color: #333; /* Hover durumunda arka plan rengi */
+}
+
+/* Sağ üst köşeye sabitlenen buton grubu */
+.fixed-button-group {
+  position: absolute; /* Sabit pozisyonlama */
+  top: 20px;
+  right: 20px;
+  display: flex; /* Esnek kutu düzeni */
+  gap: 10px; /* Butonlar arasında boşluk */
+}
+
+.button-group-container {
+  display: flex; /* Esnek kutu düzeni */
+  justify-content: space-between; /* Elemanları yan yana yerleştir */
+  align-items: center; /* Dikeyde hizala */
+  width: 100%; /* Genişlik %100 */
+  padding: 10px; /* İçerik boşluğu */
+}
+
+.btn-kaydet {
+  background-color: #0056b3; /* Kaydet butonu arka plan rengi */
+}
+
+.btn-kaydet:hover {
+  background-color: #004a99; /* Hover durumunda arka plan rengi */
+}
+
+/* Onaya Gönder butonunun farklı renk olması */
+.btn-onaya-gonder {
+  background-color: #28a745; /* Onaya gönder butonu arka plan rengi */
+}
+
+.btn-onaya-gonder:hover {
+  background-color: #218838; /* Hover durumunda arka plan rengi */
 }
