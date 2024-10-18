@@ -26,7 +26,7 @@ const SatinAlmaTalepleri = () => {
 
   // Silme işlemini onayla
   const confirmDelete = () => {
-    console.log(`Silinecek ID: ${selectedItem.id}`);
+    console.log(`Silinecek ID: ${selectedItem.RequestID}`);
     setShowModal(false); // Modalı kapat
   };
 
@@ -101,7 +101,7 @@ const SatinAlmaTalepleri = () => {
           <div className="modal-content">
             <h2>Silme Onayı</h2>
             <div className="modal-body">
-              <p>'{selectedItem?.talepNo}' numaralı talebi silmek istediğinizden emin misiniz?</p>
+              <p>'{selectedItem?.RequestID}' numaralı talebi silmek istediğinizden emin misiniz?</p>
             </div>
             <div className="modal-footer">
               <button className="modal-button cancel" onClick={() => setShowModal(false)}>İptal</button>
