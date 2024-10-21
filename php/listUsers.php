@@ -1,6 +1,5 @@
 <?php
-header('Content-Type: application/json');
-
+include 'outputHeaders.php';
 include 'connect.php';
 
 $sql = "SELECT UserID, UserName FROM Users";
