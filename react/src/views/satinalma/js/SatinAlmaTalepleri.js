@@ -7,7 +7,7 @@ import TalepEkleme from './TalepEkleme'; // Talep ekleme bileşeni
 import axios from 'axios';
 import baseURL from "./baseURL.js"; //add this file yourself in this directory like following:
                                     /*
-                                        const baseURL = "your php server url";
+                                        const baseURL = "http://localhost:8000";
                                         export default baseURL;
                                     */
 
@@ -39,7 +39,7 @@ const SatinAlmaTalepleri = () => {
       setTableData(response.data);
     }
     catch(e) {}
-  }
+  };
 
   // Silme işlemini onayla
   const confirmDelete = () => {
@@ -47,6 +47,11 @@ const SatinAlmaTalepleri = () => {
     axios.post(baseURL + '/deleteRequest.php', new URLSearchParams({request_id: selectedItem.RequestID}));
     setShowModal(false); // Modalı kapat
     fetchData();
+  };
+
+  // Düzenleme işlemi için yönlendirme
+  const handleEditClick = (item) => {
+    history.push(`/talep-duzenle/${item.RequestID}`); // Talep ID'si ile yönlendirme yapılır
   };
 
   useEffect(() => {
@@ -80,7 +85,10 @@ const SatinAlmaTalepleri = () => {
               {tableData.map((item) => (
                 <tr key={item.id}>
                   <td>
-                    <button className="duzenle-butonlari duzenle-butonlari-duzenle">
+                    <button 
+                      className="duzenle-butonlari duzenle-butonlari-duzenle"
+                      onClick={() => handleEditClick(item)} // Düzenleme butonuna tıklanıldığında yönlendirme yapılır
+                    >
                       <FontAwesomeIcon icon={faEdit} />
                     </button>
                     <button 
