@@ -1,5 +1,5 @@
 <?php
-include 'outputHeaders.php';
+include 'headers.php';
 include 'connect.php';
 
 $sql = "SELECT UserID, UserName FROM Users";

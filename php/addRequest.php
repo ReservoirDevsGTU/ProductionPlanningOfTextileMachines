@@ -1,4 +1,5 @@
 <?php
+include 'headers.php';
 include 'connect.php';
 
 $sql = "INSERT INTO PurchaseRequests(RequestID, RequestDeadline, RequestedBy, CreatedBy, CreationDate, RequestStatus, IsDeleted)
