@@ -20,10 +20,12 @@ const SatinAlmaTalepleri = () => {
 
   // Talep ekleme formunu açma
   const handleTalepEkleClick = () => {
-    setShowTalepEkleme(true); // Talep ekleme sayfasını göster
+    //setShowTalepEkleme(true); // Talep ekleme sayfasını göster
+    history.push('/satinalma/talep-ekleme');
   };
 
   const exitTalepEkleme = () => {
+    //fetchData();
     setShowTalepEkleme(false);
   }
 
@@ -51,7 +53,7 @@ const SatinAlmaTalepleri = () => {
 
   // Düzenleme işlemi için yönlendirme
   const handleEditClick = (item) => {
-    history.push(`/talep-duzenle/${item.RequestID}`); // Talep ID'si ile yönlendirme yapılır
+    history.push(`/satinalma/talep-duzenle/${item.RequestID}`); // Talep ID'si ile yönlendirme yapılır
   };
 
   useEffect(() => {

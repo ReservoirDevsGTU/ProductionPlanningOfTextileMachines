@@ -14,7 +14,8 @@ const TalepEkleme = ({exitFunc}) => {
 
   // Geri butonuna basıldığında önceki sayfaya dön
   const handleGoBack = () => {
-    exitFunc();
+    history.push('/satinalma/talepler');
+    //exitFunc();
   };
 
   // Buton seçimlerini ayarla
