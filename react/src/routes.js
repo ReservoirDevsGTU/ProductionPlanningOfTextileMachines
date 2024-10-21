@@ -42,6 +42,9 @@ const User = React.lazy(() => import('./views/users/User'));
 // satın alma talepleri
 const SatinAlmaTalepleri = React.lazy(() => import('./views/satinalma/js/SatinAlmaTalepleri'));
 
+// satın alma talepleri düzenleme
+const TalepDuzenle = React.lazy(() => import('./views/satinalma/js/TalepDuzenle'));
+
 
 
 
@@ -91,6 +94,8 @@ const routes = [
   // satın alma talepleri
   { path: '/satinalma/talepler', name: 'Satın Alma Talepleri', component: SatinAlmaTalepleri},
 
+  // satın alma talepleri düzenleme
+  { path: '/talep-duzenle/:id', name: 'Talep Düzenle', component: TalepDuzenle},
 
 
 ];
