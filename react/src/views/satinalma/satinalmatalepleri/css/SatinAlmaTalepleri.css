@@ -18,6 +18,16 @@
     color: white; /* Yazı beyaz */
   }
   
+  .talep-ekle-container {
+    display: flex;
+    justify-content: space-between; /* Buton solda, arama çubuğu sağda */
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+
+
+
 
   .tablo {
     width: 100%;
@@ -60,6 +70,15 @@
   
   .duzenle-butonlari:hover {
     opacity: 0.8;
+  }
+  
+  .search-bar {
+    width: 300px !important;
+    padding: 8px !important;
+    border: 1px solid #ddd !important;
+    border-radius: 5px !important;
+    outline: none;
+    transition: border-color 0.3s;
   }
   
 
@@ -119,3 +138,6 @@
 .modal-button:hover {
   opacity: 0.9;
 }
+
+
+

@@ -185,3 +185,12 @@ textarea {
 .btn-onaya-gonder:hover {
   background-color: #218838; /* Hover durumunda arka plan rengi */
 }
+
+
+.arama-bari-container {
+  display: flex;
+  align-items: center;
+  margin-left: auto; /* Sağda hizalama */
+  width: 250px;
+  position: relative;
+}

@@ -1,101 +1,95 @@
 import React, { useState, useEffect } from "react";
 import '../css/TalepEkleme.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSearch } from '@fortawesome/free-solid-svg-icons';
 import { useHistory } from 'react-router-dom';
+import { CInput } from '@coreui/react';
 import axios from 'axios';
 import baseURL from './baseURL.js';
 
-const TalepEkleme = ({exitFunc}) => {
-  const [selectedMaterials, setSelectedMaterials] = useState([]); // Seçilen malzemeleri tutar
-  const [selectedButton, setSelectedButton] = useState('secili'); // Varsayılan olarak "Seçili Malzemeler" seçili
-  const [allMaterials, setAllMaterials] = useState([]);
+const TalepEkleme = ({ exitFunc }) => {
+  const [selectedMaterials, setSelectedMaterials] = useState([]); // Seçili malzemeler listesi
+  const [allMaterials, setAllMaterials] = useState([]); // Tüm malzemeler listesi
   const [users, setUsers] = useState([]);
-  
-  const history = useHistory(); // Geçmişi kullanmak için hook
+  const [selectedButton, setSelectedButton] = useState('secili'); // Varsayılan olarak "Seçili Malzemeler"
+  const [searchTerm, setSearchTerm] = useState(''); // Arama çubuğu için
 
-  // Geri butonuna basıldığında önceki sayfaya dön
+  const history = useHistory();
+
   const handleGoBack = () => {
     history.push('/satinalma/talepler');
-    //exitFunc();
   };
 
-  // Buton seçimlerini ayarla
   const handleButtonClick = (button) => {
     setSelectedButton(button);
+    setSearchTerm(''); // Düğme değişince arama terimini temizler
   };
 
-  const [requestDetails, setRequestDetails] = useState({ // Talep detaylarını tutar
+  const [requestDetails, setRequestDetails] = useState({
     date: "",
     requester: "",
     description: "",
   });
 
-  // Malzeme seçimi
   const handleMaterialSelect = (material) => {
     setSelectedMaterials((prev) => {
-      // Malzeme zaten seçilmişse tekrar eklemez
       if (prev.find((item) => item.id === material.id)) return prev;
       return [...prev, { ...material, quantity: "" }];
     });
   };
 
-  // Seçilen malzemeyi kaldır
   const handleRemoveMaterial = (id) => {
     setSelectedMaterials(selectedMaterials.filter((material) => material.id !== id));
   };
 
-  // Miktar değişimi
   const handleQuantityChange = (id, quantity) => {
     setSelectedMaterials((prev) =>
       prev.map((material) => material.id === id ? { ...material, quantity } : material)
     );
   };
 
-  // Girdi değişikliklerini ayarla
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setRequestDetails((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Formu gönder
   const handleSubmit = () => {
     if (!requestDetails.date || !requestDetails.requester) {
       alert("Lütfen tüm gerekli alanları doldurun!");
       return;
     }
     axios.post(baseURL + '/addRequest.php', {
-        RequestDeadline: requestDetails.date,
-        RequestedBy: requestDetails.requester,
-        CreatedBy: requestDetails.requester,
-        RequestDescription: requestDetails.description,
-        ManufacturingUnitID: 1,
-        IsDraft: true,
-        Materials: selectedMaterials.map((m) => ({
-            MaterialID: m.id,
-            RequestedAmount: m.quantity
-        }))
+      RequestDeadline: requestDetails.date,
+      RequestedBy: requestDetails.requester,
+      CreatedBy: requestDetails.requester,
+      RequestDescription: requestDetails.description,
+      ManufacturingUnitID: 1,
+      IsDraft: true,
+      Materials: selectedMaterials.map((m) => ({
+        MaterialID: m.id,
+        RequestedAmount: m.quantity
+      }))
     });
     console.log("Form Submitted: ", requestDetails, selectedMaterials);
   };
 
-  // Talebi onaya gönder
   const handleOnayaGonder = () => {
     if (!requestDetails.date || !requestDetails.requester) {
       alert("Lütfen tüm gerekli alanları doldurun!");
       return;
     }
     axios.post(baseURL + '/addRequest.php', {
-        RequestDeadline: requestDetails.date,
-        RequestedBy: requestDetails.requester,
-        CreatedBy: requestDetails.requester,
-        RequestDescription: requestDetails.description,
-        ManufacturingUnitID: 1,
-        IsDraft: false,
-        Materials: selectedMaterials.map((m) => ({
-            MaterialID: m.id,
-            RequestedAmount: m.quantity
-        }))
+      RequestDeadline: requestDetails.date,
+      RequestedBy: requestDetails.requester,
+      CreatedBy: requestDetails.requester,
+      RequestDescription: requestDetails.description,
+      ManufacturingUnitID: 1,
+      IsDraft: false,
+      Materials: selectedMaterials.map((m) => ({
+        MaterialID: m.id,
+        RequestedAmount: m.quantity
+      }))
     });
-    console.log("Onaya Gönderildi: ", requestDetails, selectedMaterials);
     alert("Talebiniz onaya gönderildi.");
   };
 
@@ -105,16 +99,20 @@ const TalepEkleme = ({exitFunc}) => {
       setAllMaterials(response.data);
       const response1 = await axios.get(baseURL + '/listUsers.php');
       setUsers(response1.data);
+    } catch (error) {
+      console.error(error);
     }
-    catch(e) {}
-  }
+  };
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  // Görüntülenecek malzeme listesini belirle
-  const displayedMaterials = selectedButton === 'secili' ? selectedMaterials : allMaterials;
+  // Arama çubuğuna göre filtrelenmiş malzeme listesi
+  const filteredMaterials = (selectedButton === 'secili' ? selectedMaterials : allMaterials).filter(material =>
+    material.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    material.id.toString().includes(searchTerm)
+  );
 
   return (
     <div className="talep-container">
@@ -142,7 +140,7 @@ const TalepEkleme = ({exitFunc}) => {
         </div>
         <div className="form-group requester-container">
           <label>Talep Eden</label>
-          <select 
+          <select
             name="requester"
             value={requestDetails.requester}
             onChange={handleInputChange}
@@ -169,20 +167,34 @@ const TalepEkleme = ({exitFunc}) => {
 
       <h3>Malzemeler</h3>
       <div className="button-group">
-        <button
-          className={`btn-secili-malzemeler ${selectedButton === 'secili' ? 'active' : ''}`}
-          onClick={() => handleButtonClick('secili')}
-        >
-          Seçili Malzemeler
-        </button>
-        <button
-          className={`btn-tum-malzemeler ${selectedButton === 'tum' ? 'active' : ''}`}
-          onClick={() => handleButtonClick('tum')}
-        >
-          Tüm Malzemeler
-        </button>
-      </div>
+      {/* Seçili Malzemeler Butonu */}
+      <button
+        className={`btn-secili-malzemeler ${selectedButton === 'secili' ? 'active' : ''}`}
+        onClick={() => handleButtonClick('secili')}
+      >
+        Seçili Malzemeler
+      </button>
 
+      {/* Tüm Malzemeler Butonu */}
+      <button
+        className={`btn-tum-malzemeler ${selectedButton === 'tum' ? 'active' : ''}`}
+        onClick={() => handleButtonClick('tum')}
+      >
+        Tüm Malzemeler
+      </button>
+
+      {/* Arama Çubuğu */}
+      <div className="arama-bari-container">
+        <CInput
+          type="text"
+          placeholder="Malzeme No veya Adı Giriniz..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+    </div>
+
+      {/* Malzeme Tablosu */}
       <table className="material-table">
         <thead>
           <tr>
@@ -195,7 +207,7 @@ const TalepEkleme = ({exitFunc}) => {
           </tr>
         </thead>
         <tbody>
-          {displayedMaterials.map((material) => (
+          {filteredMaterials.map((material) => (
             <tr key={material.id}>
               <td>{material.id}</td>
               <td>{material.name}</td>

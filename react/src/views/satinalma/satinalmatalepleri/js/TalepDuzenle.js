@@ -3,6 +3,8 @@ import '../css/TalepEkleme.css';
 import { useHistory, useParams } from 'react-router-dom';
 import axios from 'axios'; // Assuming Axios is used for API requests
 import baseURL from "./baseURL.js"; //add this file yourself in this directory like following:
+import { CInput } from '@coreui/react'; // CInput importu eklendi
+
 
 const TalepDuzenle = () => {
   const { id } = useParams(); // Düzenlenecek talebin ID'si
@@ -10,7 +12,9 @@ const TalepDuzenle = () => {
   const [selectedButton, setSelectedButton] = useState('secili'); // Varsayılan olarak "Seçili Malzemeler" seçili
   const [allMaterials, setAllMaterials] = useState([]); // Tüm malzemeler
   const [users, setUsers] = useState([]); // Kullanıcılar
-  
+  const [searchTerm, setSearchTerm] = useState(''); // Arama çubuğu için searchTerm eklendi
+
+
   const history = useHistory(); // Yönlendirme işlemleri için hook
 
   // Geri butonuna basıldığında önceki sayfaya dön
@@ -108,7 +112,15 @@ const TalepDuzenle = () => {
   };
 
   // Görüntülenecek malzeme listesini belirle
-  const displayedMaterials = selectedButton === 'secili' ? selectedMaterials : allMaterials;
+  const displayedMaterials = (selectedButton === 'secili' ? selectedMaterials : allMaterials).filter(material => {
+    // Arama terimi boşsa, tüm malzemeleri göster
+    if (!searchTerm) return true;
+    
+    // Arama terimi varsa, adı veya ID'yi karşılaştır
+    return (material.name && material.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+           (material.id && material.id.toString().includes(searchTerm));
+  });
+  
 
   return (
     <div className="talep-container">
@@ -187,6 +199,14 @@ const TalepDuzenle = () => {
         >
           Tüm Malzemeler
         </button>
+        <div className="arama-bari-container">
+        <CInput
+          type="text"
+          placeholder="Malzeme No veya Adı Giriniz..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
       </div>
 
       <table className="material-table">

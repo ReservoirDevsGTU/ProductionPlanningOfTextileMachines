@@ -1,77 +1,85 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faTrashAlt, faPrint } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faTrashAlt, faPrint, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { useHistory } from 'react-router-dom';
+import { CInput } from '@coreui/react';
 import '../css/SatinAlmaTalepleri.css'; 
-import TalepEkleme from './TalepEkleme'; // Talep ekleme bileşeni
+import TalepEkleme from './TalepEkleme';
 import axios from 'axios';
-import baseURL from "./baseURL.js"; //add this file yourself in this directory like following:
-                                    /*
-                                        const baseURL = "http://localhost:8000";
-                                        export default baseURL;
-                                    */
+import baseURL from "./baseURL.js";
 
 const SatinAlmaTalepleri = () => {
-  const [showModal, setShowModal] = useState(false); // Modalın görünürlüğünü kontrol eden state
-  const [showTalepEkleme, setShowTalepEkleme] = useState(false); // Talep ekleme görünürlüğü
-  const [selectedItem, setSelectedItem] = useState(null); // Silinecek item'in id'si
+  const [showModal, setShowModal] = useState(false);
+  const [showTalepEkleme, setShowTalepEkleme] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
   const [tableData, setTableData] = useState([]);
-  const history = useHistory(); // Yönlendirme için kullanılan hook
+  const [searchTerm, setSearchTerm] = useState('');
+  const history = useHistory();
 
-  // Talep ekleme formunu açma
   const handleTalepEkleClick = () => {
-    //setShowTalepEkleme(true); // Talep ekleme sayfasını göster
     history.push('/satinalma/talep-ekleme');
   };
 
   const exitTalepEkleme = () => {
-    //fetchData();
     setShowTalepEkleme(false);
-  }
+  };
 
-  // Silme işlemini başlatmak için modalı aç
   const handleDeleteClick = (item) => {
-    setSelectedItem(item); // Silinecek öğeyi belirle
-    setShowModal(true); // Modalı aç
+    setSelectedItem(item);
+    setShowModal(true);
   };
 
   const fetchData = async () => {
     try {
       const response = await axios.get(baseURL + '/requestListing.php');
       setTableData(response.data);
-    }
-    catch(e) {}
+    } catch (e) {}
   };
 
-  // Silme işlemini onayla
   const confirmDelete = () => {
-    console.log(`Silinecek ID: ${selectedItem.RequestID}`);
-    axios.post(baseURL + '/deleteRequest.php', new URLSearchParams({request_id: selectedItem.RequestID}));
-    setShowModal(false); // Modalı kapat
+    axios.post(baseURL + '/deleteRequest.php', new URLSearchParams({ request_id: selectedItem.RequestID }));
+    setShowModal(false);
     fetchData();
   };
 
-  // Düzenleme işlemi için yönlendirme
   const handleEditClick = (item) => {
-    history.push(`/satinalma/talep-duzenle/${item.RequestID}`); // Talep ID'si ile yönlendirme yapılır
+    history.push(`/satinalma/talep-duzenle/${item.RequestID}`);
   };
 
   useEffect(() => {
     fetchData();
   }, []);
 
+  const filteredData = tableData.filter((item) =>
+    item.RequestID.toString().includes(searchTerm) ||
+    item.RequestedBy.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.RequestDescription.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div>
-      {!showTalepEkleme && <h1>Satın Alma Talepleri</h1>} {/* Başlık, talep ekleme açık değilse gösterilecek */}
+      {!showTalepEkleme && <h1>Satın Alma Talepleri</h1>}
       
       {!showTalepEkleme ? (
         <div>
-          {/* Talep Ekle butonu */}
-          <button onClick={handleTalepEkleClick} className="talep-ekle-buton-css">
-            + Talep Ekle
-          </button>
+          <div className="talep-ekle-container">
+            <button onClick={handleTalepEkleClick} className="talep-ekle-buton-css">
+              + Talep Ekle
+            </button>
+            
+            {/* Arama çubuğu */}
+            <div className="search-bar-container">
+              <CInput
+                type="text"
+                placeholder="Talep No, Talep Eden veya Açıklama Giriniz..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-bar"
+                style={{ width: "500px" }}
+              />
+            </div>
+          </div>
 
-          {/* Satın Alma Talebi içeriği */}
           <table className="tablo">
             <thead>
               <tr>
@@ -84,18 +92,18 @@ const SatinAlmaTalepleri = () => {
               </tr>
             </thead>
             <tbody>
-              {tableData.map((item) => (
+              {filteredData.map((item) => (
                 <tr key={item.id}>
                   <td>
                     <button 
                       className="duzenle-butonlari duzenle-butonlari-duzenle"
-                      onClick={() => handleEditClick(item)} // Düzenleme butonuna tıklanıldığında yönlendirme yapılır
+                      onClick={() => handleEditClick(item)}
                     >
                       <FontAwesomeIcon icon={faEdit} />
                     </button>
                     <button 
                       className="duzenle-butonlari duzenle-butonlari-sil"
-                      onClick={() => handleDeleteClick(item)} // Silme işlemi başlatılıyor
+                      onClick={() => handleDeleteClick(item)}
                     >
                       <FontAwesomeIcon icon={faTrashAlt} />
                     </button>
@@ -114,10 +122,9 @@ const SatinAlmaTalepleri = () => {
           </table>
         </div>
       ) : (
-        <TalepEkleme exitFunc={exitTalepEkleme} /> // Talep ekleme formu gösteriliyor
+        <TalepEkleme exitFunc={exitTalepEkleme} />
       )}
 
-      {/* Silme Onay Modalı */}
       {showModal && (
         <div className="modal">
           <div className="modal-content">
