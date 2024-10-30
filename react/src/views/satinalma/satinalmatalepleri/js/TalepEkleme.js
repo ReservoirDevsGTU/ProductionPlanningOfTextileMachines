@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import '../css/TalepEkleme.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch } from '@fortawesome/free-solid-svg-icons';
+import { faX } from '@fortawesome/free-solid-svg-icons';
 import { useHistory } from 'react-router-dom';
 import { CInput } from '@coreui/react';
 import axios from 'axios';
 import baseURL from './baseURL.js';
+import * as XLSX from "xlsx";
 
 const TalepEkleme = ({ exitFunc }) => {
   const [selectedMaterials, setSelectedMaterials] = useState([]); // Seçili malzemeler listesi
@@ -13,7 +14,8 @@ const TalepEkleme = ({ exitFunc }) => {
   const [users, setUsers] = useState([]);
   const [selectedButton, setSelectedButton] = useState('secili'); // Varsayılan olarak "Seçili Malzemeler"
   const [searchTerm, setSearchTerm] = useState(''); // Arama çubuğu için
-
+  const [templateModal, setTemplateModal] = useState(false);
+  const [templateTable, setTemplateTable] = useState(false);
   const history = useHistory();
 
   const handleGoBack = () => {
@@ -114,6 +116,50 @@ const TalepEkleme = ({ exitFunc }) => {
     material.id.toString().includes(searchTerm)
   );
 
+  const showTemplateModal = () => {
+    setTemplateModal(true);
+  };
+
+  const hideTemplateModal = (event) => {
+    if(event.target.className == "modal" || event.target.className == "template-modal-btn-close") {
+      setTemplateModal(false);
+      setTemplateTable(false);
+    }
+  };
+
+  const processFile = (file) => {
+      const reader = new FileReader();
+      reader.onload = (data) => {
+          const workbook = XLSX.read(reader.result);
+          const table = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+          setTemplateTable(table);
+      }
+      reader.readAsArrayBuffer(file);
+  }
+
+  const handleFileInput = (event) => {
+    processFile(event.target.files[0]);
+  }
+
+  const handleFileDrop = (event) => {
+    event.preventDefault();
+    processFile(event.dataTransfer.files[0]);
+  }
+
+  const handleFileDragOver = (event) => {
+    var t = event.target;
+    while(!t.classList.contains("file-drop-zone")) t = t.parentElement;
+    event.preventDefault();
+    t.classList.add("file-drag");
+  }
+
+  const handleFileDragLeave = (event) => {
+    var t = event.target;
+    while(!t.classList.contains("file-drop-zone")) t = t.parentElement;
+    event.preventDefault();
+    t.classList.remove("file-drag");
+  }
+
   return (
     <div className="talep-container">
       <div className="button-group-container">
@@ -125,6 +171,60 @@ const TalepEkleme = ({ exitFunc }) => {
           <button className="btn btn-onaya-gonder" onClick={handleOnayaGonder}>Onaya Gönder</button>
         </div>
       </div>
+
+      {templateModal && (
+        <div className="modal" onClick={hideTemplateModal}>
+          <div className="template-modal-content">
+            <div className="modal-header">
+              <h3>Malzeme Ekleme Formu</h3>
+              <button className="template-modal-btn-close" onClick={hideTemplateModal}>
+                X
+              </button>
+            </div>
+            <div className="template-modal-body">
+              {!templateTable ? (<label className="file-drop-zone"
+                onDrop={handleFileDrop}
+                onDragOver={handleFileDragOver}
+                onDragLeave={handleFileDragLeave}
+              >
+                <h4>Dosya Surukle veya Tikla</h4>
+                <input type="file"
+                  style={{display: "none"}}
+                  onChange={handleFileInput}/>
+              </label>) : (<table className="material-table">
+                <thead>
+                  <tr>
+                    <th>Malzeme No</th>
+                    <th>Malzeme Adı</th>
+                    <th>Toplam Stok</th>
+                    <th>Birim</th>
+                    <th>Miktar</th>
+                    <th>İşlem</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {templateTable.map((material) => (
+                    <tr key={material.id}>
+                      <td>{material["Talep No"]}</td>
+                      <td>{"malzeme adi"}</td>
+                      <td>{1}</td>
+                      <td>{"birim"}</td>
+                      <td>
+                      <input
+                        type="number"
+                        value={material.Miktar || ''}
+                        min="1"
+                      /></td>
+                    </tr>))}
+                </tbody>
+              </table>
+              )}
+            </div>
+            <div className="modal-footer">
+            </div>
+          </div>
+        </div>
+      )}
 
       <h2>Satın Alma Talebi</h2>
       <div className="termin-requester">
@@ -167,6 +267,7 @@ const TalepEkleme = ({ exitFunc }) => {
 
       <h3>Malzemeler</h3>
       <div className="button-group">
+
       {/* Seçili Malzemeler Butonu */}
       <button
         className={`btn-secili-malzemeler ${selectedButton === 'secili' ? 'active' : ''}`}
@@ -181,6 +282,14 @@ const TalepEkleme = ({ exitFunc }) => {
         onClick={() => handleButtonClick('tum')}
       >
         Tüm Malzemeler
+      </button>
+
+      {/* Sablondan Aktarma Butonu */}
+      <button
+        className={`btn-sablondan-aktar`}
+        onClick={showTemplateModal}
+      >
+        Sablondan Aktar
       </button>
 
       {/* Arama Çubuğu */}
