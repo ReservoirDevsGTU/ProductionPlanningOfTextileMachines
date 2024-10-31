@@ -23,7 +23,7 @@ if ($stmt !== false) {
         $data[$row["MaterialID"]] = array(
             "id" => $row["MaterialID"],
             "name" => $row["MaterialName"],
-            "quantity" => $row["Quantity"],
+            "stock" => $row["Quantity"],
             "unitID" => $row["UnitID"]
             );
     }

@@ -21,19 +21,23 @@ $params = $materialIDs;
 $stmt = sqlsrv_query($conn, $sql, $params);
 
 $data = [];
+$dataArr = [];
 if ($stmt) {
     while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-        $data[] = array(
+        $data[$row["MaterialID"]] = array(
             "MaterialID" => $row["MaterialID"],
             "MaterialName" => $row["MaterialName"],
             "Quantity" => $row["Quantity"],
             "UnitID" => $row["UnitID"]
         );
     }
+    foreach($data as $i) {
+        $dataArr[] = $i;
+    }
     sqlsrv_free_stmt($stmt);
 }
 
-echo json_encode($data);
+echo json_encode($dataArr);
 
 sqlsrv_close($conn);
 ?>

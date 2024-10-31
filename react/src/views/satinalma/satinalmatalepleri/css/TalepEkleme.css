@@ -221,8 +221,33 @@ textarea {
   border: none;
 }
 
+.template-modal-btn-add {
+  padding: 10px 15px;
+  border-radius: 5px;
+  background-color: #0d6efd;
+  color: white;
+  border: none;
+}
+
+.template-modal-btn-cancel {
+  padding: 10px 15px;
+  margin: 3px;
+  border-radius: 5px;
+  background-color: red;
+  color: white;
+  border: none;
+}
+
 .template-modal-btn-close:hover {
   background-color: #eee;
+}
+
+.template-modal-btn-add:hover {
+  background-color: #1284ff;
+}
+
+.template-modal-btn-cancel:hover {
+  background-color: #f55;
 }
 
 .template-modal-content {

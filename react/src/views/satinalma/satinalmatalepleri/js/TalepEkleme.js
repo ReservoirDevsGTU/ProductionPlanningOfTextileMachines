@@ -36,7 +36,7 @@ const TalepEkleme = ({ exitFunc }) => {
   const handleMaterialSelect = (material) => {
     setSelectedMaterials((prev) => {
       if (prev.find((item) => item.id === material.id)) return prev;
-      return [...prev, { ...material, quantity: "" }];
+      return [...prev, { ...material, quantity: 1 }];
     });
   };
 
@@ -124,19 +124,28 @@ const TalepEkleme = ({ exitFunc }) => {
     setTemplateModal(true);
   };
 
-  const hideTemplateModal = (event) => {
-    if(event.target.className == "modal" || event.target.className == "template-modal-btn-close") {
-      setTemplateModal(false);
-      setTemplateTable(false);
-    }
+  const hideTemplateModal = () => {
+    setTemplateModal(false);
+    setTemplateTable(false);
+  }
+
+  const hideTemplateModalFromBackground = (event) => {
+    if(event.target.className === "modal") hideTemplateModal();
   };
 
   const processFile = (file) => {
       const reader = new FileReader();
-      reader.onload = (data) => {
+      reader.onload = async (data) => {
           const workbook = XLSX.read(reader.result);
           const table = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-          setTemplateTable(table);
+          const response = await axios.post(baseURL + "/getMaterialsByID.php", {MaterialIDs: table.map((e)=>e.MaterialID)});
+          setTemplateTable(response.data.map((e) => ({
+            id: e.MaterialID,
+            name: e.MaterialName,
+            stock: e.Quantity,
+            unitID: e.UnitID,
+            quantity: table.find(r => r.MaterialID === e.MaterialID).Quantity
+          })));
       }
       reader.readAsArrayBuffer(file);
   }
@@ -164,6 +173,20 @@ const TalepEkleme = ({ exitFunc }) => {
     t.classList.remove("file-drag");
   }
 
+  const addTemplateData = () => {
+    var template = templateTable;
+    var selected = selectedMaterials;
+    if(selected) {
+      template.forEach(e=>{
+        var exist = selected.findIndex(s=>s.id === e.id);
+        if(exist !== -1) selected[exist].quantity += e.quantity;
+        else selected.push(e);});
+      setSelectedMaterials(selected);
+    }
+    else setSelectedMaterials(template);
+    hideTemplateModal();
+  }
+
   return (
     <div className="talep-container">
       <div className="button-group-container">
@@ -177,7 +200,7 @@ const TalepEkleme = ({ exitFunc }) => {
       </div>
 
       {templateModal && (
-        <div className="modal" onClick={hideTemplateModal}>
+        <div className="modal" onClick={hideTemplateModalFromBackground}>
           <div className="template-modal-content">
             <div className="modal-header">
               <h3>Malzeme Ekleme Formu</h3>
@@ -209,22 +232,41 @@ const TalepEkleme = ({ exitFunc }) => {
                 <tbody>
                   {templateTable.map((material) => (
                     <tr key={material.id}>
-                      <td>{material["Talep No"]}</td>
-                      <td>{"malzeme adi"}</td>
-                      <td>{1}</td>
-                      <td>{"birim"}</td>
+                      <td>{material.id}</td>
+                      <td>{material.name}</td>
+                      <td>{material.stock}</td>
+                      <td>{material.unitID}</td>
                       <td>
-                      <input
-                        type="number"
-                        value={material.Miktar || ''}
-                        min="1"
-                      /></td>
+                        <input
+                          type="number"
+                          value={material.quantity}
+                          min="1"
+                          onChange={e=>setTemplateTable(templateTable.map(m=>
+                            material.id === m.id ?
+                            {...m, quantity: e.target.value} : m))}
+                        /></td>
+                      <td>
+                        <button onClick={()=>
+                          setTemplateTable(templateTable.filter(m=>
+                            material.id !== m.id))}>Sil</button>
+                      </td>
                     </tr>))}
                 </tbody>
               </table>
               )}
             </div>
             <div className="modal-footer">
+            {templateTable && (
+              <div>
+                <button
+                  className="template-modal-btn-cancel"
+                  onClick={hideTemplateModal}
+                >Iptal</button>
+                <button
+                  className="template-modal-btn-add"
+                  onClick={addTemplateData}
+                >Ekle</button>
+              </div>)}
             </div>
           </div>
         </div>
