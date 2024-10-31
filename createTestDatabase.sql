@@ -12,6 +12,25 @@ CREATE TABLE Users (
     UserStatus INT
 );
 
+CREATE TABLE MaterialTypes (
+    MaterialTypeID INT PRIMARY KEY,
+    MaterialTypeName VARCHAR(100),
+    MaterialTypeStatus INT,
+    IsDeleted INT
+);
+
+CREATE TABLE Warehouses (
+    WarehouseID INT PRIMARY KEY,
+    WarehouseName VARCHAR(100),
+    WarehouseAddress VARCHAR(255),
+    WarehouseSupervisorID INT,
+    WarehouseStatus INT,
+    IsDeleted INT,
+    FOREIGN KEY (WarehouseSupervisorID) REFERENCES Users(UserID)
+);
+
+
+
 CREATE TABLE PurchaseRequests (
     RequestID INT PRIMARY KEY,
     CreatedBy INT,
@@ -39,6 +58,30 @@ CREATE TABLE Materials (
     MaterialName VARCHAR(100),
     MaterialStatus INT,
     IsDeleted INT
+);
+
+CREATE TABLE MaterialSpecs (
+    MaterialSpecID INT PRIMARY KEY,
+    MaterialID INT,
+    MainMaterialID INT,
+    SuckerNo VARCHAR(50),
+    MaterialNo VARCHAR(50),
+    PhotoNo VARCHAR(50),
+    MaterialTypeID INT,
+    UnitID INT,
+    IsDeleted INT,
+    FOREIGN KEY (MaterialID) REFERENCES Materials(MaterialID),
+    FOREIGN KEY (MaterialTypeID) REFERENCES MaterialTypes(MaterialTypeID)
+);
+
+CREATE TABLE MaterialInventory (
+    InventoryID INT PRIMARY KEY,
+    MaterialID INT,
+    WarehouseID INT,
+    Quantity DECIMAL(18, 2),
+    LastUpdated DATETIME,
+    FOREIGN KEY (MaterialID) REFERENCES Materials(MaterialID),
+    FOREIGN KEY (WarehouseID) REFERENCES Warehouses(WarehouseID)
 );
 
 CREATE TABLE PurchaseRequestItems (
@@ -139,6 +182,18 @@ VALUES
     (4, 'Monitör', 1, 0),
     (5, 'Yazıcı', 1, 0);
 
+INSERT INTO MaterialTypes (MaterialTypeID, MaterialTypeName, MaterialTypeStatus, IsDeleted)
+VALUES (1, 'Type A', 1, 0);
+
+INSERT INTO Warehouses (WarehouseID, WarehouseName, WarehouseAddress, WarehouseSupervisorID, WarehouseStatus, IsDeleted)
+VALUES (1, 'Central Warehouse', '123 Warehouse St', 1, 1, 0);
+
+INSERT INTO MaterialSpecs (MaterialSpecID, MaterialID, MainMaterialID, SuckerNo, MaterialNo, PhotoNo, MaterialTypeID, UnitID, IsDeleted)
+VALUES (1, 1, NULL, 'SN001', 'MN001', 'PN001', 1, 1, 0);
+
+INSERT INTO MaterialInventory (InventoryID, MaterialID, WarehouseID, Quantity, LastUpdated)
+VALUES (1, 1, 1, 100, GETDATE());
+
 
 INSERT INTO PurchaseRequestItems (ItemID, RequestID, MaterialID, RequestedAmount, OrderedAmount, ProvidedAmount, ItemStatus, IsDeleted)
 VALUES 
@@ -193,6 +248,9 @@ SELECT * FROM PurchaseOffers;
 SELECT * FROM PurchaseOfferDetails;
 SELECT * FROM PurchaseOfferItems;
 SELECT * FROM Suppliers;
-
+SELECT * FROM MaterialTypes;
+SELECT * FROM Warehouses;
+SELECT * FROM MaterialSpecs;
+SELECT * FROM MaterialInventory;
 GO
 
