@@ -4,15 +4,15 @@ include 'connect.php';
 
 $sql = "SELECT
         PurchaseRequests.RequestID,
-        PurchaseRequests.RequestDeadline,
+        PurchaseRequestDetails.RequestDeadline,
         Users.UserName,
-        PurchaseRequestInfos.RequestDescription,
+        PurchaseRequestDetails.RequestDescription,
         PurchaseRequests.RequestStatus
         FROM PurchaseRequests
-        JOIN PurchaseRequestInfos
-        ON PurchaseRequests.RequestID = PurchaseRequestInfos.RequestID
+        JOIN PurchaseRequestDetails
+        ON PurchaseRequests.RequestID = PurchaseRequestDetails.RequestID
         JOIN Users
-        ON PurchaseRequests.RequestedBy = Users.UserID
+        ON PurchaseRequestDetails.RequestedBy = Users.UserID
         WHERE PurchaseRequests.IsDeleted = 0
         ";
 $stmt = sqlsrv_query($conn, $sql);
