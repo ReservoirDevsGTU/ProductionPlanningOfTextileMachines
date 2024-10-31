@@ -98,6 +98,10 @@ const TalepEkleme = ({ exitFunc }) => {
   const fetchData = async () => {
     try {
       const response = await axios.get(baseURL + '/listAllMaterials.php');
+      const metarials = response.data.map((metarial) => ({
+        ...metarial,
+   stock: metarial.stock // backendden gelecek olan stok 
+       }));
       setAllMaterials(response.data);
       const response1 = await axios.get(baseURL + '/listUsers.php');
       setUsers(response1.data);
@@ -320,7 +324,7 @@ const TalepEkleme = ({ exitFunc }) => {
             <tr key={material.id}>
               <td>{material.id}</td>
               <td>{material.name}</td>
-              <td>{material.quantity}</td>
+              <td>{material.stock}</td> {/*backendden gelen stoğu gösteriyoruz. */}
               <td>{material.unitID}</td>
               <td>
                 {selectedButton === 'secili' && (
