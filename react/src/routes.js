@@ -48,6 +48,8 @@ const TalepDuzenle = React.lazy(() => import('./views/satinalma/satinalmataleple
 // talep ekleme
 const TalepEkleme = React.lazy(() => import('./views/satinalma/satinalmatalepleri/js/TalepEkleme'));
 
+// talep onaylama
+const TalepOnaylama = React.lazy(() => import('./views/satinalma/satinalmatalepleri/js/TalepOnaylama'));
 
 
 const routes = [
@@ -102,6 +104,8 @@ const routes = [
   // satın alma talep ekleme
   {path: '/satinalma/talep-ekleme', name: 'Talep Ekleme', component: TalepEkleme},
 
+  // satin alma talep onaylama
+  { path: '/satinalma/talep-onaylama/:id', name: 'Talep Onaylama', component: TalepOnaylama }
 ];
 
 export default routes;

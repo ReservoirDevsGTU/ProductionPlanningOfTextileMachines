@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import '../css/TalepEkleme.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faX } from '@fortawesome/free-solid-svg-icons';
 import { useHistory } from 'react-router-dom';
 import { CInput } from '@coreui/react';
 import axios from 'axios';
