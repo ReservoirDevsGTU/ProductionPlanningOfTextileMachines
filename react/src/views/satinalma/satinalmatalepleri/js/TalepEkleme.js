@@ -178,7 +178,7 @@ const TalepEkleme = ({ exitFunc }) => {
     if(selected) {
       template.forEach(e=>{
         var exist = selected.findIndex(s=>s.id === e.id);
-        if(exist !== -1) selected[exist].quantity += e.quantity;
+        if(exist !== -1) selected[exist].quantity = Number(selected[exist].quantity) + Number(e.quantity);
         else selected.push(e);});
       setSelectedMaterials(selected);
     }
