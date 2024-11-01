@@ -54,7 +54,10 @@ const TalepOnayla = () => {
   );
 
   const handleApprove = () => {
-    axios.post(`${baseURL}/approveRequest.php`, { id })
+    axios.post(`${baseURL}/approveRequest.php`, { 
+        RequestID: id,
+        Approve: true
+      })
       .then(() => {
         alert("Talep onaylandı");
         handleGoBack();
@@ -66,7 +69,10 @@ const TalepOnayla = () => {
   };
 
   const handleReject = () => {
-    axios.post(`${baseURL}/rejectRequest.php`, { id })
+    axios.post(`${baseURL}/approveRequest.php`, {
+        RequestID: id,
+        Approve: false
+      })
       .then(() => {
         alert("Talep reddedildi");
         handleGoBack(); 
