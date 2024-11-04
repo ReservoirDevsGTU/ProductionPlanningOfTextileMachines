@@ -25,6 +25,16 @@
     margin-bottom: 10px;
 }
 
+/* SatinAlmaTalepleri.css */
+
+.custom-progress {
+  background-color: #800000; /* Bordo arka plan */
+  border: 1px solid black; /* İnce siyah kenar */
+}
+
+.custom-progress-bar {
+  background-color: #4caf50; /* İlerleme çubuğunun rengi (yeşil örnek) */
+}
 
 
 
