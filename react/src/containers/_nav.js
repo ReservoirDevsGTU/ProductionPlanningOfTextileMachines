@@ -29,7 +29,7 @@ const _nav = [
       {
         _tag: 'CSidebarNavItem',
         name: 'Teklif / Sipariş İsteme Listesi',
-        to: '/satinalma/teklif-siparis',
+        to: '/satinalma/teklif-siparis-liste',
         style: { paddingLeft: '10px', fontSize: '0.8rem' },
       },
       {

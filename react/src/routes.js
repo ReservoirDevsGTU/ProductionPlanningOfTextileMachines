@@ -51,6 +51,14 @@ const TalepEkleme = React.lazy(() => import('./views/satinalma/satinalmatalepler
 // talep onaylama
 const TalepOnaylama = React.lazy(() => import('./views/satinalma/satinalmatalepleri/js/TalepOnaylama'));
 
+// teklif isteme
+const TeklifIsteme = React.lazy(() => import('./views/satinalma/teklifsiparisisteme/js/TeklifIsteme'));
+
+// teklif sipariş liste
+const TeklifSiparisListe = React.lazy(() => import('./views/satinalma/teklifsiparisisteme/js/TeklifSiparisListe'));
+
+
+
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },
@@ -105,7 +113,14 @@ const routes = [
   {path: '/satinalma/talep-ekleme', name: 'Talep Ekleme', component: TalepEkleme},
 
   // satin alma talep onaylama
-  { path: '/satinalma/talep-onaylama/:id', name: 'Talep Onaylama', component: TalepOnaylama }
+  { path: '/satinalma/talep-onaylama/:id', name: 'Talep Onaylama', component: TalepOnaylama },
+
+    // teklif sipariş liste
+  { path: '/satinalma/teklif-siparis-liste', name: 'Teklif Sipariş Liste', component: TeklifSiparisListe },
+
+    // teklif isteme
+  { path: '/satinalma/teklif-isteme', name: 'Teklif İsteme', component: TeklifIsteme },
+ 
 ];
 
 export default routes;
