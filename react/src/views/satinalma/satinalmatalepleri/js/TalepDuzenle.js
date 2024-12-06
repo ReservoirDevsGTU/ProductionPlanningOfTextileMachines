@@ -3,10 +3,16 @@ import '../css/TalepEkleme.css';
 import { useHistory, useParams } from 'react-router-dom';
 import axios from 'axios'; // Assuming Axios is used for API requests
 import baseURL from "./baseURL.js"; //add this file yourself in this directory like following:
+import TalepEkleme from './TalepEkleme.js'
 import { CInput } from '@coreui/react'; // CInput importu eklendi
 
-
 const TalepDuzenle = () => {
+  const { id } = useParams(); // Düzenlenecek talebin ID'si
+  if (id)
+    return TalepEkleme({editID: id});
+}
+
+const TalepDuzenleOld = () => {
   const { id } = useParams(); // Düzenlenecek talebin ID'si
   const [selectedMaterials, setSelectedMaterials] = useState([]); // Seçilen malzemeleri tutar
   const [selectedButton, setSelectedButton] = useState('secili'); // Varsayılan olarak "Seçili Malzemeler" seçili

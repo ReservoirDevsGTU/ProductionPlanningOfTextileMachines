@@ -22,10 +22,6 @@ const SatinAlmaTalepleri = () => {
     history.push('/satinalma/talep-ekleme');
   };
 
-  const exitTalepEkleme = () => {
-    setShowTalepEkleme(false);
-  };
-
   const handleDeleteClick = (item) => {
     setSelectedItem(item);
     setShowModal(true);
@@ -213,7 +209,7 @@ const SatinAlmaTalepleri = () => {
           </table>
         </div>
       ) : (
-        <TalepEkleme exitFunc={exitTalepEkleme} />
+        <TalepEkleme/>
       )}
 
       {showModal && (

@@ -7,7 +7,7 @@ import axios from 'axios';
 import baseURL from './baseURL.js';
 import * as XLSX from "xlsx";
 
-const TalepEkleme = ({ exitFunc, editID }) => {
+const TalepEkleme = ({ editID }) => {
   const [selectedMaterials, setSelectedMaterials] = useState([]); // Seçili malzemeler listesi
   const [allMaterials, setAllMaterials] = useState([]); // Tüm malzemeler listesi
   const [users, setUsers] = useState([]);
@@ -35,7 +35,7 @@ const TalepEkleme = ({ exitFunc, editID }) => {
   const handleMaterialSelect = (material) => {
     setSelectedMaterials((prev) => {
       if (prev.find((item) => item.MaterialID === material.MaterialID)) return prev;
-      return [...prev, { ...material, quantity: 1 }];
+      return [...prev, { ...material, RequestedAmount: 1 }];
     });
   };
 
@@ -45,7 +45,7 @@ const TalepEkleme = ({ exitFunc, editID }) => {
 
   const handleQuantityChange = (id, quantity) => {
     setSelectedMaterials((prev) =>
-      prev.map((material) => material.MaterialID === id ? { ...material, quantity } : material)
+      prev.map((material) => material.MaterialID === id ? { ...material, RequestedAmount: quantity } : material)
     );
   };
 
@@ -54,12 +54,8 @@ const TalepEkleme = ({ exitFunc, editID }) => {
     setRequestDetails((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = () => {
-    if (!requestDetails.date || !requestDetails.requester) {
-      alert("Lütfen tüm gerekli alanları doldurun!");
-      return;
-    }
-    axios.post(baseURL + '/addRequest.php', {
+  const getSubmitData = () => {
+    return {
       RequestDeadline: requestDetails.date,
       RequestedBy: requestDetails.requester,
       CreatedBy: requestDetails.requester,
@@ -68,9 +64,21 @@ const TalepEkleme = ({ exitFunc, editID }) => {
       IsDraft: true,
       Materials: selectedMaterials.map((m) => ({
         MaterialID: m.MaterialID,
-        RequestedAmount: m.quantity
+        RequestedAmount: m.RequestedAmount
       }))
-    });
+    };
+  }
+
+  const handleSubmit = () => {
+    if (!requestDetails.date || !requestDetails.requester) {
+      alert("Lütfen tüm gerekli alanları doldurun!");
+      return;
+    }
+    if(editID) {
+      axios.post(baseURL + '/deleteRequest.php', new URLSearchParams({ request_id: editID }));
+    }
+    axios.post(baseURL + '/addRequest.php', {...getSubmitData(), IsDraft: true});
+    handleGoBack();
     console.log("Form Submitted: ", requestDetails, selectedMaterials);
   };
 
@@ -79,39 +87,56 @@ const TalepEkleme = ({ exitFunc, editID }) => {
       alert("Lütfen tüm gerekli alanları doldurun!");
       return;
     }
-    axios.post(baseURL + '/addRequest.php', {
-      RequestDeadline: requestDetails.date,
-      RequestedBy: requestDetails.requester,
-      CreatedBy: requestDetails.requester,
-      RequestDescription: requestDetails.description,
-      ManufacturingUnitID: 1,
-      IsDraft: false,
-      Materials: selectedMaterials.map((m) => ({
-        MaterialID: m.MaterialID,
-        RequestedAmount: m.quantity
-      }))
-    });
+    if(editID) {
+      axios.post(baseURL + '/deleteRequest.php', new URLSearchParams({ request_id: editID }));
+    }
+    axios.post(baseURL + '/addRequest.php', {...getSubmitData(), IsDraft: false});
+    handleGoBack();
     alert("Talebiniz onaya gönderildi.");
   };
 
-  const fetchData = async () => {
-    try {
-      const response = await axios.get(baseURL + '/listAllMaterials.php');
-      const metarials = response.data.map((metarial) => ({
-        ...metarial,
-   stock: metarial.Quantity // backendden gelecek olan stok 
-       }));
-      setAllMaterials(response.data);
-      const response1 = await axios.get(baseURL + '/listUsers.php');
-      setUsers(response1.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
+  // Fetch the specific request data and materials
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (editID) {
+      // Fetch request details from the backend
+      axios.get(baseURL + '/getRequestByID.php?id=' + editID)
+        .then((response) => {
+          const data = response.data;
+          // Set request details like date, requester, and description
+          setRequestDetails({
+            date: data.RequestDeadline,
+            requester: data.RequestedBy, // Backend'den gelen talep eden
+            description: data.RequestDescription,
+          });
+          console.log('Fetched request details:', data);
+        })
+        .catch((error) => console.error('Error fetching request details:', error));
+      
+      // Fetch materials related to this request
+      axios.get(baseURL + '/getRequestsMaterials.php?id=' + editID)
+        .then((response) => {
+          const materials = response.data;
+          // Set selected materials related to this request
+          setSelectedMaterials(materials || []); // Ensure it sets an empty array if no materials
+          console.log('Fetched request materials:', materials);
+        })
+        .catch((error) => console.error('Error fetching request materials:', error));
+    }
+  
+    // Fetch all materials for adding new materials if needed
+    axios.get(baseURL + '/listAllMaterials.php')
+      .then((response) => {
+        setAllMaterials(response.data);
+      })
+      .catch((error) => console.error('Error fetching materials:', error));
+  
+    // Fetch users for the requester dropdown
+    axios.get(baseURL + '/listUsers.php')
+      .then((response) => {
+        setUsers(response.data);
+      })
+      .catch((error) => console.error('Error fetching users:', error));
+  }, [editID]);
 
   // Arama çubuğuna göre filtrelenmiş malzeme listesi
   const filteredMaterials = (selectedButton === 'secili' ? selectedMaterials : allMaterials).filter(material =>
@@ -139,11 +164,8 @@ const TalepEkleme = ({ exitFunc, editID }) => {
           const table = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
           const response = await axios.post(baseURL + "/getMaterialsByID.php", {MaterialIDs: table.map((e)=>e.MaterialID)});
           setTemplateTable(response.data.map((e) => ({
-            id: e.MaterialID,
-            name: e.MaterialName,
-            stock: e.Quantity,
-            unitID: e.UnitID,
-            quantity: table.find(r => r.MaterialID === e.MaterialID).Quantity
+            ...e, 
+            RequestedAmount: table.find(r => r.MaterialID === e.MaterialID).Quantity
           })));
       }
       reader.readAsArrayBuffer(file);
@@ -178,7 +200,7 @@ const TalepEkleme = ({ exitFunc, editID }) => {
     if(selected) {
       template.forEach(e=>{
         var exist = selected.findIndex(s=>s.MaterialID === e.MaterialID);
-        if(exist !== -1) selected[exist].quantity = Number(selected[exist].quantity) + Number(e.quantity);
+        if(exist !== -1) selected[exist].RequestedAmount = Number(selected[exist].RequestedAmount) + Number(e.RequestedAmount);
         else selected.push(e);});
       setSelectedMaterials(selected);
     }
@@ -238,11 +260,11 @@ const TalepEkleme = ({ exitFunc, editID }) => {
                       <td>
                         <input
                           type="number"
-                          value={material.quantity}
+                          value={material.RequestedAmount}
                           min="1"
                           onChange={e=>setTemplateTable(templateTable.map(m=>
                             material.MaterialID === m.MaterialID ?
-                            {...m, quantity: e.target.value} : m))}
+                            {...m, RequestedAmount: e.target.value} : m))}
                         /></td>
                       <td>
                         <button onClick={()=>
@@ -271,7 +293,7 @@ const TalepEkleme = ({ exitFunc, editID }) => {
         </div>
       )}
 
-      <h2>Satın Alma Talebi</h2>
+      {editID ? (<h2>Talep Duzenle</h2>) : (<h2>Satın Alma Talebi</h2>)}
       <div className="termin-requester">
         <div className="form-group">
           <label>Termin Tarihi</label>
@@ -356,7 +378,7 @@ const TalepEkleme = ({ exitFunc, editID }) => {
             <th>Malzeme Adı</th>
             <th>Toplam Stok</th>
             <th>Birim</th>
-            <th>Miktar</th>
+            {selectedButton === 'secili' && <th>Miktar</th>}
             <th>İşlem</th>
           </tr>
         </thead>
@@ -367,16 +389,16 @@ const TalepEkleme = ({ exitFunc, editID }) => {
               <td>{material.MaterialName}</td>
               <td>{material.Quantity}</td> {/*backendden gelen stoğu gösteriyoruz. */}
               <td>{material.UnitID}</td>
-              <td>
-                {selectedButton === 'secili' && (
+              {selectedButton === 'secili' && (
+                <td>
                   <input
                     type="number"
-                    value={material.quantity || ''}
+                    value={material.RequestedAmount || ''}
                     onChange={(e) => handleQuantityChange(material.MaterialID, e.target.value)}
                     min="1"
                   />
-                )}
-              </td>
+                </td>
+              )}
               <td>
                 {selectedButton === 'secili' ? (
                   <button onClick={() => handleRemoveMaterial(material.MaterialID)}>Sil</button>
