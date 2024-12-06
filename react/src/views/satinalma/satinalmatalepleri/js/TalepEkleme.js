@@ -7,7 +7,7 @@ import axios from 'axios';
 import baseURL from './baseURL.js';
 import * as XLSX from "xlsx";
 
-const TalepEkleme = ({ exitFunc }) => {
+const TalepEkleme = ({ exitFunc, editID }) => {
   const [selectedMaterials, setSelectedMaterials] = useState([]); // Seçili malzemeler listesi
   const [allMaterials, setAllMaterials] = useState([]); // Tüm malzemeler listesi
   const [users, setUsers] = useState([]);

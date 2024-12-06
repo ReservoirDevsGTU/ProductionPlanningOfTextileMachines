@@ -107,7 +107,7 @@ const TalepDuzenle = () => {
   // Miktar değişimi
   const handleQuantityChange = (id, quantity) => {
     setSelectedMaterials((prev) =>
-      prev.map((material) => material.MaterialID === id ? { ...material, quantity } : material)
+      prev.map((material) => material.MaterialID === id ? { ...material, RequestedAmount: quantity } : material)
     );
   };
 
@@ -216,7 +216,7 @@ const TalepDuzenle = () => {
             <th>Malzeme Adı</th>
             <th>Toplam Stok</th>
             <th>Birim</th>
-            <th>Miktar</th>
+            {selectedButton === 'secili' && (<th>Miktar</th>)}
             <th>İşlem</th>
           </tr>
         </thead>
@@ -227,17 +227,16 @@ const TalepDuzenle = () => {
               <td>{material.MaterialName}</td>
               <td>{material.Quantity}</td>
               <td>{material.UnitID}</td>
-              <td>{material.OrderedAmount}</td>
-              <td>
-                {selectedButton === 'secili' && (
+              {selectedButton === 'secili' && (
+                <td>
                   <input
                     type="number"
-                    value={material.quantity || ''} // Backend'den gelen veriler
+                    value={material.RequestedAmount || ''} // Backend'den gelen veriler
                     onChange={(e) => handleQuantityChange(material.MaterialID, e.target.value)}
                     min="1"
                   />
-                )}
-              </td>
+                </td>
+              )}
               <td>
                 {selectedButton === 'secili' ? (
                   <button onClick={() => handleRemoveMaterial(material.MaterialID)}>Sil</button>
