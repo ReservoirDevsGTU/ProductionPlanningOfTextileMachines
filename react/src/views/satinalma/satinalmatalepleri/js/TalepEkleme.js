@@ -293,8 +293,8 @@ const TalepEkleme = ({ exitFunc }) => {
           >
             <option value="">Seçiniz</option>
             {users.map((user) => (
-              <option key={user.MaterialID} value={user.MaterialID}>
-                {user.MaterialName}
+              <option key={user.id} value={user.id}>
+                {user.name}
               </option>
             ))}
           </select>

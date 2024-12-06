@@ -194,7 +194,7 @@ const SatinAlmaTalepleri = () => {
                                 <td>{material.MaterialNo}</td>
                                 <td>{material.SuckerNo}</td>
                                 <td>{material.MaterialName}</td>
-                                <td>{material.OrderedAmount}</td>
+                                <td>{material.RequestedAmount}</td>
                                 <td>{material.UnitID}</td>
                               </tr>
                             )) || (

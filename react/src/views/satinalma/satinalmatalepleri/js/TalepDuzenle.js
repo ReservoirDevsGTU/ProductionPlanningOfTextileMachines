@@ -80,7 +80,7 @@ const TalepDuzenle = () => {
   // Girdi değişikliklerini ayarla
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setRequestDetails((prev) => ({ ...prev, [name]: value }));
+    setRequestDetails((prev) => ({ ...prev, [name]: Number(value) }));
   };
 
   const handleSubmit = () => {
@@ -159,15 +159,15 @@ const TalepDuzenle = () => {
     <>
       {/* Seçili kullanıcıyı buluyoruz ve onu seçili gösteriyoruz */}
       <option value={requestDetails.requester} selected>
-        {users.find(user => user.MaterialName === requestDetails.requester)?.MaterialName || "Yükleniyor..."}
+        {users.find(user => user.id === requestDetails.requester)?.name || "Yükleniyor..."}
       </option>
 
       {/* Diğer kullanıcıları listeliyoruz, fakat requestDetails.requester ile eşleşen kullanıcıyı listelemiyoruz */}
       {users
-        .filter(user => user.MaterialName !== requestDetails.requester) // Aynı kullanıcıyı eklemiyoruz
+        .filter(user => user.id !== requestDetails.requester) // Aynı kullanıcıyı eklemiyoruz
         .map((user) => (
-          <option key={user.MaterialName} value={user.MaterialName}>
-            {user.MaterialName}
+          <option key={user.id} value={user.id}>
+            {user.name}
           </option>
         ))}
     </>

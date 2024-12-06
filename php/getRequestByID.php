@@ -7,14 +7,12 @@ $requestID = $_GET['id'];
     $sql = "SELECT
             PurchaseRequests.RequestID,
             PurchaseRequestDetails.RequestDeadline,
-            Users.UserName,
             PurchaseRequestDetails.RequestDescription,
+            PurchaseRequestDetails.RequestedBy,
             PurchaseRequests.RequestStatus
             FROM PurchaseRequests
             JOIN PurchaseRequestDetails
             ON PurchaseRequests.RequestID = PurchaseRequestDetails.RequestID
-            JOIN Users
-            ON PurchaseRequestDetails.RequestedBy = Users.UserID
             WHERE PurchaseRequests.IsDeleted = 0
             AND PurchaseRequests.RequestID = $requestID"; 
 
@@ -27,7 +25,7 @@ $requestID = $_GET['id'];
             $data = array(
                 "RequestID" => $row["RequestID"],
                 "RequestDeadline" => $row["RequestDeadline"]->format("Y-m-d"),
-                "RequestedBy" => $row["UserName"],
+                "RequestedBy" => $row["RequestedBy"],
                 "RequestDescription" => $row["RequestDescription"],
                 "RequestStatus" => $row["RequestStatus"]
             );
