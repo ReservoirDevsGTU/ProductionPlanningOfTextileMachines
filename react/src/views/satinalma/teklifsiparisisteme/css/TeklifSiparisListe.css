@@ -1,26 +1,116 @@
-/* TeklifSiparisListe.css */
-.container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f4f4f4;
-  }
-  
-  .button {
-    background-color: #4CAF50; /* Yeşil */
-    border: none;
-    color: white;
-    padding: 15px 32px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    border-radius: 8px;
-    cursor: pointer;
-  }
-  
-  .button:hover {
-    background-color: #45a049;
-  }
-  
+.teklif-siparis-container {
+  padding: 20px;
+}
+
+.header-title {
+  margin-bottom: 20px;
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.left-button {
+  flex: 1; 
+}
+
+.right-section {
+  display: flex; 
+  gap: 10px; 
+  margin-right: 200px;
+}
+
+.search-bar {
+  width: 250px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.search-bar-section {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+.tablo {
+  width: 100%;
+  margin-top: 20px;
+  border-collapse: collapse;
+}
+
+.tablo th,
+.tablo td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.tablo th {
+  background-color: #f2f2f2;
+}
+
+
+.left-button-css {
+  color: rgb(82, 159, 236); 
+  background-color: transparent; /* Arka plan transparan */
+  border: 1px solid rgb(117, 184, 250); /* Mavi çerçeve */
+  padding: 10px 15px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s, color 0.3s; /* Geçiş efekti */
+}
+
+.left-button-css:hover {
+  background-color: rgb(0, 162, 255); /* Hover üzerinde arka plan mavi */
+  color: white; /* Yazı rengi beyaz */
+}
+
+.left-button-css:active {
+  background-color: rgb(84, 111, 206); /* Butona basıldığında koyu mavi */
+  color: white; /* Yazı beyaz */
+}
+
+
+.middle-button-css {
+  color: rgb(7, 36, 65); 
+  background-color: transparent; /* Arka plan transparan */
+  border: 1px solid rgb(29, 56, 83); /* Mavi çerçeve */
+  padding: 10px 15px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s, color 0.3s; /* Geçiş efekti */
+}
+
+.middle-button-css:hover {
+  background-color: rgb(22, 47, 61); /* Hover üzerinde arka plan mavi */
+  color: white; /* Yazı rengi beyaz */
+}
+
+.middle-button-css:active {
+  background-color: rgb(8, 11, 22); /* Butona basıldığında koyu mavi */
+  color: white; /* Yazı beyaz */
+}
+
+.right-button-css {
+  color: rgb(16, 91, 167); 
+  background-color: transparent; /* Arka plan transparan */
+  border: 1px solid rgb(20, 74, 128); /* Mavi çerçeve */
+  padding: 10px 15px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s, color 0.3s; /* Geçiş efekti */
+}
+
+.right-button-css:hover {
+  background-color: rgb(14, 91, 136); /* Hover üzerinde arka plan mavi */
+  color: white; /* Yazı rengi beyaz */
+}
+
+.right-button-css:active {
+  background-color: rgb(18, 45, 143); /* Butona basıldığında koyu mavi */
+  color: white; /* Yazı beyaz */
+}
