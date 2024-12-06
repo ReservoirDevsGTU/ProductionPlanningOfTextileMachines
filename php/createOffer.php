@@ -16,7 +16,7 @@ if($input) {
         $id = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)["OfferID"];
         sqlsrv_free_stmt($stmt);
         $sql = "INSERT INTO PurchaseOfferDetails(DetailID, OfferID, OfferDate, OfferDeadline, RequestedBy, OfferDescription, SupplierID, DetailStatus, IsDeleted)
-            VALUES((SELECT ISNULL(MAX(DetailID)+1,1) FROM PurchaseOfferDetails), ?, ?, ?, ?, ?, ?, 0, 0)";
+                VALUES((SELECT ISNULL(MAX(DetailID)+1,1) FROM PurchaseOfferDetails), ?, ?, ?, ?, ?, ?, 0, 0)";
         $stmt = sqlsrv_query($conn, $sql, array(
             $id,
             $input["date"],

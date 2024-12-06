@@ -49,8 +49,8 @@ const TalepOnayla = () => {
   }, [id]);
 
   const filteredMaterials = selectedMaterials.filter(material => 
-    material.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    material.id.toString().includes(searchTerm)
+    material.MaterialName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    material.MaterialID.toString().includes(searchTerm)
   );
 
   const handleApprove = () => {
@@ -182,12 +182,12 @@ const TalepOnayla = () => {
         </thead>
         <tbody>
           {filteredMaterials.map((material) => (
-            <tr key={material.id}>
-              <td>{material.id}</td>
-              <td>{material.name}</td>
-              <td style={{ backgroundColor: '#ff4d4f', color: 'white' }}>{material.quantity}</td>
-              <td>{material.stock}</td>
-              <td>{material.unitID}</td>
+            <tr key={material.MaterialID}>
+              <td>{material.MaterialID}</td>
+              <td>{material.MaterialName}</td>
+              <td style={{ backgroundColor: '#ff4d4f', color: 'white' }}>{material.OrderedAmount}</td>
+              <td>{material.Quantity}</td>
+              <td>{material.UnitID}</td>
             </tr>
           ))}
         </tbody>

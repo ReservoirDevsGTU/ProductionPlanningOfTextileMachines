@@ -47,9 +47,7 @@ const SatinAlmaTalepleri = () => {
   // MALZEMELERİ ÇEK
   const fetchMaterials = async (requestId) => {
     try {
-      const response = await axios.get(`${baseURL}/getRequestsMaterials.php`, {
-        params: { request_id: requestId },
-      });
+      const response = await axios.get(baseURL + '/getRequestsMaterials.php?id=' + requestId)
       setMaterialsData((prevData) => ({
         ...prevData,
         [requestId]: response.data,
@@ -193,11 +191,11 @@ const SatinAlmaTalepleri = () => {
                             
                             {materialsData[item.RequestID]?.map((material) => (
                               <tr key={material.MaterialID}>
-                                <td>{material.MaterialID}</td>
+                                <td>{material.MaterialNo}</td>
                                 <td>{material.SuckerNo}</td>
                                 <td>{material.MaterialName}</td>
-                                <td>{material.Quantity}</td>
-                                <td>{material.Unit}</td>
+                                <td>{material.OrderedAmount}</td>
+                                <td>{material.UnitID}</td>
                               </tr>
                             )) || (
                                 <tr>

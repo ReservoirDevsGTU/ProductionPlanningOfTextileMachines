@@ -34,18 +34,18 @@ const TalepEkleme = ({ exitFunc }) => {
 
   const handleMaterialSelect = (material) => {
     setSelectedMaterials((prev) => {
-      if (prev.find((item) => item.id === material.id)) return prev;
+      if (prev.find((item) => item.MaterialID === material.MaterialID)) return prev;
       return [...prev, { ...material, quantity: 1 }];
     });
   };
 
   const handleRemoveMaterial = (id) => {
-    setSelectedMaterials(selectedMaterials.filter((material) => material.id !== id));
+    setSelectedMaterials(selectedMaterials.filter((material) => material.MaterialID !== id));
   };
 
   const handleQuantityChange = (id, quantity) => {
     setSelectedMaterials((prev) =>
-      prev.map((material) => material.id === id ? { ...material, quantity } : material)
+      prev.map((material) => material.MaterialID === id ? { ...material, quantity } : material)
     );
   };
 
@@ -67,7 +67,7 @@ const TalepEkleme = ({ exitFunc }) => {
       ManufacturingUnitID: 1,
       IsDraft: true,
       Materials: selectedMaterials.map((m) => ({
-        MaterialID: m.id,
+        MaterialID: m.MaterialID,
         RequestedAmount: m.quantity
       }))
     });
@@ -87,7 +87,7 @@ const TalepEkleme = ({ exitFunc }) => {
       ManufacturingUnitID: 1,
       IsDraft: false,
       Materials: selectedMaterials.map((m) => ({
-        MaterialID: m.id,
+        MaterialID: m.MaterialID,
         RequestedAmount: m.quantity
       }))
     });
@@ -99,7 +99,7 @@ const TalepEkleme = ({ exitFunc }) => {
       const response = await axios.get(baseURL + '/listAllMaterials.php');
       const metarials = response.data.map((metarial) => ({
         ...metarial,
-   stock: metarial.stock // backendden gelecek olan stok 
+   stock: metarial.Quantity // backendden gelecek olan stok 
        }));
       setAllMaterials(response.data);
       const response1 = await axios.get(baseURL + '/listUsers.php');
@@ -115,8 +115,8 @@ const TalepEkleme = ({ exitFunc }) => {
 
   // Arama çubuğuna göre filtrelenmiş malzeme listesi
   const filteredMaterials = (selectedButton === 'secili' ? selectedMaterials : allMaterials).filter(material =>
-    material.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    material.id.toString().includes(searchTerm)
+    material.MaterialName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    material.MaterialID.toString().includes(searchTerm)
   );
 
   const showTemplateModal = () => {
@@ -177,7 +177,7 @@ const TalepEkleme = ({ exitFunc }) => {
     var selected = selectedMaterials;
     if(selected) {
       template.forEach(e=>{
-        var exist = selected.findIndex(s=>s.id === e.id);
+        var exist = selected.findIndex(s=>s.MaterialID === e.MaterialID);
         if(exist !== -1) selected[exist].quantity = Number(selected[exist].quantity) + Number(e.quantity);
         else selected.push(e);});
       setSelectedMaterials(selected);
@@ -230,24 +230,24 @@ const TalepEkleme = ({ exitFunc }) => {
                 </thead>
                 <tbody>
                   {templateTable.map((material) => (
-                    <tr key={material.id}>
-                      <td>{material.id}</td>
-                      <td>{material.name}</td>
-                      <td>{material.stock}</td>
-                      <td>{material.unitID}</td>
+                    <tr key={material.MaterialID}>
+                      <td>{material.MaterialID}</td>
+                      <td>{material.MaterialName}</td>
+                      <td>{material.Quantity}</td>
+                      <td>{material.UnitID}</td>
                       <td>
                         <input
                           type="number"
                           value={material.quantity}
                           min="1"
                           onChange={e=>setTemplateTable(templateTable.map(m=>
-                            material.id === m.id ?
+                            material.MaterialID === m.MaterialID ?
                             {...m, quantity: e.target.value} : m))}
                         /></td>
                       <td>
                         <button onClick={()=>
                           setTemplateTable(templateTable.filter(m=>
-                            material.id !== m.id))}>Sil</button>
+                            material.MaterialID !== m.MaterialID))}>Sil</button>
                       </td>
                     </tr>))}
                 </tbody>
@@ -293,8 +293,8 @@ const TalepEkleme = ({ exitFunc }) => {
           >
             <option value="">Seçiniz</option>
             {users.map((user) => (
-              <option key={user.id} value={user.id}>
-                {user.name}
+              <option key={user.MaterialID} value={user.MaterialID}>
+                {user.MaterialName}
               </option>
             ))}
           </select>
@@ -362,24 +362,24 @@ const TalepEkleme = ({ exitFunc }) => {
         </thead>
         <tbody>
           {filteredMaterials.map((material) => (
-            <tr key={material.id}>
-              <td>{material.id}</td>
-              <td>{material.name}</td>
-              <td>{material.stock}</td> {/*backendden gelen stoğu gösteriyoruz. */}
-              <td>{material.unitID}</td>
+            <tr key={material.MaterialID}>
+              <td>{material.MaterialID}</td>
+              <td>{material.MaterialName}</td>
+              <td>{material.Quantity}</td> {/*backendden gelen stoğu gösteriyoruz. */}
+              <td>{material.UnitID}</td>
               <td>
                 {selectedButton === 'secili' && (
                   <input
                     type="number"
                     value={material.quantity || ''}
-                    onChange={(e) => handleQuantityChange(material.id, e.target.value)}
+                    onChange={(e) => handleQuantityChange(material.MaterialID, e.target.value)}
                     min="1"
                   />
                 )}
               </td>
               <td>
                 {selectedButton === 'secili' ? (
-                  <button onClick={() => handleRemoveMaterial(material.id)}>Sil</button>
+                  <button onClick={() => handleRemoveMaterial(material.MaterialID)}>Sil</button>
                 ) : (
                   <button onClick={() => handleMaterialSelect(material)}>Seç</button>
                 )}

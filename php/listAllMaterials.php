@@ -20,12 +20,7 @@ $data = [];
 $dataArr = [];
 if ($stmt !== false) {
     while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-        $data[$row["MaterialID"]] = array(
-            "id" => $row["MaterialID"],
-            "name" => $row["MaterialName"],
-            "stock" => $row["Quantity"],
-            "unitID" => $row["UnitID"]
-            );
+        $data[$row["MaterialID"]] = $row;
     }
     foreach($data as $i) {
         $dataArr[] = $i;

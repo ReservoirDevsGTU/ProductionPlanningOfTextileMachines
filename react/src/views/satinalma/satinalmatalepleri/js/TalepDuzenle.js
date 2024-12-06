@@ -94,20 +94,20 @@ const TalepDuzenle = () => {
   // Malzeme seçimi
   const handleMaterialSelect = (material) => {
     setSelectedMaterials((prev) => {
-      if (prev.find((item) => item.id === material.id)) return prev; // Malzeme zaten seçiliyse ekleme
+      if (prev.find((item) => item.MaterialID === material.MaterialID)) return prev; // Malzeme zaten seçiliyse ekleme
       return [...prev, { ...material, quantity: "" }];
     });
   };
 
   // Seçilen malzemeyi kaldır
   const handleRemoveMaterial = (id) => {
-    setSelectedMaterials(selectedMaterials.filter((material) => material.id !== id));
+    setSelectedMaterials(selectedMaterials.filter((material) => material.MaterialID !== id));
   };
 
   // Miktar değişimi
   const handleQuantityChange = (id, quantity) => {
     setSelectedMaterials((prev) =>
-      prev.map((material) => material.id === id ? { ...material, quantity } : material)
+      prev.map((material) => material.MaterialID === id ? { ...material, quantity } : material)
     );
   };
 
@@ -117,8 +117,8 @@ const TalepDuzenle = () => {
     if (!searchTerm) return true;
     
     // Arama terimi varsa, adı veya ID'yi karşılaştır
-    return (material.name && material.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-           (material.id && material.id.toString().includes(searchTerm));
+    return (material.MaterialName && material.MaterialName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+           (material.MaterialID && material.MaterialID.toString().includes(searchTerm));
   });
   
 
@@ -159,15 +159,15 @@ const TalepDuzenle = () => {
     <>
       {/* Seçili kullanıcıyı buluyoruz ve onu seçili gösteriyoruz */}
       <option value={requestDetails.requester} selected>
-        {users.find(user => user.name === requestDetails.requester)?.name || "Yükleniyor..."}
+        {users.find(user => user.MaterialName === requestDetails.requester)?.MaterialName || "Yükleniyor..."}
       </option>
 
       {/* Diğer kullanıcıları listeliyoruz, fakat requestDetails.requester ile eşleşen kullanıcıyı listelemiyoruz */}
       {users
-        .filter(user => user.name !== requestDetails.requester) // Aynı kullanıcıyı eklemiyoruz
+        .filter(user => user.MaterialName !== requestDetails.requester) // Aynı kullanıcıyı eklemiyoruz
         .map((user) => (
-          <option key={user.name} value={user.name}>
-            {user.name}
+          <option key={user.MaterialName} value={user.MaterialName}>
+            {user.MaterialName}
           </option>
         ))}
     </>
@@ -222,24 +222,25 @@ const TalepDuzenle = () => {
         </thead>
         <tbody>
           {displayedMaterials.map((material) => (
-            <tr key={material.id}>
-              <td>{material.id}</td>
-              <td>{material.name}</td>
-              <td>{material.stock}</td>
-              <td>{material.unitID}</td>
+            <tr key={material.MaterialID}>
+              <td>{material.MaterialID}</td>
+              <td>{material.MaterialName}</td>
+              <td>{material.Quantity}</td>
+              <td>{material.UnitID}</td>
+              <td>{material.OrderedAmount}</td>
               <td>
                 {selectedButton === 'secili' && (
                   <input
                     type="number"
                     value={material.quantity || ''} // Backend'den gelen veriler
-                    onChange={(e) => handleQuantityChange(material.id, e.target.value)}
+                    onChange={(e) => handleQuantityChange(material.MaterialID, e.target.value)}
                     min="1"
                   />
                 )}
               </td>
               <td>
                 {selectedButton === 'secili' ? (
-                  <button onClick={() => handleRemoveMaterial(material.id)}>Sil</button>
+                  <button onClick={() => handleRemoveMaterial(material.MaterialID)}>Sil</button>
                 ) : (
                   <button onClick={() => handleMaterialSelect(material)}>Seç</button>
                 )}

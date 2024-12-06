@@ -5,34 +5,43 @@ include 'connect.php';
 $requestID = $_GET['id'];
 
     $sql = "SELECT
-            PurchaseRequestDetails.RequestDetailID,
-            PurchaseRequestDetails.MaterialID,
-            PurchaseRequestDetails.RequestedAmount,
-            PurchaseRequestDetails.OrderedAmount,
-            PurchaseRequestDetails.OfferedAmount,
-            PurchaseRequestDetails.ProvidedAmount,
-            PurchaseRequestDetails.MaterialStatus
-            FROM PurchaseRequestDetails
-            WHERE PurchaseRequestDetails.IsDeleted = 0
-            AND PurchaseRequestDetails.RequestID = $requestID"; 
+            PurchaseRequestItems.ItemID,
+            PurchaseRequestItems.MaterialID,
+            PurchaseRequestItems.RequestedAmount,
+            PurchaseRequestItems.OrderedAmount,
+            PurchaseRequestItems.ProvidedAmount,
+            PurchaseRequestItems.ItemStatus,
+            Materials.MaterialName,
+            MaterialInventory.Quantity,
+            MaterialSpecs.UnitID,
+            MaterialSpecs.MaterialNo,
+            MaterialSpecs.SuckerNo
+            FROM PurchaseRequestItems
+            JOIN MaterialInventory
+            ON MaterialInventory.MaterialID = PurchaseRequestItems.MaterialID
+            JOIN Materials
+            ON Materials.MaterialID = PurchaseRequestItems.MaterialID
+            JOIN MaterialSpecs
+            ON MaterialSpecs.MaterialID = PurchaseRequestItems.MaterialID
+            WHERE PurchaseRequestItems.IsDeleted = 0
+            AND PurchaseRequestItems.RequestID = $requestID"; 
 
+    $data = [];
     $materials = [];
     
     $stmt = sqlsrv_query($conn, $sql);
 
     if ($stmt !== false) {
         while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-            $materials[] = array(
-                "RequestDetailID"   => $row["RequestDetailID"],
-                "MaterialID"        => $row["MaterialID"],
-                "RequestedAmount"   => $row["RequestedAmount"],
-                "OrderedAmount"     => $row["OrderedAmount"],
-                "OfferedAmount"     => $row["OfferedAmount"],
-                "ProvidedAmount"    => $row["ProvidedAmount"],
-                "MaterialStatus"    => $row["MaterialStatus"]
-            );
+            $data[$row["MaterialID"]] = $row;
+        }
+        foreach($data as $i) {
+            $materials[] = $i;
         }
         sqlsrv_free_stmt($stmt);
+    }
+    else {
+        die(json_encode(sqlsrv_errors(), true));
     }
     sqlsrv_close($conn);
 
