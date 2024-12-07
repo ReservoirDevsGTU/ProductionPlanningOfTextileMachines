@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../css/TeklifIsteme.css";
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
 const TeklifIsteme = () => {
   const [activeTab, setActiveTab] = useState("details"); // "details" = teklif bilgileri, "materials" = malzemeler
   const [quoteDate, setQuoteDate] = useState("");
@@ -9,27 +10,44 @@ const TeklifIsteme = () => {
   const [quoteGroupNo, setQuoteGroupNo] = useState("");
   const [description, setDescription] = useState("");
   const [supplierTab, setSupplierTab] = useState("selected"); // "selected" or "all"
+  const [materialsTab, setMaterialsTab] = useState("selected"); // Sub-tabs for materials
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [suppliers, setSuppliers] = useState([]);
   const [selectedSuppliers, setSelectedSuppliers] = useState([]);
   const [selectedCheckboxes, setSelectedCheckboxes] = useState([]);
-
   const [selectAllChecked, setSelectAllChecked] = useState(false); // Tüm tedarikçileri seçme durumu
 
-  // Tedarikçi verilerini çekmek için useEffect
-  useEffect(() => {
-    const fetchSuppliers = async () => {
-      try {
-        const response = await fetch("http://localhost/path_to_php/getAllSuppliers.php");
-        const data = await response.json();
-        setSuppliers(data); // Veritabanından gelen verileri state'e atıyoruz
-      } catch (error) {
-        console.error("Tedarikçiler alınırken bir hata oluştu:", error);
-      }
-    };
-    
-    fetchSuppliers();
-  }, []);
+  const [showModal, setShowModal] = useState(false); // Modal görünürlüğü
+  const [selectedMaterialToDelete, setSelectedMaterialToDelete] = useState(null); // Silinecek malzeme
+ 
+  const handleRemoveMaterial = () => {
+    setSelectedMaterials((prev) => prev.filter((m) => m.id !== selectedMaterialToDelete.id));
+    setShowModal(false); // Popup'u kapat
+  };
+
+  const handleDeleteClick = (material) => {
+    setSelectedMaterialToDelete(material); // Silinecek malzemeyi belirle
+    setShowModal(true); // Popup'u aç
+  };
+
+
+
+    // Tedarikçi verilerini çekmek için useEffect
+    useEffect(() => {
+      const fetchSuppliers = async () => {
+        try {
+          const response = await fetch("http://localhost/path_to_php/getAllSuppliers.php");
+          const data = await response.json();
+          setSuppliers(data); // Veritabanından gelen verileri state'e atıyoruz
+        } catch (error) {
+          console.error("Tedarikçiler alınırken bir hata oluştu:", error);
+        }
+      };
+      
+      fetchSuppliers();
+    }, []);
+  
 
   // Sayfa yüklendiğinde bugünün tarihini atama
   useEffect(() => {
@@ -38,8 +56,46 @@ const TeklifIsteme = () => {
     setQuoteDate(formattedDate);
   }, []);
 
-  // Checkbox seçimlerini yönetme
-  const handleCheckboxChange = (supplierId) => {
+
+
+
+  const filteredMaterials = (materials) =>
+    materials.filter(
+      (material) =>
+        material.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        material.id.includes(searchTerm)
+    );
+
+    
+
+    const handleAddMaterial = () => {
+      // Tüm seçilen malzemeleri filtrele
+      const toAdd = allMaterials.filter((material) => material.isChecked);
+    
+      // Geçersiz teklif miktarlarını kontrol et
+      const hasErrors = toAdd.some(
+        (material) => !material.offerAmount || material.offerAmount <= 0
+      );
+    
+      if (hasErrors) {
+        // Eğer geçersiz miktar varsa, kullanıcıyı uyar
+        alert("Lütfen seçilen malzemeler için geçerli bir teklif miktarı giriniz.");
+      } else if (toAdd.length === 0) {
+        // Eğer hiçbir malzeme seçilmemişse, kullanıcıyı uyar
+        alert("Hiç malzeme seçmediniz.");
+      } else {
+        // Geçerli malzemeleri seçili listeye ekle
+        setSelectedMaterials((prev) => [
+          ...prev,
+          ...toAdd.filter((m) => !prev.some((prevMaterial) => prevMaterial.id === m.id)),
+        ]);
+        alert("Malzemeler seçili listeye eklendi.");
+      }
+    };
+    
+
+  // Checkbox seçimlerini yönetme supplier için
+  const handleCheckboxChangesupplier = (supplierId) => {
     setSelectedCheckboxes((prevSelected) => {
       if (prevSelected.includes(supplierId)) {
         return prevSelected.filter((id) => id !== supplierId);
@@ -49,20 +105,31 @@ const TeklifIsteme = () => {
     });
   };
 
-  // Tüm tedarikçileri seçme
-  const handleSelectAllChange = () => {
-    setSelectAllChecked(!selectAllChecked);
-    if (!selectAllChecked) {
-      // Tüm tedarikçileri seç
-      const allSupplierIds = suppliers.map((supplier) => supplier.id);
-      setSelectedCheckboxes(allSupplierIds);
-    } else {
-      // Tüm tedarikçileri seçme
-      setSelectedCheckboxes([]);
-    }
-  };
+    // Tüm tedarikçileri seçme
+    const handleSelectAllChange = () => {
+      setSelectAllChecked(!selectAllChecked);
+      if (!selectAllChecked) {
+        // Tüm tedarikçileri seç
+        const allSupplierIds = suppliers.map((supplier) => supplier.id);
+        setSelectedCheckboxes(allSupplierIds);
+      } else {
+        // Tüm tedarikçileri seçme
+        setSelectedCheckboxes([]);
+      }
+    };
 
-  // Seçilen tedarikçileri Seçili Tedarikçiler sekmesine ekleme
+
+  
+  
+    const handleCheckboxChange = (id, checked) => {
+      setAllMaterials((prev) =>
+        prev.map((material) =>
+          material.id === id ? { ...material, isChecked: checked } : material
+        )
+      );
+    };
+
+      // Seçilen tedarikçileri Seçili Tedarikçiler sekmesine ekleme
   const handleAddSelectedSuppliers = () => {
     const selected = suppliers.filter((supplier) =>
       selectedCheckboxes.includes(supplier.id)
@@ -74,12 +141,20 @@ const TeklifIsteme = () => {
     setSelectedCheckboxes([]); // Seçimleri temizle
   };
 
+
   // Seçili tedarikçiyi listeden kaldırma
   const handleRemoveSupplier = (supplierId) => {
     setSelectedSuppliers((prevSelected) => 
       prevSelected.filter(supplier => supplier.id !== supplierId)
     );
   };
+
+    const [selectedMaterials, setSelectedMaterials] = useState([]); // Start with an empty array
+    const [allMaterials, setAllMaterials] = useState([
+      { id: "3", name: "YXX", stock: 100, unit: "Litre", offerAmount: "" },
+      { id: "4", name: "XXZ", stock: 200, unit: "Metre", offerAmount: "" },
+    ]);
+
 
   return (
     <div className="teklif-isteme-container">
@@ -240,7 +315,7 @@ const TeklifIsteme = () => {
                         <input
                           type="checkbox"
                           checked={selectedCheckboxes.includes(supplier.id)}
-                          onChange={() => handleCheckboxChange(supplier.id)}
+                          onChange={() => handleCheckboxChangesupplier(supplier.id)}
                         />
                       </td>
                       <td>{supplier.code}</td>
@@ -256,9 +331,9 @@ const TeklifIsteme = () => {
           )}
 
           {supplierTab === "all" && (
-            <div className="button-container">
+            <div className="button-container" style={{ textAlign: "right", marginTop: "20px" }}>
               <button
-                className="save-button"
+                className="listeye-ekle-button"
                 onClick={handleAddSelectedSuppliers}
               >
                 Listeye Ekle
@@ -273,6 +348,151 @@ const TeklifIsteme = () => {
         <div className="button-container">
           <button className="save-button">Kaydet</button>
           <button className="cancel-button">İptal</button>
+        </div>
+      )}
+
+
+
+
+
+
+
+{activeTab === "materials" && (
+        <div>
+          <div className="tabs-container">
+            <button
+              className={`tab-button ${materialsTab === "selected" ? "active" : ""}`}
+              onClick={() => setMaterialsTab("selected")}
+            >
+              Seçili Malzemeler
+            </button>
+
+            <button
+              className={`tab-button ${materialsTab === "all" ? "active" : ""}`}
+              onClick={() => setMaterialsTab("all")}
+            >
+              Tüm Malzemeler
+            </button>
+          </div>
+
+          <div className="search-bar-container">
+            <input
+              type="text"
+              placeholder="Arama Yapın..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          {materialsTab === "selected" ? (
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Sil</th>
+                  <th>Malzeme No</th>
+                  <th>Malzeme Adı</th>
+                  <th>Teklif Miktarı</th>
+                  <th>Talep Miktarı</th>
+                  <th>Birim</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedMaterials.map((material) => (
+                  <tr key={material.id}>
+                    <td>
+                      <button onClick={() => handleDeleteClick(material)}>
+                      <FontAwesomeIcon icon={faTrash} style={{ marginRight: '8px'}} />
+                      </button>
+                    </td>
+                    <td>{material.id}</td>
+                    <td>{material.name}</td>
+                    <td>{material.offerAmount}</td>
+                    <td>{material.stock}</td>
+                    <td>{material.unit}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <table className="table">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Malzeme No</th>
+                  <th>Malzeme Adı</th>
+                  <th>Teklif Miktarı</th>
+                  <th>Talep Miktarı</th>
+                  <th>Birim</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredMaterials(allMaterials).map((material) => (
+                  <tr key={material.id}>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={material.isChecked || false}
+                        onChange={(e) =>
+                          handleCheckboxChange(material.id, e.target.checked)
+                        }
+                      />
+                    </td>
+                    <td>{material.id}</td>
+                    <td>{material.name}</td>
+                    <td>
+                      <input
+                        type="number"
+                        value={material.offerAmount}
+                        onChange={(e) =>
+                          setAllMaterials((prev) =>
+                            prev.map((m) =>
+                              m.id === material.id
+                                ? { ...m, offerAmount: e.target.value }
+                                : m
+                            )
+                          )
+                        }
+                      />
+                    </td>
+                    <td>{material.stock}</td>
+                    <td>{material.unit}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+
+          {materialsTab === "all" && (
+             <div style={{ textAlign: "right", marginTop: "20px" }}>
+             <button
+               className="listeye-ekle-button"
+               onClick={handleAddMaterial}>Listeye Ekle
+               </button>
+
+           </div>
+          )}
+
+           {/* Modal */}
+      {showModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <h2>Silme Onayı</h2>
+            <div className="modal-body">
+              <p>
+                '{selectedMaterialToDelete?.name}' malzemesini silmek istediğinizden emin misiniz?
+              </p>
+            </div>
+            <div className="modal-footer">
+              <button className="modal-button cancel" onClick={() => setShowModal(false)}>
+                İptal
+              </button>
+              <button className="modal-button delete" onClick={handleRemoveMaterial}>
+                Sil
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
         </div>
       )}
     </div>

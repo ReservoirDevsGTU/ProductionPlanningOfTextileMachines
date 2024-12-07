@@ -141,3 +141,159 @@ select:focus {
   border-radius: 5px;
   cursor: pointer;
 }
+
+
+/* Search Bar Container */
+.search-bar-container {
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: flex-end; /* Sağ tarafa hizala */
+}
+
+.search-bar-container input {
+  width: 300px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+  transition: border-color 0.3s ease-in-out;
+}
+
+.search-bar-container input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+
+
+/* Materials Table */
+.table {
+  width: 100%;
+  margin-top: 20px;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.table th {
+  background-color: #f2f2f2;
+}
+
+
+
+
+.table tbody input[type="number"] {
+  width: 100px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.table tbody input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+
+/* Add to List Button */
+.listeye-ekle-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out, transform 0.2s ease;
+}
+
+.listeye-ekle-button:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+.listeye-ekle-button:active {
+  background-color: #004085;
+}
+
+
+/* Delete Button */
+.table tbody button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  color: #dc3545;
+  font-size: 16px;
+  transition: transform 0.2s ease-in-out;
+}
+
+.table tbody button:hover {
+  transform: scale(1.2);
+  color: #c82333;
+}
+
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 400px;
+}
+
+.modal-body {
+  background-color: #f8d7da;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.modal-button {
+  padding: 10px 20px;
+  margin: 5px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.modal-button.cancel {
+  background-color: #6c757d;
+  color: white;
+}
+
+.modal-button.delete {
+  background-color: #dc3545;
+  color: white;
+}
+
+.modal-button:hover {
+  opacity: 0.9;
+}
