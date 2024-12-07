@@ -1,172 +1,95 @@
-import React, { useState } from "react";
-import "../css/TeklifIsteme.css";
+import React, {useState} from "react";
+import '../css/TeklifIsteme.css';
+
 
 const TeklifIsteme = () => {
-  const [activeTab, setActiveTab] = useState("teklifBilgileri"); // Başlangıçta teklif bilgileri sekmesi açık
-  const [tedarikciTab, setTedarikciTab] = useState("seciliTedarikciler");  // Tedarikçi sekmesi için yeni bir state
-
-  const [formData, setFormData] = useState({
-    teklifTarihi: "",
-    terminTarihi: "",
-    teklifIsteyen: "",
-    teklifGrupNo: "",
-    aciklama: "",
-  });
-
-  const [tedarikciler, setTedarikciler] = useState([
-    { id: 1, code: "XXX", name: "XXX XXX", phone: "XXX XXX", email: "xxx@xxx.com", address: "Adres 1" },
-    { id: 2, code: "XXY", name: "XXY XXY", phone: "XXX XXX", email: "xxy@xxy.com", address: "Adres 2" },
-    { id: 3, code: "YYZ", name: "YYZ YYZ", phone: "XXX XXX", email: "yyz@yyz.com", address: "Adres 3" },
-    // Diğer tedarikçiler burada olacak
-  ]);
-
-  const [selectedTedarikciler, setSelectedTedarikciler] = useState([]);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleTedarikciSelect = (id) => {
-    const selectedTedarikci = tedarikciler.find((tedarikci) => tedarikci.id === id);
-    if (!selectedTedarikciler.includes(selectedTedarikci)) {
-      setSelectedTedarikciler([...selectedTedarikciler, selectedTedarikci]);
-    }
-  };
-
-  const handleTedarikciDeselect = (id) => {
-    setSelectedTedarikciler(selectedTedarikciler.filter((tedarikci) => tedarikci.id !== id));
-  };
+  const [activeTab, setActiveTab] = useState('details'); // details = teklif bilgileri materials = malzemeler
+  const [quoteDate, setQuoteDate] = useState('');
+  const [deadlineDate, setDeadlineDate] = useState('');
+  const [requester, setRequster] = useState('');
+  const [quoteGroupNo, setQuoteGroupNo] = useState('');
+  const [description, setDescription] = useState('');
+  
 
   return (
     <div className="teklif-isteme-container">
-      {/* Sekme Geçişi */}
-      <div className="tabs">
+      <h1>Teklif İsteme</h1>
+
+      {/* Sekmeler */}
+      <div className="tabs-container">
         <button
-          className={activeTab === "teklifBilgileri" ? "active" : ""}
-          onClick={() => setActiveTab("teklifBilgileri")}
+          className={`tab-button ${activeTab === "details" ? "active" : ""}`}
+          onClick={() => setActiveTab("details")}
         >
           Teklif Bilgileri
         </button>
         <button
-          className={activeTab === "malzemeler" ? "active" : ""}
-          onClick={() => setActiveTab("malzemeler")}
+          className={`tab-button ${activeTab === "materials" ? "active" : ""}`}
+          onClick={() => setActiveTab("materials")}
         >
           Malzemeler
         </button>
       </div>
 
-      {/* Teklif Bilgileri Formu */}
-      {activeTab === "teklifBilgileri" && (
+      {/* Form Alanları */}
+      {activeTab === "details" && (
         <div className="form-section">
+          {/* Tarih Alanları */}
           <div className="form-row">
             <div className="form-group">
               <label>Teklif Tarihi</label>
               <input
                 type="date"
-                name="teklifTarihi"
-                value={formData.teklifTarihi}
-                onChange={handleInputChange}
+                value={quoteDate}
+                onChange={(e) => setQuoteDate(e.target.value)}
               />
             </div>
             <div className="form-group">
               <label>Termin Tarihi</label>
               <input
                 type="date"
-                name="terminTarihi"
-                value={formData.terminTarihi}
-                onChange={handleInputChange}
+                value={deadlineDate}
+                onChange={(e) => setDeadlineDate(e.target.value)}
               />
             </div>
           </div>
+
+          {/* Teklif İsteyen ve Grup No */}
           <div className="form-row">
             <div className="form-group">
               <label>Teklif İsteyen</label>
               <select
-                name="teklifIsteyen"
-                value={formData.teklifIsteyen}
-                onChange={handleInputChange}
+                value={requester}
+                onChange={(e) => setRequster(e.target.value)}
               >
                 <option value="">Seçiniz</option>
-                <option value="Kişi 1">Kişi 1</option>
-                <option value="Kişi 2">Kişi 2</option>
+                <option value="user1">User 1</option>
+                <option value="user2">User 2</option>
+                <option value="user3">User 3</option>
               </select>
             </div>
             <div className="form-group">
-              <label>Teklif Grup NO</label>
+              <label>Teklif Grup No</label>
               <input
                 type="text"
-                name="teklifGrupNo"
-                value={formData.teklifGrupNo}
-                onChange={handleInputChange}
-                placeholder="xx"
+                placeholder="XX"
+                value={quoteGroupNo}
+                onChange={(e) => setQuoteGroupNo(e.target.value)}
               />
             </div>
           </div>
+
+          {/* Açıklama Alanı */}
           <div className="form-row">
             <div className="form-group full-width">
               <label>Açıklama</label>
               <textarea
-                name="aciklama"
-                value={formData.aciklama}
-                onChange={handleInputChange}
-                placeholder="Açıklama giriniz..."
-              ></textarea>
+                placeholder="Açıklama Giriniz..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Malzemeler Tab */}
-      {activeTab === "malzemeler" && (
-        <div className="form-section">
-          <p>Malzeme tablosu burada olacak...</p>
-        </div>
-      )}
-
-      {/* Tedarikçi Seçimi - Teklif Bilgileri Tabında Görünmeli */}
-      {activeTab === "teklifBilgileri" && (
-        <div className="tedarikci-section">
-          <div className="tedarikci-tabs">
-            <button
-              className={tedarikciTab === "seciliTedarikciler" ? "active" : ""}
-              onClick={() => setTedarikciTab("seciliTedarikciler")}
-            >
-              Seçili Tedarikçiler
-            </button>
-            <button
-              className={tedarikciTab === "tumTedarikciler" ? "active" : ""}
-              onClick={() => setTedarikciTab("tumTedarikciler")}
-            >
-              Tüm Tedarikçiler
-            </button>
-          </div>
-
-          {/* Seçili Tedarikçiler */}
-          {tedarikciTab === "seciliTedarikciler" && (
-            <div className="tedarikci-list">
-              <ul>
-                {selectedTedarikciler.map((tedarikci) => (
-                  <li key={tedarikci.id}>
-                    {tedarikci.name} <button onClick={() => handleTedarikciDeselect(tedarikci.id)}>Sil</button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Tüm Tedarikçiler */}
-          {tedarikciTab === "tumTedarikciler" && (
-            <div className="tedarikci-list">
-              <ul>
-                {tedarikciler.map((tedarikci) => (
-                  <li key={tedarikci.id}>
-                    {tedarikci.name} <button onClick={() => handleTedarikciSelect(tedarikci.id)}>Ekle</button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
       )}
     </div>
