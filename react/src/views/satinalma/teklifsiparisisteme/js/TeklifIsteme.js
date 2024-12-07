@@ -1,15 +1,19 @@
-import React, {useState} from "react";
-import '../css/TeklifIsteme.css';
-
+import React, { useState } from "react";
+import "../css/TeklifIsteme.css";
 
 const TeklifIsteme = () => {
-  const [activeTab, setActiveTab] = useState('details'); // details = teklif bilgileri materials = malzemeler
-  const [quoteDate, setQuoteDate] = useState('');
-  const [deadlineDate, setDeadlineDate] = useState('');
-  const [requester, setRequster] = useState('');
-  const [quoteGroupNo, setQuoteGroupNo] = useState('');
-  const [description, setDescription] = useState('');
-  
+  const [activeTab, setActiveTab] = useState("details"); // "details" = teklif bilgileri, "materials" = malzemeler
+  const [quoteDate, setQuoteDate] = useState("");
+  const [deadlineDate, setDeadlineDate] = useState("");
+  const [requester, setRequester] = useState("");
+  const [quoteGroupNo, setQuoteGroupNo] = useState("");
+  const [description, setDescription] = useState("");
+  const [supplierTab, setSupplierTab] = useState("selected"); // "selected" or "all"
+
+  const suppliers = [
+    { code: "101", name: "Supplier 1", phone: "123456789", email: "email1@example.com", address: "Address 1" },
+    { code: "102", name: "Supplier 2", phone: "987654321", email: "email2@example.com", address: "Address 2" },
+  ];
 
   return (
     <div className="teklif-isteme-container">
@@ -34,7 +38,6 @@ const TeklifIsteme = () => {
       {/* Form Alanları */}
       {activeTab === "details" && (
         <div className="form-section">
-          {/* Tarih Alanları */}
           <div className="form-row">
             <div className="form-group">
               <label>Teklif Tarihi</label>
@@ -54,18 +57,16 @@ const TeklifIsteme = () => {
             </div>
           </div>
 
-          {/* Teklif İsteyen ve Grup No */}
           <div className="form-row">
             <div className="form-group">
               <label>Teklif İsteyen</label>
               <select
                 value={requester}
-                onChange={(e) => setRequster(e.target.value)}
+                onChange={(e) => setRequester(e.target.value)}
               >
                 <option value="">Seçiniz</option>
                 <option value="user1">User 1</option>
                 <option value="user2">User 2</option>
-                <option value="user3">User 3</option>
               </select>
             </div>
             <div className="form-group">
@@ -79,7 +80,6 @@ const TeklifIsteme = () => {
             </div>
           </div>
 
-          {/* Açıklama Alanı */}
           <div className="form-row">
             <div className="form-group full-width">
               <label>Açıklama</label>
@@ -89,6 +89,58 @@ const TeklifIsteme = () => {
                 onChange={(e) => setDescription(e.target.value)}
               />
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tedarikçi Alanları - Sadece "Teklif Bilgileri" seçildiğinde göster */}
+      {activeTab === "details" && (
+        <div className="supplier-section">
+          <div className="tabs-container">
+            <button
+              className={`tab-button ${supplierTab === "selected" ? "active" : ""}`}
+              onClick={() => setSupplierTab("selected")}
+            >
+              Seçili Tedarikçiler
+            </button>
+            <button
+              className={`tab-button ${supplierTab === "all" ? "active" : ""}`}
+              onClick={() => setSupplierTab("all")}
+            >
+              Tüm Tedarikçiler
+            </button>
+          </div>
+
+          {/* Tedarikçi Tablosu */}
+          <div className="supplier-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Tedarikçi Kodu</th>
+                  <th>Tedarikçi Adı</th>
+                  <th>Tel. NO</th>
+                  <th>E-Posta</th>
+                  <th>Adres</th>
+                </tr>
+              </thead>
+              <tbody>
+                {suppliers.map((supplier, index) => (
+                  <tr key={index}>
+                    <td>{supplier.code}</td>
+                    <td>{supplier.name}</td>
+                    <td>{supplier.phone}</td>
+                    <td>{supplier.email}</td>
+                    <td>{supplier.address}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Butonlar */}
+          <div className="button-container">
+            <button className="save-button">Kaydet</button>
+            <button className="cancel-button">İptal</button>
           </div>
         </div>
       )}

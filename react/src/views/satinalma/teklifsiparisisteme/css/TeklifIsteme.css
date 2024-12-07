@@ -89,3 +89,55 @@ select:focus {
 .full-width {
   width: 100%;
 }
+
+/* Tedarikçi Sekmesi */
+.supplier-section {
+  margin-top: 30px;
+}
+
+.supplier-table {
+  margin-top: 20px;
+  overflow-x: auto;
+}
+
+.supplier-table table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.supplier-table th,
+.supplier-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.supplier-table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+}
+
+.button-container {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.save-button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.cancel-button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
