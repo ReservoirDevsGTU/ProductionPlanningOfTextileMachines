@@ -124,6 +124,20 @@ select:focus {
   margin-top: 20px;
 }
 
+.add-supplier-button {
+  background-color: #007BFF; /* Mavi arka plan */
+  color: #fff; /* Beyaz yazı */
+  border: none; /* Kenarlıkları kaldır */
+  padding: 10px 20px; /* Butonun iç boşluğu */
+  border-radius: 5px; /* Yuvarlak köşeler */
+  cursor: pointer; /* Fare işaretçisini değiştir */
+  
+}
+
+.add-supplier-button:hover {
+  background-color: #0056b3; /* Hover'da koyu mavi */
+}
+
 .save-button {
   background-color: #28a745;
   color: white;
