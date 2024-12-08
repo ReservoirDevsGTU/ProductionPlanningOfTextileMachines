@@ -11,6 +11,7 @@ const TeklifIsteme = () => {
   const [description, setDescription] = useState("");
   const [supplierTab, setSupplierTab] = useState("selected"); // "selected" or "all"
   const [materialsTab, setMaterialsTab] = useState("selected"); // Sub-tabs for materials
+  
   const [searchTerm, setSearchTerm] = useState("");
 
   const [suppliers, setSuppliers] = useState([]);
@@ -20,7 +21,7 @@ const TeklifIsteme = () => {
 
   const [showModal, setShowModal] = useState(false); // Modal görünürlüğü
   const [selectedMaterialToDelete, setSelectedMaterialToDelete] = useState(null); // Silinecek malzeme
- 
+
   const handleRemoveMaterial = () => {
     setSelectedMaterials((prev) => prev.filter((m) => m.id !== selectedMaterialToDelete.id));
     setShowModal(false); // Popup'u kapat
@@ -33,21 +34,21 @@ const TeklifIsteme = () => {
 
 
 
-    // Tedarikçi verilerini çekmek için useEffect
-    useEffect(() => {
-      const fetchSuppliers = async () => {
-        try {
-          const response = await fetch("http://localhost/path_to_php/getAllSuppliers.php");
-          const data = await response.json();
-          setSuppliers(data); // Veritabanından gelen verileri state'e atıyoruz
-        } catch (error) {
-          console.error("Tedarikçiler alınırken bir hata oluştu:", error);
-        }
-      };
-      
-      fetchSuppliers();
-    }, []);
-  
+  // Tedarikçi verilerini çekmek için useEffect
+  useEffect(() => {
+    const fetchSuppliers = async () => {
+      try {
+        const response = await fetch("http://localhost/path_to_php/getAllSuppliers.php");
+        const data = await response.json();
+        setSuppliers(data); // Veritabanından gelen verileri state'e atıyoruz
+      } catch (error) {
+        console.error("Tedarikçiler alınırken bir hata oluştu:", error);
+      }
+    };
+
+    fetchSuppliers();
+  }, []);
+
 
   // Sayfa yüklendiğinde bugünün tarihini atama
   useEffect(() => {
@@ -59,40 +60,57 @@ const TeklifIsteme = () => {
 
 
 
-  const filteredMaterials = (materials) =>
-    materials.filter(
-      (material) =>
-        material.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        material.id.includes(searchTerm)
+  const filteredMaterials = (materials) => 
+    materials.filter((material) => {
+      let matches = true;
+      for (let i = 0; i < searchTerm.length; i++) {
+        if (material.name[i]?.toLowerCase() !== searchTerm[i].toLowerCase()) {
+          matches = false;
+          break;
+        }
+      }
+      return matches;
+    });
+  
+  const filteredSuppliers = suppliers.filter((supplier) => {
+    let matches = true;
+    for (let i = 0; i < searchTerm.length; i++) {
+      if (supplier.name[i]?.toLowerCase() !== searchTerm[i].toLowerCase()) {
+        matches = false;
+        break;
+      }
+    }
+    return matches;
+  });
+  
+
+
+
+  const handleAddMaterial = () => {
+    // Tüm seçilen malzemeleri filtrele
+    const toAdd = allMaterials.filter((material) => material.isChecked);
+
+    // Geçersiz teklif miktarlarını kontrol et
+    const hasErrors = toAdd.some(
+      (material) => !material.offerAmount || material.offerAmount <= 0
     );
 
-    
+    if (hasErrors) {
+      // Eğer geçersiz miktar varsa, kullanıcıyı uyar
+      alert("Lütfen seçilen malzemeler için geçerli bir teklif miktarı giriniz.");
+    } else if (toAdd.length === 0) {
+      // Eğer hiçbir malzeme seçilmemişse, kullanıcıyı uyar
+      alert("Hiç malzeme seçmediniz.");
+    } else {
+      // Geçerli malzemeleri seçili listeye ekle
+      setSelectedMaterials((prev) => [
+        ...prev,
+        ...toAdd.filter((m) => !prev.some((prevMaterial) => prevMaterial.id === m.id)),
+      ]);
+      alert("Malzemeler seçili listeye eklendi.");
+    }
+  };
 
-    const handleAddMaterial = () => {
-      // Tüm seçilen malzemeleri filtrele
-      const toAdd = allMaterials.filter((material) => material.isChecked);
-    
-      // Geçersiz teklif miktarlarını kontrol et
-      const hasErrors = toAdd.some(
-        (material) => !material.offerAmount || material.offerAmount <= 0
-      );
-    
-      if (hasErrors) {
-        // Eğer geçersiz miktar varsa, kullanıcıyı uyar
-        alert("Lütfen seçilen malzemeler için geçerli bir teklif miktarı giriniz.");
-      } else if (toAdd.length === 0) {
-        // Eğer hiçbir malzeme seçilmemişse, kullanıcıyı uyar
-        alert("Hiç malzeme seçmediniz.");
-      } else {
-        // Geçerli malzemeleri seçili listeye ekle
-        setSelectedMaterials((prev) => [
-          ...prev,
-          ...toAdd.filter((m) => !prev.some((prevMaterial) => prevMaterial.id === m.id)),
-        ]);
-        alert("Malzemeler seçili listeye eklendi.");
-      }
-    };
-    
 
   // Checkbox seçimlerini yönetme supplier için
   const handleCheckboxChangesupplier = (supplierId) => {
@@ -105,31 +123,31 @@ const TeklifIsteme = () => {
     });
   };
 
-    // Tüm tedarikçileri seçme
-    const handleSelectAllChange = () => {
-      setSelectAllChecked(!selectAllChecked);
-      if (!selectAllChecked) {
-        // Tüm tedarikçileri seç
-        const allSupplierIds = suppliers.map((supplier) => supplier.id);
-        setSelectedCheckboxes(allSupplierIds);
-      } else {
-        // Tüm tedarikçileri seçme
-        setSelectedCheckboxes([]);
-      }
-    };
+  // Tüm tedarikçileri seçme
+  const handleSelectAllChange = () => {
+    setSelectAllChecked(!selectAllChecked);
+    if (!selectAllChecked) {
+      // Tüm tedarikçileri seç
+      const allSupplierIds = suppliers.map((supplier) => supplier.id);
+      setSelectedCheckboxes(allSupplierIds);
+    } else {
+      // Tüm tedarikçileri seçme
+      setSelectedCheckboxes([]);
+    }
+  };
 
 
-  
-  
-    const handleCheckboxChange = (id, checked) => {
-      setAllMaterials((prev) =>
-        prev.map((material) =>
-          material.id === id ? { ...material, isChecked: checked } : material
-        )
-      );
-    };
 
-      // Seçilen tedarikçileri Seçili Tedarikçiler sekmesine ekleme
+
+  const handleCheckboxChange = (id, checked) => {
+    setAllMaterials((prev) =>
+      prev.map((material) =>
+        material.id === id ? { ...material, isChecked: checked } : material
+      )
+    );
+  };
+
+  // Seçilen tedarikçileri Seçili Tedarikçiler sekmesine ekleme
   const handleAddSelectedSuppliers = () => {
     const selected = suppliers.filter((supplier) =>
       selectedCheckboxes.includes(supplier.id)
@@ -144,16 +162,16 @@ const TeklifIsteme = () => {
 
   // Seçili tedarikçiyi listeden kaldırma
   const handleRemoveSupplier = (supplierId) => {
-    setSelectedSuppliers((prevSelected) => 
+    setSelectedSuppliers((prevSelected) =>
       prevSelected.filter(supplier => supplier.id !== supplierId)
     );
   };
 
-    const [selectedMaterials, setSelectedMaterials] = useState([]); // Start with an empty array
-    const [allMaterials, setAllMaterials] = useState([
-      { id: "3", name: "YXX", stock: 100, unit: "Litre", offerAmount: "" },
-      { id: "4", name: "XXZ", stock: 200, unit: "Metre", offerAmount: "" },
-    ]);
+  const [selectedMaterials, setSelectedMaterials] = useState([]); // Start with an empty array
+  const [allMaterials, setAllMaterials] = useState([
+    { id: "3", name: "YXX", stock: 100, unit: "Litre", offerAmount: "" },
+    { id: "4", name: "XXZ", stock: 200, unit: "Metre", offerAmount: "" },
+  ]);
 
 
   return (
@@ -252,6 +270,15 @@ const TeklifIsteme = () => {
             </button>
           </div>
 
+         <div className="search-bar-container">
+            <input
+              type="text"
+              placeholder="Arama Yapın..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
           {/* Seçili Tedarikçiler Tablosu */}
           {supplierTab === "selected" && (
             <div className="supplier-table">
@@ -291,6 +318,22 @@ const TeklifIsteme = () => {
           {/* Tüm Tedarikçiler Tablosu */}
           {supplierTab === "all" && (
             <div className="supplier-table">
+              <div className="button-container" style={{
+                display: "flex",
+                justifyContent: "flex-start", // Butonu sola hizalar
+                marginTop: "10px",
+                marginBottom: "20px"
+              }}>
+                <button
+                  className="add-supplier-button"
+                  onClick={() => {
+                    // Tedarikçi ekleme işlemi için bir işlev çağırabilirsiniz
+                    console.log("Tedarikçi ekleme işlemi.");
+                  }}
+                >
+                  Tedarikçi Ekle
+                </button>
+              </div>
               <table>
                 <thead>
                   <tr>
@@ -357,7 +400,7 @@ const TeklifIsteme = () => {
 
 
 
-{activeTab === "materials" && (
+      {activeTab === "materials" && (
         <div>
           <div className="tabs-container">
             <button
@@ -401,7 +444,7 @@ const TeklifIsteme = () => {
                   <tr key={material.id}>
                     <td>
                       <button onClick={() => handleDeleteClick(material)}>
-                      <FontAwesomeIcon icon={faTrash} style={{ marginRight: '8px'}} />
+                        <FontAwesomeIcon icon={faTrash} style={{ marginRight: '8px' }} />
                       </button>
                     </td>
                     <td>{material.id}</td>
@@ -463,36 +506,36 @@ const TeklifIsteme = () => {
           )}
 
           {materialsTab === "all" && (
-             <div style={{ textAlign: "right", marginTop: "20px" }}>
-             <button
-               className="listeye-ekle-button"
-               onClick={handleAddMaterial}>Listeye Ekle
-               </button>
+            <div style={{ textAlign: "right", marginTop: "20px" }}>
+              <button
+                className="listeye-ekle-button"
+                onClick={handleAddMaterial}>Listeye Ekle
+              </button>
 
-           </div>
+            </div>
           )}
 
-           {/* Modal */}
-      {showModal && (
-        <div className="modal">
-          <div className="modal-content">
-            <h2>Silme Onayı</h2>
-            <div className="modal-body">
-              <p>
-                '{selectedMaterialToDelete?.name}' malzemesini silmek istediğinizden emin misiniz?
-              </p>
+          {/* Modal */}
+          {showModal && (
+            <div className="modal">
+              <div className="modal-content">
+                <h2>Silme Onayı</h2>
+                <div className="modal-body">
+                  <p>
+                    '{selectedMaterialToDelete?.name}' malzemesini silmek istediğinizden emin misiniz?
+                  </p>
+                </div>
+                <div className="modal-footer">
+                  <button className="modal-button cancel" onClick={() => setShowModal(false)}>
+                    İptal
+                  </button>
+                  <button className="modal-button delete" onClick={handleRemoveMaterial}>
+                    Sil
+                  </button>
+                </div>
+              </div>
             </div>
-            <div className="modal-footer">
-              <button className="modal-button cancel" onClick={() => setShowModal(false)}>
-                İptal
-              </button>
-              <button className="modal-button delete" onClick={handleRemoveMaterial}>
-                Sil
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          )}
         </div>
       )}
     </div>
