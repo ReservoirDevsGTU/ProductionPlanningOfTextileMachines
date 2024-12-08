@@ -109,6 +109,18 @@ CREATE TABLE Suppliers (
     IsDeleted INT
 );
 
+CREATE TABLE SupplierContactDetails (
+    ContactDetailID INT PRIMARY KEY,
+    SupplierID INT,
+    ContactName VARCHAR(100),
+    ContactSurname VARCHAR(100),
+    ContactTitle VARCHAR(100),
+    ContactPhoneNo VARCHAR(50),
+    ContactEmail VARCHAR(100),
+    IsDeleted INT,
+    FOREIGN KEY (SupplierID) REFERENCES Suppliers(SupplierID)
+);
+
 CREATE TABLE PurchaseOffers (
     OfferID INT PRIMARY KEY,
     OfferGroupID INT,
@@ -272,11 +284,24 @@ BEGIN
         @i, 
         CONCAT('supplier ', @i), 
         CONCAT('taxcode', @i), 
-        CONCAT('+905424413380', @i), 
+        CONCAT('+905000000000', @i), 
         CONCAT('supplier', @i, '@gmail.com'), 
         CONCAT('address ', @i), 
         CONCAT('notes for supplier ', @i), 
         1, 
+        0
+    );
+
+    INSERT INTO SupplierContactDetails(ContactDetailID, SupplierID, ContactName, ContactSurname, ContactTitle, ContactPhoneNo, ContactEmail, IsDeleted)
+    VALUES
+    (
+        @i,
+        @i,
+        CONCAT('suppliercontactname', @i),
+        CONCAT('suppliercontactsurname', @i),
+        CONCAT('level', @i,'patron'),
+        CONCAT('+905000000000', @i),
+        CONCAT('Contact', @i,'@gmail.com'),
         0
     );
 
@@ -337,6 +362,7 @@ SELECT * FROM PurchaseOffers;
 SELECT * FROM PurchaseOfferDetails;
 SELECT * FROM PurchaseOfferItems;
 SELECT * FROM Suppliers;
+SELECT * FROM SupplierContacts;
 SELECT * FROM MaterialTypes;
 SELECT * FROM Warehouses;
 SELECT * FROM MaterialSpecs;
