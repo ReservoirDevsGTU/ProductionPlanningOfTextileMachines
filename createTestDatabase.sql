@@ -150,93 +150,182 @@ CREATE TABLE PurchaseOfferItems (
     FOREIGN KEY (MaterialID) REFERENCES Materials(MaterialID)
 );
 
-INSERT INTO Users (UserID, UserName, Name, Surname, UserEmail, UserStatus) 
-VALUES 
-    (1, 'Çağrı', 'Cağrı', 'Özcanlı', 'cagriözcanli@gmail.com', 1),
-    (2, 'jfouche', 'Batuhan', 'Altun', 'batuhanaltun@gmail.com', 1),
-    (3, 'Mert', 'Mert', 'Seker', 'mertseker@gmail.com', 1),
-    (4, 'mrwhite', 'mehme', 'Mrtekin', 'baytekin@gmail.com', 1),
-    (5, 'Baran', 'Baran', 'Sahin', 'baransahin@gmail.com', 1);
-
-INSERT INTO PurchaseRequests (RequestID, CreatedBy, CreationDate, RequestStatus, IsDeleted) 
-VALUES 
-    (1, 1, '2024-10-20 14:30:00', 1, 0),
-    (2, 2, '2024-10-21 09:15:00', 2, 0),
-    (3, 3, '2024-10-22 11:45:00', 1, 0),
-    (4, 4, '2024-10-23 10:00:00', 3, 0),
-    (5, 5, '2024-10-24 13:20:00', 1, 0);
-
-INSERT INTO PurchaseRequestDetails (RequestInfoID, RequestID, RequestedBy, RequestDeadline, RequestDescription, ManufacturingUnitID, RequestDetailStatus, IsDeleted)
-VALUES 
-    (1, 1, 2, '2024-11-01', 'Elektronik', 100, 1, 0),
-    (2, 2, 3, '2024-11-05', 'Ofis Eşyaları', 101, 1, 0),
-    (3, 3, 4, '2024-11-07', 'Temizlik Malzemeleri', 102, 2, 0),
-    (4, 4, 5, '2024-11-10', 'Bakım Ekipmanları', 103, 1, 0),
-    (5, 5, 1, '2024-11-15', 'Bilgisayar Ekipmanları', 104, 1, 0);
-
-INSERT INTO Materials (MaterialID, MaterialName, MaterialStatus, IsDeleted)
-VALUES 
-    (1, 'Laptop', 1, 0),
-    (2, 'Fare', 1, 0),
-    (3, 'Klavye', 1, 0),
-    (4, 'Monitör', 1, 0),
-    (5, 'Yazıcı', 1, 0);
-
-INSERT INTO MaterialTypes (MaterialTypeID, MaterialTypeName, MaterialTypeStatus, IsDeleted)
-VALUES (1, 'Type A', 1, 0);
-
-INSERT INTO Warehouses (WarehouseID, WarehouseName, WarehouseAddress, WarehouseSupervisorID, WarehouseStatus, IsDeleted)
-VALUES (1, 'Central Warehouse', '123 Warehouse St', 1, 1, 0);
-
-INSERT INTO MaterialSpecs (MaterialSpecID, MaterialID, MainMaterialID, SuckerNo, MaterialNo, PhotoNo, MaterialTypeID, UnitID, IsDeleted)
-VALUES (1, 1, NULL, 'SN001', 'MN001', 'PN001', 1, 1, 0);
-
-INSERT INTO MaterialInventory (InventoryID, MaterialID, WarehouseID, Quantity, LastUpdated)
-VALUES (1, 1, 1, 100, GETDATE());
 
 
-INSERT INTO PurchaseRequestItems (ItemID, RequestID, MaterialID, RequestedAmount, OrderedAmount, ProvidedAmount, ItemStatus, IsDeleted)
-VALUES 
-    (1, 1, 1, 10, 5, 5, 1, 0),
-    (2, 1, 2, 20, 15, 10, 1, 0),
-    (3, 2, 3, 5, 2, 1, 1, 0),
-    (4, 3, 4, 8, 4, 4, 1, 0),
-    (5, 4, 5, 12, 6, 6, 1, 0);
 
 
-INSERT INTO Suppliers (SupplierID, SupplierName, SupplierTaxCode, SupplierTelNo, SupplierEmail, SupplierAddress, SupplierNotes, SupplierStatus, IsDeleted)
-VALUES 
-    (1, 'Teknoloji Tedarikçileri', '12345', '123-456-7890', 'teknotedarik@tek.com', ' Teknoloji Cad.', 'Önde gelen teknoloji tedarikçisi', 1, 0),
-    (2, 'Ofis Malzemeleri', '67890', '234-567-8901', 'ofismalz@ofis.com', 'Ofis Sok.', 'Güvenilir ofis tedarikçisi', 1, 0),
-    (3, 'Temizlik Malzemeleri', '54321', '345-678-9012', 'temizlik@tem.com', ' Temizlik Bulv.', 'Kaliteli temizlik malzemeleri tedarikçisi', 1, 0),
-    (4, 'Bakım Ekipmanları', '98765', '456-789-0123', 'bakimtedarik@btkd.com', ' Bakım Mah.', 'Güvenilir bakım ekipmanları tedarikçisi', 1, 0),
-    (5, 'Bilgisayar Dünyası', '19283', '567-890-1234', 'bilgisayardunyasi@bdunyasi.com', ' Bilgisayar Sok.', 'Bilgisayar aksesuarları konusunda uzmanlaşmış', 1, 0);
+DECLARE @i INT = 1;
+--
+WHILE @i <= 10000
+BEGIN
+    INSERT INTO Users (UserID, UserName, Name, Surname, UserEmail, UserStatus)
+    VALUES 
+    (
+        @i, 
+        CONCAT('user', @i), 
+        CONCAT('name', @i), 
+        CONCAT('surname', @i), 
+        CONCAT('user', @i, '@gmail.com'), 
+        1
+    );
 
+    INSERT INTO PurchaseRequests (RequestID, CreatedBy, CreationDate, RequestStatus, IsDeleted)
+    VALUES 
+    (
+        @i, 
+        @i, 
+        DATEADD(DAY, @i - 1, '2024-10-20 14:53:00'), 
+        CASE 
+            WHEN @i % 3 = 1 THEN 1 
+            WHEN @i % 3 = 2 THEN 2 
+            ELSE 3 
+        END, 
+        0
+    );
 
-INSERT INTO PurchaseOffers (OfferID, OfferGroupID, CreatedBy, CreationDate, OfferStatus, IsDeleted)
-VALUES 
-    (1, 101, 1, '2024-10-25 12:00:00', 1, 0),
-    (2, 102, 2, '2024-10-26 10:30:00', 2, 0),
-    (3, 103, 3, '2024-10-27 15:45:00', 1, 0),
-    (4, 104, 4, '2024-10-28 09:00:00', 1, 0),
-    (5, 105, 5, '2024-10-29 11:20:00', 3, 0);
+    INSERT INTO PurchaseRequestDetails (RequestInfoID, RequestID, RequestedBy, RequestDeadline, RequestDescription, ManufacturingUnitID, RequestDetailStatus, IsDeleted)
+    VALUES 
+    (
+        @i,
+        @i,
+        @i, 
+        DATEADD(DAY, @i, '2024-12-01'), 
+        CONCAT('description ', @i), 
+        100 + @i, 
+        CASE 
+            WHEN @i % 3 = 1 THEN 1 
+            WHEN @i % 3 = 2 THEN 2 
+            ELSE 3 
+        END, 
+        0
+    );
 
-INSERT INTO PurchaseOfferDetails (DetailID, OfferID, OfferDate, OfferDeadline, RequestedBy, OfferDescription, SupplierID, DetailStatus, IsDeleted)
-VALUES 
-    (1, 1, '2024-10-30', '2024-11-15', 2, 'Elektronik ', 1, 1, 0),
-    (2, 2, '2024-10-31', '2024-11-20', 3, 'Ofis Eşyaları', 2, 1, 0),
-    (3, 3, '2024-11-01', '2024-11-22', 4, 'Temizlik Malzemeleri', 3, 2, 0),
-    (4, 4, '2024-11-02', '2024-11-25', 5, 'Bakım Ekipmanları', 4, 1, 0),
-    (5, 5, '2024-11-03', '2024-11-28', 1, 'Bilgisayar Ekipmanları', 5, 1, 0);
+    INSERT INTO Materials (MaterialID, MaterialName, MaterialStatus, IsDeleted)
+    VALUES 
+    (
+        @i,
+        CONCAT('material ', @i), 
+        1, 
+        0
+    );
 
-INSERT INTO PurchaseOfferItems (ItemID, OfferID, RequestItemID, MaterialID, RequestedAmount, OfferedAmount, OfferedPrice, ConformationStatus, ItemStatus, IsDeleted)
-VALUES 
-    (1, 1, 1, 1, 10, 8, 1200.00, 1, 1, 0),
-    (2, 1, 2, 2, 20, 18, 25.50, 1, 1, 0),
-    (3, 2, 3, 3, 5, 4, 50.00, 2, 1, 0),
-    (4, 3, 4, 4, 8, 7, 200.00, 1, 1, 0),
-    (5, 4, 5, 5, 12, 10, 300.00, 1, 1, 0);
+    INSERT INTO MaterialTypes (MaterialTypeID, MaterialTypeName, MaterialTypeStatus, IsDeleted)
+    VALUES 
+    (
+        @i, 
+        CONCAT('type ', @i), 
+        1, 
+        0
+    );
 
+    INSERT INTO Warehouses (WarehouseID, WarehouseName, WarehouseAddress, WarehouseSupervisorID, WarehouseStatus, IsDeleted)
+    VALUES 
+    (
+        @i, 
+        CONCAT('warehouse ', @i), 
+        CONCAT('address ', @i), 
+        1, 
+        1, 
+        0
+    );
+
+    INSERT INTO MaterialSpecs (MaterialSpecID, MaterialID, MainMaterialID, SuckerNo, MaterialNo, PhotoNo, MaterialTypeID, UnitID, IsDeleted)
+    VALUES 
+    (
+        @i,
+        @i,
+        NULL, 
+        CONCAT('SN', @i), 
+        CONCAT('MN', @i), 
+        CONCAT('PN', @i), 
+        @i, 
+        1, 
+        0
+    );
+
+    INSERT INTO MaterialInventory (InventoryID, MaterialID, WarehouseID, Quantity, LastUpdated)
+    VALUES 
+    (
+        @i,
+        @i, 
+        @i, 
+        @i * 10, 
+        GETDATE()
+    );
+
+    INSERT INTO PurchaseRequestItems (ItemID, RequestID, MaterialID, RequestedAmount, OrderedAmount, ProvidedAmount, ItemStatus, IsDeleted)
+    VALUES 
+    (
+        @i,
+        @i, 
+        @i, 
+        10 + @i, 
+        5 + @i, 
+        3 + @i, 
+        1, 
+        0
+    );
+
+    INSERT INTO Suppliers (SupplierID, SupplierName, SupplierTaxCode, SupplierTelNo, SupplierEmail, SupplierAddress, SupplierNotes, SupplierStatus, IsDeleted)
+    VALUES 
+    (
+        @i, 
+        CONCAT('supplier ', @i), 
+        CONCAT('taxcode', @i), 
+        CONCAT('+905424413380', @i), 
+        CONCAT('supplier', @i, '@gmail.com'), 
+        CONCAT('address ', @i), 
+        CONCAT('notes for supplier ', @i), 
+        1, 
+        0
+    );
+
+    INSERT INTO PurchaseOffers (OfferID, OfferGroupID, CreatedBy, CreationDate, OfferStatus, IsDeleted)
+    VALUES 
+    (
+        @i, 
+        100 + @i, 
+        @i, 
+        DATEADD(DAY, @i - 1, '2024-10-25 12:00:00'), 
+        CASE 
+            WHEN @i % 3 = 1 THEN 1 
+            WHEN @i % 3 = 2 THEN 2 
+            ELSE 3 
+        END, 
+        0
+    );
+
+    INSERT INTO PurchaseOfferDetails (DetailID, OfferID, OfferDate, OfferDeadline, RequestedBy, OfferDescription, SupplierID, DetailStatus, IsDeleted)
+    VALUES 
+    (
+        @i,
+        @i, 
+        DATEADD(DAY, @i - 1, '2024-12-30'), 
+        DATEADD(DAY, @i, '2024-12-15'), 
+        @i, 
+        CONCAT('description ', @i), 
+        @i, 
+        1, 
+        0
+    );
+
+    INSERT INTO PurchaseOfferItems (ItemID, OfferID, RequestItemID, MaterialID, RequestedAmount, OfferedAmount, OfferedPrice, ConformationStatus, ItemStatus, IsDeleted)
+    VALUES 
+    (
+        @i,
+        @i, 
+        @i, 
+        @i, 
+        10 + @i, 
+        8 + @i, 
+        100.00 + (@i * 10.00), 
+        1, 
+        1, 
+        0
+    );
+
+    SET @i = @i + 1;
+END;
 
 
 SELECT * FROM Users;
@@ -253,4 +342,3 @@ SELECT * FROM Warehouses;
 SELECT * FROM MaterialSpecs;
 SELECT * FROM MaterialInventory;
 GO
-
