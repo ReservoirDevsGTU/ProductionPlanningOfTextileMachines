@@ -28,7 +28,7 @@ const SatinAlmaTalepleri = () => {
 
   const fetchData = async () => {
     try {
-      const response = await axios.post(baseURL + '/queryRequests.php');
+      const response = await axios.post(baseURL + '/queryRequests.php', {offset: [100, 10]});
       const updatedData = response.data.map(item => ({
         ...item,
         progress: item.progress || 50.5

@@ -117,7 +117,7 @@ const TalepEkleme = ({ editID }) => {
     }
   
     // Fetch all materials for adding new materials if needed
-    axios.post(baseURL + '/queryMaterials.php')
+    axios.post(baseURL + '/queryMaterials.php', {offset: [100, 10]})
       .then((response) => {
         setAllMaterials(response.data);
       })

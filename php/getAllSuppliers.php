@@ -7,10 +7,12 @@
  *   A nested array that includes all suppliers' details
  *   Every item of that array is a discrete supplier
  */
+include 'connect.php';
+include 'headers.php';
 
 function getAllSuppliers($conn) {
   # Fetching all suppliers from the Suppliers table
-  $query = "SELECT * FROM Suppliers";
+  $query = "SELECT * FROM Suppliers WHERE IsDeleted = 0";
   $stmt = sqlsrv_query($conn, $query);
 
   if ($stmt === false) {
@@ -20,8 +22,9 @@ function getAllSuppliers($conn) {
   $suppliers = array();
   while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
     # Fetch additional details for each supplier if needed
-    $supplierDetails = getSupplierDetails($row['SupplierID'], $conn);
-    $suppliers[] = array_merge($row, $supplierDetails);
+    //$supplierDetails = getSupplierDetails($row['SupplierID'], $conn);
+    //$suppliers[] = array_merge($row, $supplierDetails);
+    $suppliers[] = $row;
   }
 
   return $suppliers;
@@ -45,6 +48,6 @@ function getSupplierDetails($supplierID, $conn) {
   return $details;
 }
 
-// $suppliers = getAllSuppliers($conn);
-// print_r($suppliers);
+$suppliers = getAllSuppliers($conn);
+echo json_encode($suppliers);
 ?>

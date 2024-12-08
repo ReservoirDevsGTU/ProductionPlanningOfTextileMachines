@@ -23,7 +23,7 @@ $sql1 = "SELECT
         ";
 
 $sql2 = "SELECT
-         pri.ItemID,
+         pri.ItemID RequestItemID,
          pri.MaterialID,
          pri.RequestedAmount,
          pri.OrderedAmount,
@@ -49,6 +49,12 @@ $input = json_decode(file_get_contents("php://input"), true);
 
 $data = [];
 
+if($input["offset"]) {
+    $offsetAmt = $input["offset"][0];
+    $fetchAmt = $input["offset"][1];
+    $offset = " ORDER BY (SELECT NULL) OFFSET $offsetAmt ROWS FETCH NEXT $fetchAmt ROWS ONLY";
+}
+
 if($input["filters"]) {
     foreach($input["filters"] as $f) {
         $filteredQuery = $sql1;
@@ -64,6 +70,7 @@ if($input["filters"]) {
             $d = implode('\', \'', $f["UserName"]);
             $filteredQuery = $filteredQuery . " AND u.UserName IN ('$d')";
         }
+        $filteredQuery = $filteredQuery . $offset;
         $stmt = sqlsrv_query($conn, $filteredQuery);
         if(!$stmt) {
             die(json_encode(sqlsrv_errors(), true));
@@ -77,7 +84,7 @@ if($input["filters"]) {
     }
 }
 else {
-    $stmt = sqlsrv_query($conn, $sql1);
+    $stmt = sqlsrv_query($conn, $sql1 . $offset);
     if(!$stmt) {
         die(json_encode(sqlsrv_errors(), true));
     }
@@ -100,7 +107,7 @@ foreach($data as $r) {
     }
     $mData =[];
     while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-        $mData[] = $row;
+        $mData[$row["MaterialID"]] = $row;
     }
     $mDataFinal = [];
     foreach($mData as $m) {

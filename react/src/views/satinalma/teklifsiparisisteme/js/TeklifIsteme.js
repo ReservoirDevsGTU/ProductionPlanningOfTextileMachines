@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import "../css/TeklifIsteme.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import baseURL from '../../satinalmatalepleri/js/baseURL.js';
+import axios from 'axios';
+
 const TeklifIsteme = () => {
   const [activeTab, setActiveTab] = useState("details"); // "details" = teklif bilgileri, "materials" = malzemeler
   const [quoteDate, setQuoteDate] = useState("");
@@ -21,9 +24,11 @@ const TeklifIsteme = () => {
 
   const [showModal, setShowModal] = useState(false); // Modal görünürlüğü
   const [selectedMaterialToDelete, setSelectedMaterialToDelete] = useState(null); // Silinecek malzeme
+  const [selectedMaterials, setSelectedMaterials] = useState([]); // Start with an empty array
+  const [allMaterials, setAllMaterials] = useState([]);
 
   const handleRemoveMaterial = () => {
-    setSelectedMaterials((prev) => prev.filter((m) => m.id !== selectedMaterialToDelete.id));
+    setSelectedMaterials((prev) => prev.filter((m) => m.RequestItemID !== selectedMaterialToDelete.RequestItemID));
     setShowModal(false); // Popup'u kapat
   };
 
@@ -38,15 +43,26 @@ const TeklifIsteme = () => {
   useEffect(() => {
     const fetchSuppliers = async () => {
       try {
-        const response = await fetch("http://localhost/path_to_php/getAllSuppliers.php");
-        const data = await response.json();
-        setSuppliers(data); // Veritabanından gelen verileri state'e atıyoruz
+        const response = await axios.get(baseURL + "/getAllSuppliers.php");
+        setSuppliers(response.data); // Veritabanından gelen verileri state'e atıyoruz
       } catch (error) {
         console.error("Tedarikçiler alınırken bir hata oluştu:", error);
       }
     };
 
+    const fetchMaterials = async () => {
+      try {
+        const response = await axios.post(baseURL + "/queryRequests.php");
+        const data = response.data.reduce((acc, cur) => acc = acc.concat(cur.Materials), []);
+        setAllMaterials(data);
+      }
+      catch (error) {
+        console.error("Materyaller alınırken bir hata oluştu:", error);
+      }
+    };
+
     fetchSuppliers();
+    fetchMaterials();
   }, []);
 
 
@@ -92,7 +108,7 @@ const TeklifIsteme = () => {
 
     // Geçersiz teklif miktarlarını kontrol et
     const hasErrors = toAdd.some(
-      (material) => !material.offerAmount || material.offerAmount <= 0
+      (material) => !material.OfferedAmount || material.OfferedAmount <= 0
     );
 
     if (hasErrors) {
@@ -128,7 +144,7 @@ const TeklifIsteme = () => {
     setSelectAllChecked(!selectAllChecked);
     if (!selectAllChecked) {
       // Tüm tedarikçileri seç
-      const allSupplierIds = suppliers.map((supplier) => supplier.id);
+      const allSupplierIds = suppliers.map((supplier) => supplier.SupplierID);
       setSelectedCheckboxes(allSupplierIds);
     } else {
       // Tüm tedarikçileri seçme
@@ -142,7 +158,7 @@ const TeklifIsteme = () => {
   const handleCheckboxChange = (id, checked) => {
     setAllMaterials((prev) =>
       prev.map((material) =>
-        material.id === id ? { ...material, isChecked: checked } : material
+        material.RequestItemID === id ? { ...material, isChecked: checked } : material
       )
     );
   };
@@ -150,7 +166,7 @@ const TeklifIsteme = () => {
   // Seçilen tedarikçileri Seçili Tedarikçiler sekmesine ekleme
   const handleAddSelectedSuppliers = () => {
     const selected = suppliers.filter((supplier) =>
-      selectedCheckboxes.includes(supplier.id)
+      selectedCheckboxes.includes(supplier.SupplierID)
     );
     setSelectedSuppliers((prevSelected) => [
       ...prevSelected,
@@ -163,16 +179,9 @@ const TeklifIsteme = () => {
   // Seçili tedarikçiyi listeden kaldırma
   const handleRemoveSupplier = (supplierId) => {
     setSelectedSuppliers((prevSelected) =>
-      prevSelected.filter(supplier => supplier.id !== supplierId)
+      prevSelected.filter(supplier => supplier.SupplierID !== supplierId)
     );
   };
-
-  const [selectedMaterials, setSelectedMaterials] = useState([]); // Start with an empty array
-  const [allMaterials, setAllMaterials] = useState([
-    { id: "3", name: "YXX", stock: 100, unit: "Litre", offerAmount: "" },
-    { id: "4", name: "XXZ", stock: 200, unit: "Metre", offerAmount: "" },
-  ]);
-
 
   return (
     <div className="teklif-isteme-container">
@@ -296,14 +305,14 @@ const TeklifIsteme = () => {
                 <tbody>
                   {selectedSuppliers.map((supplier, index) => (
                     <tr key={index}>
-                      <td>{supplier.code}</td>
-                      <td>{supplier.name}</td>
-                      <td>{supplier.phone}</td>
-                      <td>{supplier.email}</td>
-                      <td>{supplier.address}</td>
+                      <td>{supplier.SupplierID}</td>
+                      <td>{supplier.SupplierName}</td>
+                      <td>{supplier.SupplierTelNo}</td>
+                      <td>{supplier.SupplierEmail}</td>
+                      <td>{supplier.SupplierAddress}</td>
                       <td>
                         <button
-                          onClick={() => handleRemoveSupplier(supplier.id)}
+                          onClick={() => handleRemoveSupplier(supplier.SupplierID)}
                         >
                           Kaldır
                         </button>
@@ -357,15 +366,15 @@ const TeklifIsteme = () => {
                       <td>
                         <input
                           type="checkbox"
-                          checked={selectedCheckboxes.includes(supplier.id)}
-                          onChange={() => handleCheckboxChangesupplier(supplier.id)}
+                          checked={selectedCheckboxes.includes(supplier.SupplierID)}
+                          onChange={() => handleCheckboxChangesupplier(supplier.SupplierID)}
                         />
                       </td>
-                      <td>{supplier.code}</td>
-                      <td>{supplier.name}</td>
-                      <td>{supplier.phone}</td>
-                      <td>{supplier.email}</td>
-                      <td>{supplier.address}</td>
+                      <td>{supplier.SupplierID}</td>
+                      <td>{supplier.SupplierName}</td>
+                      <td>{supplier.SupplierTelNo}</td>
+                      <td>{supplier.SupplierEmail}</td>
+                      <td>{supplier.SupplierAddress}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -441,17 +450,17 @@ const TeklifIsteme = () => {
               </thead>
               <tbody>
                 {selectedMaterials.map((material) => (
-                  <tr key={material.id}>
+                  <tr key={material.RequestItemID}>
                     <td>
                       <button onClick={() => handleDeleteClick(material)}>
                         <FontAwesomeIcon icon={faTrash} style={{ marginRight: '8px' }} />
                       </button>
                     </td>
-                    <td>{material.id}</td>
-                    <td>{material.name}</td>
-                    <td>{material.offerAmount}</td>
-                    <td>{material.stock}</td>
-                    <td>{material.unit}</td>
+                    <td>{material.MaterialNo}</td>
+                    <td>{material.MaterialName}</td>
+                    <td>{material.OfferedAmount}</td>
+                    <td>{material.RequestedAmount}</td>
+                    <td>{material.UnitID}</td>
                   </tr>
                 ))}
               </tbody>
@@ -470,35 +479,35 @@ const TeklifIsteme = () => {
               </thead>
               <tbody>
                 {filteredMaterials(allMaterials).map((material) => (
-                  <tr key={material.id}>
+                  <tr key={material.RequestItemID}>
                     <td>
                       <input
                         type="checkbox"
                         checked={material.isChecked || false}
                         onChange={(e) =>
-                          handleCheckboxChange(material.id, e.target.checked)
+                          handleCheckboxChange(material.RequestItemID, e.target.checked)
                         }
                       />
                     </td>
-                    <td>{material.id}</td>
-                    <td>{material.name}</td>
+                    <td>{material.MaterialNo}</td>
+                    <td>{material.MaterialName}</td>
                     <td>
                       <input
                         type="number"
-                        value={material.offerAmount}
+                        value={material.OfferedAmount}
                         onChange={(e) =>
                           setAllMaterials((prev) =>
                             prev.map((m) =>
-                              m.id === material.id
-                                ? { ...m, offerAmount: e.target.value }
+                              m.RequestItemID === material.RequestItemID
+                                ? { ...m, OfferedAmount: e.target.value }
                                 : m
                             )
                           )
                         }
                       />
                     </td>
-                    <td>{material.stock}</td>
-                    <td>{material.unit}</td>
+                    <td>{material.RequestedAmount}</td>
+                    <td>{material.UnitID}</td>
                   </tr>
                 ))}
               </tbody>
@@ -522,7 +531,7 @@ const TeklifIsteme = () => {
                 <h2>Silme Onayı</h2>
                 <div className="modal-body">
                   <p>
-                    '{selectedMaterialToDelete?.name}' malzemesini silmek istediğinizden emin misiniz?
+                    '{selectedMaterialToDelete?.MaterialName}' malzemesini silmek istediğinizden emin misiniz?
                   </p>
                 </div>
                 <div className="modal-footer">

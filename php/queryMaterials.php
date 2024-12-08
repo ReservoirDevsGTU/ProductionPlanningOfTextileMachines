@@ -24,6 +24,12 @@ $input = json_decode(file_get_contents("php://input"), true);
 
 $data = [];
 
+if($input["offset"]) {
+    $offsetAmt = $input["offset"][0];
+    $fetchAmt = $input["offset"][1];
+    $offset = " ORDER BY (SELECT NULL) OFFSET $offsetAmt ROWS FETCH NEXT $fetchAmt ROWS ONLY";
+}
+
 if($input["filters"]) {
     foreach($input["filters"] as $f) {
         $filteredQuery = $sql;
@@ -39,7 +45,7 @@ if($input["filters"]) {
             $d = implode('\', \'', $f["MaterialName"]);
             $filteredQuery = $filteredQuery . " AND m.MaterialName IN ('$d')";
         }
-        $stmt = sqlsrv_query($conn, $filteredQuery);
+        $stmt = sqlsrv_query($conn, $filteredQuery . $offset);
         if(!$stmt) {
             die(json_encode(sqlsrv_errors(), true));
         }
@@ -50,7 +56,7 @@ if($input["filters"]) {
     }
 }
 else {
-    $stmt = sqlsrv_query($conn, $sql);
+    $stmt = sqlsrv_query($conn, $sql . $offset);
     if(!$stmt) {
         die(json_encode(sqlsrv_errors(), true));
     }
