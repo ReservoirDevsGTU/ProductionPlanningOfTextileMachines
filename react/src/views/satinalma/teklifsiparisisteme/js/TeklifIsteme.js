@@ -14,7 +14,7 @@ const TeklifIsteme = () => {
   const [description, setDescription] = useState("");
   const [supplierTab, setSupplierTab] = useState("selected"); // "selected" or "all"
   const [materialsTab, setMaterialsTab] = useState("selected"); // Sub-tabs for materials
-  
+
   const [searchTerm, setSearchTerm] = useState("");
 
   const [suppliers, setSuppliers] = useState([]);
@@ -76,29 +76,18 @@ const TeklifIsteme = () => {
 
 
 
-  const filteredMaterials = (materials) => 
-    materials.filter((material) => {
-      let matches = true;
-      for (let i = 0; i < searchTerm.length; i++) {
-        if (material.name[i]?.toLowerCase() !== searchTerm[i].toLowerCase()) {
-          matches = false;
-          break;
-        }
-      }
-      return matches;
-    });
-  
-  const filteredSuppliers = suppliers.filter((supplier) => {
-    let matches = true;
-    for (let i = 0; i < searchTerm.length; i++) {
-      if (supplier.name[i]?.toLowerCase() !== searchTerm[i].toLowerCase()) {
-        matches = false;
-        break;
-      }
-    }
-    return matches;
-  });
-  
+  const filteredMaterials = (materials) =>
+    materials.filter((material) =>
+      material.MaterialName?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+  const filteredSuppliers = searchTerm
+    ? suppliers.filter((supplier) =>
+      supplier.SupplierName?.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    : suppliers;
+
+
 
 
 
@@ -279,7 +268,7 @@ const TeklifIsteme = () => {
             </button>
           </div>
 
-         <div className="search-bar-container">
+          <div className="search-bar-container">
             <input
               type="text"
               placeholder="Arama Yapın..."
@@ -303,23 +292,25 @@ const TeklifIsteme = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {selectedSuppliers.map((supplier, index) => (
+                  {filteredSuppliers.map((supplier, index) => (
                     <tr key={index}>
+                      <td>
+                        <input
+                          type="checkbox"
+                          checked={selectedCheckboxes.includes(supplier.SupplierID)}
+                          onChange={() => handleCheckboxChangesupplier(supplier.SupplierID)}
+                        />
+                      </td>
                       <td>{supplier.SupplierID}</td>
                       <td>{supplier.SupplierName}</td>
                       <td>{supplier.SupplierTelNo}</td>
                       <td>{supplier.SupplierEmail}</td>
                       <td>{supplier.SupplierAddress}</td>
-                      <td>
-                        <button
-                          onClick={() => handleRemoveSupplier(supplier.SupplierID)}
-                        >
-                          Kaldır
-                        </button>
-                      </td>
                     </tr>
                   ))}
                 </tbody>
+
+
               </table>
             </div>
           )}
@@ -361,7 +352,7 @@ const TeklifIsteme = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {suppliers.map((supplier, index) => (
+                  {filteredSuppliers.map((supplier, index) => (
                     <tr key={index}>
                       <td>
                         <input
@@ -381,6 +372,7 @@ const TeklifIsteme = () => {
               </table>
             </div>
           )}
+
 
           {supplierTab === "all" && (
             <div className="button-container" style={{ textAlign: "right", marginTop: "20px" }}>
