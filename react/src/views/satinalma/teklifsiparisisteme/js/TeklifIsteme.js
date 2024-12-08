@@ -279,41 +279,38 @@ const TeklifIsteme = () => {
 
           {/* Seçili Tedarikçiler Tablosu */}
           {supplierTab === "selected" && (
-            <div className="supplier-table">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Tedarikçi Kodu</th>
-                    <th>Tedarikçi Adı</th>
-                    <th>Tel. NO</th>
-                    <th>E-Posta</th>
-                    <th>Adres</th>
-                    <th>Kaldır</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredSuppliers.map((supplier, index) => (
-                    <tr key={index}>
-                      <td>
-                        <input
-                          type="checkbox"
-                          checked={selectedCheckboxes.includes(supplier.SupplierID)}
-                          onChange={() => handleCheckboxChangesupplier(supplier.SupplierID)}
-                        />
-                      </td>
-                      <td>{supplier.SupplierID}</td>
-                      <td>{supplier.SupplierName}</td>
-                      <td>{supplier.SupplierTelNo}</td>
-                      <td>{supplier.SupplierEmail}</td>
-                      <td>{supplier.SupplierAddress}</td>
-                    </tr>
-                  ))}
-                </tbody>
+  <div className="supplier-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Tedarikçi Kodu</th>
+          <th>Tedarikçi Adı</th>
+          <th>Tel. NO</th>
+          <th>E-Posta</th>
+          <th>Adres</th>
+          <th>Kaldır</th>
+        </tr>
+      </thead>
+      <tbody>
+        {selectedSuppliers.map((supplier, index) => (
+          <tr key={index}>
+            <td>{supplier.SupplierID}</td>
+            <td>{supplier.SupplierName}</td>
+            <td>{supplier.SupplierTelNo}</td>
+            <td>{supplier.SupplierEmail}</td>
+            <td>{supplier.SupplierAddress}</td>
+            <td>
+              <button onClick={() => handleRemoveSupplier(supplier.SupplierID)}>
+              <FontAwesomeIcon icon={faTrash} style={{ marginRight: '8px' }} />
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}
 
-
-              </table>
-            </div>
-          )}
 
           {/* Tüm Tedarikçiler Tablosu */}
           {supplierTab === "all" && (
