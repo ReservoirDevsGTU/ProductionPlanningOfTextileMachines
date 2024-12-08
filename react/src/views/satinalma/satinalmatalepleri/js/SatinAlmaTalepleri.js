@@ -15,7 +15,6 @@ const SatinAlmaTalepleri = () => {
   const [tableData, setTableData] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedRows, setExpandedRows] = useState({});
-  const [materialsData, setMaterialsData] = useState({});
   const history = useHistory();
 
   const handleTalepEkleClick = () => {
@@ -29,7 +28,7 @@ const SatinAlmaTalepleri = () => {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get(baseURL + '/requestListing.php');
+      const response = await axios.post(baseURL + '/queryRequests.php');
       const updatedData = response.data.map(item => ({
         ...item,
         progress: item.progress || 50.5
@@ -40,28 +39,11 @@ const SatinAlmaTalepleri = () => {
     }
   };
 
-  // MALZEMELERİ ÇEK
-  const fetchMaterials = async (requestId) => {
-    try {
-      const response = await axios.get(baseURL + '/getRequestsMaterials.php?id=' + requestId)
-      setMaterialsData((prevData) => ({
-        ...prevData,
-        [requestId]: response.data,
-      }));
-    } catch (e) {
-      console.error("Malzeme verisi alınırken hata oluştu:", e);
-    }
-  };
-
   const toggleRow = (requestId) => {
     setExpandedRows((prevRows) => ({
       ...prevRows,
       [requestId]: !prevRows[requestId],
     }));
-
-    if (!materialsData[requestId]) {
-      fetchMaterials(requestId);
-    }
   };
 
   const confirmDelete = () => {
@@ -80,7 +62,7 @@ const SatinAlmaTalepleri = () => {
 
   const filteredData = tableData.filter((item) =>
     item.RequestID.toString().includes(searchTerm) ||
-    item.RequestedBy.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.UserName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.RequestDescription.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -148,7 +130,7 @@ const SatinAlmaTalepleri = () => {
                     </td>
                     <td>{item.RequestID}</td>
                     <td>{item.RequestDeadline}</td>
-                    <td>{item.RequestedBy}</td>
+                    <td>{item.UserName}</td>
                     <td>{item.RequestDescription}</td>
                     <td>{item.RequestStatus}</td>
                     <td>
@@ -185,7 +167,7 @@ const SatinAlmaTalepleri = () => {
                           </thead>
                           <tbody>
                             
-                            {materialsData[item.RequestID]?.map((material) => (
+                            {item.Materials.map((material) => (
                               <tr key={material.MaterialID}>
                                 <td>{material.MaterialNo}</td>
                                 <td>{material.SuckerNo}</td>

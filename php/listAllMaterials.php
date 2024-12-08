@@ -6,6 +6,8 @@ $sql = "SELECT
         Materials.MaterialID,
         Materials.MaterialName,
         MaterialInventory.Quantity,
+        MaterialSpecs.MaterialNo,
+        MaterialSpecs.SuckerNo,
         MaterialSpecs.UnitID
         FROM Materials
         JOIN MaterialInventory

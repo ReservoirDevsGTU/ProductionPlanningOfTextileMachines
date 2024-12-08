@@ -13,7 +13,9 @@ if($input) {
     m.MaterialID,
     m.MaterialName,
     i.Quantity,
-    s.UnitID
+    s.UnitID,
+    s.MaterialNo,
+    s.SuckerNo
     FROM Materials m
     JOIN MaterialInventory i ON m.MaterialID = i.MaterialID
     JOIN MaterialSpecs s ON m.MaterialID = s.MaterialID
@@ -26,12 +28,7 @@ if($input) {
     $dataArr = [];
     if ($stmt) {
         while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-            $data[$row["MaterialID"]] = array(
-                "MaterialID" => $row["MaterialID"],
-                "MaterialName" => $row["MaterialName"],
-                "Quantity" => $row["Quantity"],
-                "UnitID" => $row["UnitID"]
-            );
+            $data[$row["MaterialID"]] = $row;
         }
         foreach($data as $i) {
             $dataArr[] = $i;

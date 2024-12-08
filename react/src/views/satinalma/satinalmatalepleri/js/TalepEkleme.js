@@ -99,32 +99,25 @@ const TalepEkleme = ({ editID }) => {
   useEffect(() => {
     if (editID) {
       // Fetch request details from the backend
-      axios.get(baseURL + '/getRequestByID.php?id=' + editID)
+      axios.post(baseURL + '/queryRequests.php', {filters: [{RequestID: [editID]}]})
         .then((response) => {
-          const data = response.data;
+          const data = response.data[0];
           // Set request details like date, requester, and description
           setRequestDetails({
             date: data.RequestDeadline,
             requester: data.RequestedBy, // Backend'den gelen talep eden
             description: data.RequestDescription,
           });
+          const materials = data.Materials;
+          // Set selected materials related to this request
+          setSelectedMaterials(materials || []); // Ensure it sets an empty array if no materials
           console.log('Fetched request details:', data);
         })
         .catch((error) => console.error('Error fetching request details:', error));
-      
-      // Fetch materials related to this request
-      axios.get(baseURL + '/getRequestsMaterials.php?id=' + editID)
-        .then((response) => {
-          const materials = response.data;
-          // Set selected materials related to this request
-          setSelectedMaterials(materials || []); // Ensure it sets an empty array if no materials
-          console.log('Fetched request materials:', materials);
-        })
-        .catch((error) => console.error('Error fetching request materials:', error));
     }
   
     // Fetch all materials for adding new materials if needed
-    axios.get(baseURL + '/listAllMaterials.php')
+    axios.post(baseURL + '/queryMaterials.php')
       .then((response) => {
         setAllMaterials(response.data);
       })
@@ -162,7 +155,7 @@ const TalepEkleme = ({ editID }) => {
       reader.onload = async (data) => {
           const workbook = XLSX.read(reader.result);
           const table = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-          const response = await axios.post(baseURL + "/getMaterialsByID.php", {MaterialIDs: table.map((e)=>e.MaterialID)});
+          const response = await axios.post(baseURL + "/queryMaterials.php", {filters: [{MaterialID: table.map((e)=>e.MaterialID)}]});
           setTemplateTable(response.data.map((e) => ({
             ...e, 
             RequestedAmount: table.find(r => r.MaterialID === e.MaterialID).Quantity
@@ -253,7 +246,7 @@ const TalepEkleme = ({ editID }) => {
                 <tbody>
                   {templateTable.map((material) => (
                     <tr key={material.MaterialID}>
-                      <td>{material.MaterialID}</td>
+                      <td>{material.MaterialNo}</td>
                       <td>{material.MaterialName}</td>
                       <td>{material.Quantity}</td>
                       <td>{material.UnitID}</td>
@@ -385,7 +378,7 @@ const TalepEkleme = ({ editID }) => {
         <tbody>
           {filteredMaterials.map((material) => (
             <tr key={material.MaterialID}>
-              <td>{material.MaterialID}</td>
+              <td>{material.MaterialNo}</td>
               <td>{material.MaterialName}</td>
               <td>{material.Quantity}</td> {/*backendden gelen stoğu gösteriyoruz. */}
               <td>{material.UnitID}</td>

@@ -28,8 +28,8 @@ if (isset($_POST['request_id'])) {
     $params = array($requestId);
     sqlsrv_query($conn, $sql, $params); // No error handling here
 
-    // Mark the related record in PurchaseRequestInfos as deleted
-    $sql = "UPDATE PurchaseRequestInfos SET IsDeleted = 1 WHERE RequestID = ?";
+    // Mark the related record in PurchaseRequestItems as deleted
+    $sql = "UPDATE PurchaseRequestItems SET IsDeleted = 1 WHERE RequestID = ?";
     sqlsrv_query($conn, $sql, $params); // No error handling here
 
     // Mark the related record in PurchaseRequestDetails as deleted
