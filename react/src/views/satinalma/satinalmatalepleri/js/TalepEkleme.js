@@ -308,8 +308,8 @@ const TalepEkleme = ({ editID }) => {
           >
             <option value="">Seçiniz</option>
             {users.map((user) => (
-              <option key={user.id} value={user.id}>
-                {user.name}
+              <option key={user.UserID} value={user.UserID}>
+                {user.UserName}
               </option>
             ))}
           </select>

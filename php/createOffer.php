@@ -9,8 +9,8 @@ if($input) {
             OUTPUT INSERTED.OfferID
             VALUES((SELECT ISNULL(MAX(OfferID)+1,1) FROM PurchaseOffers), ?, ?, GETDATE(), 0, 0)";
     $stmt = sqlsrv_query($conn, $sql, array(
-        $input["groupID"],
-        $input["createdBy"]
+        $input["OfferGroupID"],
+        $input["CreatedBy"]
     ));
     if($stmt !== false) {
         $id = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)["OfferID"];
@@ -19,11 +19,11 @@ if($input) {
                 VALUES((SELECT ISNULL(MAX(DetailID)+1,1) FROM PurchaseOfferDetails), ?, ?, ?, ?, ?, ?, 0, 0)";
         $stmt = sqlsrv_query($conn, $sql, array(
             $id,
-            $input["date"],
-            $input["deadline"],
-            $input["requestedBy"],
-            $input["description"],
-            $input["supplierID"]
+            $input["OfferDate"],
+            $input["OfferDeadline"],
+            $input["RequestedBy"],
+            $input["OfferDescription"],
+            $input["SupplierID"]
         ));
         sqlsrv_free_stmt($stmt);
         $sql = "INSERT INTO PurchaseOfferItems(ItemID, OfferID, RequestItemID, MaterialID, RequestedAmount, OfferedAmount, OfferedPrice, ConformationStatus, ItemStatus, IsDeleted)
