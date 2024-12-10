@@ -34,20 +34,14 @@ const _nav = [
       },
       {
         _tag: 'CSidebarNavItem',
-        name: 'Teklif Listesi / Alınan Tekliflerin Girişi',
+        name: 'Teklif Listesi',
         to: '/satinalma/teklif-listesi',
         style: { paddingLeft: '10px', fontSize: '0.8rem' },
       },
       {
         _tag: 'CSidebarNavItem',
-        name: 'Teklif Değerlendirme İsteği ve Sipariş Verme',
-        to: '/satinalma/teklif-degerlendirme-ve-siparis',
-        style: { paddingLeft: '10px', fontSize: '0.79rem' },
-      },
-      {
-        _tag: 'CSidebarNavItem',
-        name: 'Teklif Değerlendirme Listesi',
-        to: '/satinalma/teklif-degerlendirme-listesi',
+        name: 'Teklif Değerlendirme',
+        to: '/satinalma/teklif-degerlendirme',
         style: { paddingLeft: '10px', fontSize: '0.8rem' },
       },
       {
@@ -58,8 +52,14 @@ const _nav = [
       },
       {
         _tag: 'CSidebarNavItem',
-        name: 'Teslim Tesellüm ve Giriş İşlemleri',
-        to: '/satinalma/teslim-tesellum',
+        name: 'Teslim ve Giriş İşlemleri',
+        to: '/satinalma/teslim-giris-islemleri',
+        style: { paddingLeft: '10px', fontSize: '0.8rem' },
+      },
+      {
+        _tag: 'CSidebarNavItem',
+        name: 'Satın Alma Parametreleri',
+        to: '/satinalma/satinalma-parametreleri',
         style: { paddingLeft: '10px', fontSize: '0.8rem' },
       },
     ]

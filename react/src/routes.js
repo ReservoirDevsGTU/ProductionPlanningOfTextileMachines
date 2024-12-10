@@ -57,6 +57,8 @@ const TeklifIsteme = React.lazy(() => import('./views/satinalma/teklifsiparisist
 // teklif sipariş liste
 const TeklifSiparisListe = React.lazy(() => import('./views/satinalma/teklifsiparisisteme/js/TeklifSiparisListe'));
 
+// teklif listesi
+const TeklifListesi = React.lazy(() => import('./views/satinalma/tekliflistesi/js/TeklifListesi'));
 
 
 
@@ -121,6 +123,9 @@ const routes = [
     // teklif isteme
   { path: '/satinalma/teklif-isteme', name: 'Teklif İsteme', component: TeklifIsteme },
  
+    // teklif listesi
+  { path: '/satinalma/teklif-listesi', name: 'Teklif Listesi', component: TeklifListesi },
+
 ];
 
 export default routes;
