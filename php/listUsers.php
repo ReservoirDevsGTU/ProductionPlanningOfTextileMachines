@@ -9,8 +9,8 @@ $data = [];
 if ($stmt !== false) {
     while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
         $data[] = array(
-            "id" => $row["UserID"],
-            "name" => $row["UserName"],
+            "UserID" => $row["UserID"],
+            "UserName" => $row["UserName"],
             );
     }
     sqlsrv_free_stmt($stmt);

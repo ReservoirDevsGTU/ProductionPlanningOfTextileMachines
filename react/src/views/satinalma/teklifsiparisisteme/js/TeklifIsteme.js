@@ -9,12 +9,12 @@ const TeklifIsteme = () => {
   const [activeTab, setActiveTab] = useState("details"); // "details" = teklif bilgileri, "materials" = malzemeler
   const [quoteDate, setQuoteDate] = useState("");
   const [deadlineDate, setDeadlineDate] = useState("");
-  const [requester, setRequester] = useState("");
+  const [requester, setRequester] = useState(-1);
   const [quoteGroupNo, setQuoteGroupNo] = useState("");
   const [description, setDescription] = useState("");
   const [supplierTab, setSupplierTab] = useState("selected"); // "selected" or "all"
   const [materialsTab, setMaterialsTab] = useState("selected"); // Sub-tabs for materials
-  
+
   const [searchTerm, setSearchTerm] = useState("");
 
   const [suppliers, setSuppliers] = useState([]);
@@ -26,6 +26,7 @@ const TeklifIsteme = () => {
   const [selectedMaterialToDelete, setSelectedMaterialToDelete] = useState(null); // Silinecek malzeme
   const [selectedMaterials, setSelectedMaterials] = useState([]); // Start with an empty array
   const [allMaterials, setAllMaterials] = useState([]);
+  const [users, setUsers] = useState([]);
 
   const handleRemoveMaterial = () => {
     setSelectedMaterials((prev) => prev.filter((m) => m.RequestItemID !== selectedMaterialToDelete.RequestItemID));
@@ -41,28 +42,28 @@ const TeklifIsteme = () => {
 
   // Tedarikçi verilerini çekmek için useEffect
   useEffect(() => {
-    const fetchSuppliers = async () => {
+    const fetchData = async () => {
       try {
         const response = await axios.get(baseURL + "/getAllSuppliers.php");
         setSuppliers(response.data); // Veritabanından gelen verileri state'e atıyoruz
       } catch (error) {
         console.error("Tedarikçiler alınırken bir hata oluştu:", error);
       }
-    };
 
-    const fetchMaterials = async () => {
       try {
-        const response = await axios.post(baseURL + "/queryRequests.php");
+        const response = await axios.post(baseURL + "/queryRequests.php", {offset: [100, 10]});
         const data = response.data.reduce((acc, cur) => acc = acc.concat(cur.Materials), []);
         setAllMaterials(data);
       }
       catch (error) {
         console.error("Materyaller alınırken bir hata oluştu:", error);
       }
+      axios.get(baseURL + "/listUsers.php")
+        .then(response => setUsers(response.data))
+        .catch(error => console.error(error));
     };
 
-    fetchSuppliers();
-    fetchMaterials();
+    fetchData();
   }, []);
 
 
@@ -76,29 +77,18 @@ const TeklifIsteme = () => {
 
 
 
-  const filteredMaterials = (materials) => 
-    materials.filter((material) => {
-      let matches = true;
-      for (let i = 0; i < searchTerm.length; i++) {
-        if (material.name[i]?.toLowerCase() !== searchTerm[i].toLowerCase()) {
-          matches = false;
-          break;
-        }
-      }
-      return matches;
-    });
-  
-  const filteredSuppliers = suppliers.filter((supplier) => {
-    let matches = true;
-    for (let i = 0; i < searchTerm.length; i++) {
-      if (supplier.name[i]?.toLowerCase() !== searchTerm[i].toLowerCase()) {
-        matches = false;
-        break;
-      }
-    }
-    return matches;
-  });
-  
+  const filteredMaterials = (materials) =>
+    materials.filter((material) =>
+      material.MaterialName?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+  const filteredSuppliers = searchTerm
+    ? suppliers.filter((supplier) =>
+      supplier.SupplierName?.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    : suppliers;
+
+
 
 
 
@@ -183,6 +173,14 @@ const TeklifIsteme = () => {
     );
   };
 
+  const handleSaveButton = () => {
+    //TODO
+    const data = {
+      OfferGroupID: quoteGroupNo,
+      CreatedBy: requester,
+    };
+  };
+
   return (
     <div className="teklif-isteme-container">
       <h1>Teklif İsteme</h1>
@@ -232,9 +230,10 @@ const TeklifIsteme = () => {
                 value={requester}
                 onChange={(e) => setRequester(e.target.value)}
               >
-                <option value="">Seçiniz</option>
-                <option value="user1">User 1</option>
-                <option value="user2">User 2</option>
+                <option value={-1}>Seciniz</option>
+                {users && users.map(u=>
+                  (<option key={u.UserID} value={u.UserID}>{u.UserName}</option>)
+                    )}
               </select>
             </div>
             <div className="form-group">
@@ -279,7 +278,7 @@ const TeklifIsteme = () => {
             </button>
           </div>
 
-         <div className="search-bar-container">
+          <div className="search-bar-container">
             <input
               type="text"
               placeholder="Arama Yapın..."
@@ -290,39 +289,38 @@ const TeklifIsteme = () => {
 
           {/* Seçili Tedarikçiler Tablosu */}
           {supplierTab === "selected" && (
-            <div className="supplier-table">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Tedarikçi Kodu</th>
-                    <th>Tedarikçi Adı</th>
-                    <th>Tel. NO</th>
-                    <th>E-Posta</th>
-                    <th>Adres</th>
-                    <th>Kaldır</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {selectedSuppliers.map((supplier, index) => (
-                    <tr key={index}>
-                      <td>{supplier.SupplierID}</td>
-                      <td>{supplier.SupplierName}</td>
-                      <td>{supplier.SupplierTelNo}</td>
-                      <td>{supplier.SupplierEmail}</td>
-                      <td>{supplier.SupplierAddress}</td>
-                      <td>
-                        <button
-                          onClick={() => handleRemoveSupplier(supplier.SupplierID)}
-                        >
-                          Kaldır
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+  <div className="supplier-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Tedarikçi Kodu</th>
+          <th>Tedarikçi Adı</th>
+          <th>Tel. NO</th>
+          <th>E-Posta</th>
+          <th>Adres</th>
+          <th>Kaldır</th>
+        </tr>
+      </thead>
+      <tbody>
+        {selectedSuppliers.map((supplier, index) => (
+          <tr key={index}>
+            <td>{supplier.SupplierID}</td>
+            <td>{supplier.SupplierName}</td>
+            <td>{supplier.SupplierTelNo}</td>
+            <td>{supplier.SupplierEmail}</td>
+            <td>{supplier.SupplierAddress}</td>
+            <td>
+              <button onClick={() => handleRemoveSupplier(supplier.SupplierID)}>
+              <FontAwesomeIcon icon={faTrash} style={{ marginRight: '8px' }} />
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}
+
 
           {/* Tüm Tedarikçiler Tablosu */}
           {supplierTab === "all" && (
@@ -361,7 +359,7 @@ const TeklifIsteme = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {suppliers.map((supplier, index) => (
+                  {filteredSuppliers.map((supplier, index) => (
                     <tr key={index}>
                       <td>
                         <input
@@ -382,6 +380,7 @@ const TeklifIsteme = () => {
             </div>
           )}
 
+
           {supplierTab === "all" && (
             <div className="button-container" style={{ textAlign: "right", marginTop: "20px" }}>
               <button
@@ -398,7 +397,7 @@ const TeklifIsteme = () => {
       {/* Kaydet ve İptal Butonları yalnızca Teklif Bilgileri ve Seçili Tedarikçiler sekmesi açıkken görünecek */}
       {activeTab === "details" && supplierTab === "selected" && (
         <div className="button-container">
-          <button className="save-button">Kaydet</button>
+          <button className="save-button" onClick={handleSaveButton}>Kaydet</button>
           <button className="cancel-button">İptal</button>
         </div>
       )}

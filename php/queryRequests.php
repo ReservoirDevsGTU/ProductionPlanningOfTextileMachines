@@ -49,6 +49,8 @@ $input = json_decode(file_get_contents("php://input"), true);
 
 $data = [];
 
+$offset = "";
+
 if($input["offset"]) {
     $offsetAmt = $input["offset"][0];
     $fetchAmt = $input["offset"][1];
