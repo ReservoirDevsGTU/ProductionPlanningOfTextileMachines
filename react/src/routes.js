@@ -60,7 +60,8 @@ const TeklifSiparisListe = React.lazy(() => import('./views/satinalma/teklifsipa
 // teklif listesi
 const TeklifListesi = React.lazy(() => import('./views/satinalma/tekliflistesi/js/TeklifListesi'));
 
-
+// teklif degerlendirme
+const TeklifDegerlendirme = React.lazy(() => import('./views/satinalma/teklifdegerlendirme/js/TeklifDegerlendirme'));
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },
@@ -125,6 +126,9 @@ const routes = [
  
     // teklif listesi
   { path: '/satinalma/teklif-listesi', name: 'Teklif Listesi', component: TeklifListesi },
+
+  // teklif degerlendirme
+  { path: '/satinalma/teklif-degerlendirme', name: 'Teklif Degerlendirme', component: TeklifDegerlendirme },
 
 ];
 
