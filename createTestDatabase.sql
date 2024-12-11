@@ -168,7 +168,7 @@ CREATE TABLE PurchaseOfferItems (
 
 DECLARE @i INT = 1;
 --
-WHILE @i <= 10000
+WHILE @i <= 1000
 BEGIN
     INSERT INTO Users (UserID, UserName, Name, Surname, UserEmail, UserStatus)
     VALUES 
@@ -362,7 +362,7 @@ SELECT * FROM PurchaseOffers;
 SELECT * FROM PurchaseOfferDetails;
 SELECT * FROM PurchaseOfferItems;
 SELECT * FROM Suppliers;
-SELECT * FROM SupplierContacts;
+SELECT * FROM SupplierContactDetails;
 SELECT * FROM MaterialTypes;
 SELECT * FROM Warehouses;
 SELECT * FROM MaterialSpecs;
