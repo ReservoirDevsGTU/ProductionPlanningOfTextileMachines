@@ -20,19 +20,24 @@ const TeklifSiparisListe = () => {
   
 // tüm checkboxları seçme temizleme
 const handleSelectedAll = (isChecked) => {
-  let selectEdit = selected;
-  setSelected(data.reduce((acc, cur) => {return {...acc, [cur.RequestItemID]: isChecked};}, selected));
-  setAllSelected(isChecked);
+  const updatedSelected = data.reduce((acc, cur) => {
+    return { ...acc, [cur.RequestItemID]: isChecked };
+  }, {}); 
+  setSelected(updatedSelected); 
+  setAllSelected(isChecked); 
 };
+
 
 // tek bi checkbox ı temizleme seçme
 const handleRowSelect = (item, isChecked) => {
-  if(selected[item] === isChecked) return;
-  let selectEdit = selected;
-  selectEdit[item] = isChecked;
-  setAllSelected(!data.find(i => !selectEdit[i.RequestItemID]));
-  setSelected(selectEdit);
+  setSelected((prevSelected) => ({
+    ...prevSelected,
+    [item]: isChecked,
+  }));
+
+  setAllSelected(!data.find((i) => !selected[i.RequestItemID])); 
 };
+
 
 // searchbar için filtreleme
 const filteredData = (data) => selected.concat(data.filter((item) => {

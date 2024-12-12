@@ -43,8 +43,10 @@ const SatinAlmaTalepleri = () => {
   };
 
   return (
-    <div>
-      {!showTalepEkleme && <h1>Satın Alma Talepleri</h1>}
+    <div className='satin-alma-talepleri-container'>
+      {!showTalepEkleme && <h1 className='header-title'>Satın Alma Talepleri</h1>} 
+
+      <hr className='hr'/>
 
       {!showTalepEkleme ? (
         <div>

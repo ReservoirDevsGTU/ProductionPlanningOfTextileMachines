@@ -61,7 +61,12 @@ const TeklifDegerlendirme = () => {
   );
 
   return (
-    <div className="teklif-degerlendirme">
+    <div className="teklif-degerlendirme-container">
+
+      <div className="header-title">
+        <h1>Teklif Değerlenirme</h1>
+        <hr />
+      </div>
       {/* Yazdırma Butonu */}
       <div className="header">
         <button className="print-button">

@@ -6,6 +6,10 @@
   margin-bottom: 20px;
 }
 
+.header-title hr {
+  border: 1px solid #333;
+}
+
 .header-section {
   display: flex;
   justify-content: space-between; 

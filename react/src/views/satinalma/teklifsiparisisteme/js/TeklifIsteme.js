@@ -128,16 +128,15 @@ const TeklifIsteme = () => {
       }
     });
   };
+  
 
   // Tüm tedarikçileri seçme
   const handleSelectAllChange = () => {
-    setSelectAllChecked(!selectAllChecked);
+    setSelectAllChecked(!selectAllChecked); 
     if (!selectAllChecked) {
-      // Tüm tedarikçileri seç
       const allSupplierIds = suppliers.map((supplier) => supplier.SupplierID);
       setSelectedCheckboxes(allSupplierIds);
     } else {
-      // Tüm tedarikçileri seçme
       setSelectedCheckboxes([]);
     }
   };
@@ -158,20 +157,18 @@ const TeklifIsteme = () => {
     const selected = suppliers.filter((supplier) =>
       selectedCheckboxes.includes(supplier.SupplierID)
     );
-    setSelectedSuppliers((prevSelected) => [
-      ...prevSelected,
-      ...selected,
-    ]);
+    setSelectedSuppliers((prevSelected) => [...prevSelected, ...selected]);
     setSelectedCheckboxes([]); // Seçimleri temizle
   };
-
+  
 
   // Seçili tedarikçiyi listeden kaldırma
   const handleRemoveSupplier = (supplierId) => {
     setSelectedSuppliers((prevSelected) =>
-      prevSelected.filter(supplier => supplier.SupplierID !== supplierId)
+      prevSelected.filter((supplier) => supplier.SupplierID !== supplierId)
     );
   };
+  
 
   const handleSaveButton = () => {
     //TODO

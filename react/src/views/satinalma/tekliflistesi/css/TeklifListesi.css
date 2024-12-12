@@ -1,0 +1,97 @@
+.teklif-listesi-container{
+    padding: 20px;
+}
+
+.header-title{
+    margin-bottom: 20px;
+}
+
+.header-title hr {
+    border: 1px solid #333;
+  }
+  
+
+.header-section{
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.search-bar-section {
+  display: flex; 
+  justify-content: flex-end; 
+  margin-bottom: 20px; 
+}
+
+.search-bar-section .seach-bar {
+  width: 300px; 
+  max-width: 100%; 
+  padding: 8px; 
+  border: 1px solid #ccc; 
+  border-radius: 5px; 
+}
+
+
+  .button-toolbar {
+    display: flex;
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 20px;
+  }
+  
+  .button-group-left,
+  .button-group-right {
+    display: flex; 
+    gap: 10px; 
+  }
+  
+
+
+  button {
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 10px 15px;
+    border-radius: 5px;
+    border: 1px solid transparent;
+    color: #333;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  }
+  
+  .blue-button {
+    border: 1px solid rgb(117, 184, 250);
+    color: rgb(82, 159, 236);
+    padding: 10px 15px;
+    width: auto;
+    height: 40px;
+  }
+  
+  .blue-button:hover {
+    background-color: rgb(0, 162, 255);
+    color: white;
+  }
+  
+  .blue-button:active {
+    background-color: rgb(84, 111, 206);
+    color: white;
+  }
+  
+  .green-button {
+    border: 1px solid #50c878;
+    color: #34a853;
+    padding: 10px 15px;
+    width: auto;
+    height: 40px;
+  }
+  
+  .green-button:hover {
+    background-color: #34a853;
+    color: white;
+  }
+  
+  .green-button:active {
+    background-color: #247239;
+    color: white;
+  }
+  

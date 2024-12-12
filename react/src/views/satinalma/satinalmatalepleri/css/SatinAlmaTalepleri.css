@@ -1,3 +1,15 @@
+.satin-alma-talepleri-container{
+  padding: 20px;
+}
+
+.header-title{
+  margin-bottom: 20px;
+}
+
+.hr {
+  border: 1px solid #333;
+}
+
 .talep-ekle-buton-css {
     color: rgb(0, 128, 255); /* Yazı rengi mavi */
     background-color: transparent; /* Arka plan transparan */

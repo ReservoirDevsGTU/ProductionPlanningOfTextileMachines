@@ -1,7 +1,15 @@
-.teklif-degerlendirme {
+.teklif-degerlendirme-container{
     padding: 20px;
   }
   
+  .header-title {
+    margin-bottom: 20px;
+  }
+  
+  .header-title hr {
+    border: 1px solid #333;
+  }
+
   .header {
     display: flex;
     justify-content: space-between;
