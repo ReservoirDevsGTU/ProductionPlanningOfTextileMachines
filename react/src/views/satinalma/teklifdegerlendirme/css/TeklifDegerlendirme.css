@@ -1,0 +1,127 @@
+.teklif-degerlendirme {
+    padding: 20px;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  
+  .print-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .print-button i {
+    margin-right: 8px;
+  }
+  
+  .search-bar {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+  
+  .main-table,
+  .sub-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  
+  .main-table th,
+  .main-table td,
+  .sub-table th,
+  .sub-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .main-table th {
+    background-color: #f4f4f4;
+  }
+  
+  .sub-table th {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .sub-table td {
+    background-color: #f9f9f9;
+  }
+  
+  .main-table td {
+    padding-left: 30px; /* Satır başındaki ok işareti için boşluk */
+  }
+  
+  /* CSS kısmı */
+.expand-button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    padding: 0;
+    color: #007bff; /* Ok rengi */
+  }
+  
+  .expand-button:hover {
+    color: #0056b3; /* Hover rengi */
+  }
+  
+  
+  /* Detaylı satır açıldığında daha belirgin görsellik */
+  .sub-table {
+    margin-top: 10px;
+    border: 2px solid #007bff;
+  }
+  
+  .sub-table td {
+    padding: 12px;
+  }
+  
+  /* Arama çubuğunun genişliği */
+  .search-bar {
+    width: 200px;
+  }
+  
+  /* Seç butonunun stilini ekle */
+.select-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .select-button:hover {
+    background-color: #0056b3;
+  }
+
+  /* Talep Tablosu Stil */
+.talep-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  
+  .talep-table th, .talep-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .talep-table th {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .talep-table td {
+    background-color: #f9f9f9;
+  }

@@ -128,7 +128,7 @@ const routes = [
   { path: '/satinalma/teklif-listesi', name: 'Teklif Listesi', component: TeklifListesi },
 
   // teklif degerlendirme
-  { path: '/satinalma/teklif-degerlendirme', name: 'Teklif Degerlendirme', component: TeklifDegerlendirme },
+  { path: '/satinalma/teklif-degerlendirme', name: 'Teklif Değerlendirme', component: TeklifDegerlendirme },
 
 ];
 
