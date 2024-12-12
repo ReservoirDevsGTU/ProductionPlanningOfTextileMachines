@@ -1,72 +1,58 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom'; // React Router v5 kullanımı
 import '../css/TeklifSiparisListe.css';
-import { CDataTable, CInput} from '@coreui/react';
+import { CDataTable, CInput, CPagination} from '@coreui/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faList, faShoppingCart } from '@fortawesome/free-solid-svg-icons';
-import axios from 'axios';
-
-
+import CustomTable from '../../CustomTable.js'
 
 const TeklifSiparisListe = () => {
   const history = useHistory(); // useHistory() ile yönlendirme
-  const [data, setData] = useState([]);
   const [allSelected, setAllSelected] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selected, setSelected] = useState([]);
+  const [data, setData] = useState([]);
 
-  const fetchData = async () => {
-    try {
-      const response = await axios.post(baseURL + '/queryOffers.php');
-      setData(response.data);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
+  const processData = (newData) => {
+    setAllSelected(!newData.find(i => !selected[i.RequestItemID]));
+    setData(newData);
   };
   
 // tüm checkboxları seçme temizleme
 const handleSelectedAll = (isChecked) => {
+  let selectEdit = selected;
+  setSelected(data.reduce((acc, cur) => {return {...acc, [cur.RequestItemID]: isChecked};}, selected));
   setAllSelected(isChecked);
-  setData((prevData) =>
-  prevData.map((item) => ({
-    ...item,
-    selected: isChecked,
-  }))
-  );
 };
 
 // tek bi checkbox ı temizleme seçme
-const handleRowSelect = (id, isChecked) => {
-  setData((prevData) =>
-    prevData.map((item) => 
-      item.id === id ? {...item, selected: isChecked} : item
-      )
-    );
-    if(!isChecked) setAllSelected(false);
+const handleRowSelect = (item, isChecked) => {
+  if(selected[item] === isChecked) return;
+  let selectEdit = selected;
+  selectEdit[item] = isChecked;
+  setAllSelected(!data.find(i => !selectEdit[i.RequestItemID]));
+  setSelected(selectEdit);
 };
 
-useEffect(() => {
-  fetchData();
-}, []);
-
 // searchbar için filtreleme
-const filteredData = data.filter((item) => {
+const filteredData = (data) => selected.concat(data.filter((item) => {
   const search = searchTerm.toLowerCase();
   return (
-    item.OfferID.toString().toLowerCase().includes(search) ||
+    item.RequestID.toString().toLowerCase().includes(search) ||
     item.CreationDate.toLowerCase().includes(search) ||
-    item.RequestedBy.toLowerCase().includes(search) ||
-    item.OfferDeadline.toLowerCase().includes(search) ||
+    item.UserName.toLowerCase().includes(search) ||
+    item.RequestDeadline.toLowerCase().includes(search) ||
     item.MaterialID.toString().toLowerCase().includes(search) ||
     item.MaterialName.toLowerCase().includes(search)
   );
-});
+}));
 
 const fields = [
   {key: 'checkbox', label:<input type="checkbox" checked={allSelected} onChange={(e) => handleSelectedAll(e.target.checked)} />, sorter: false, filter: false},
-  {key: 'OfferID', label:'Talep No'},  
+  {key: 'RequestID', label:'Talep No'},  
   {key: 'CreationDate', label:'Talep Tarihi'},  
-  {key: 'RequestedBy', label:'Talep Eden'}, 
-  {key: 'OfferDeadline', label:'Termin Tarihi'},  
+  {key: 'UserName', label:'Talep Eden'}, 
+  {key: 'RequestDeadline', label:'Termin Tarihi'},  
   {key: 'MaterialID', label:'Malzeme No'},  
   {key: 'MaterialName', label:'Malzeme Adı'},  
 ];
@@ -114,22 +100,20 @@ const fields = [
     
     <div className='tablo'>
     {/* tablo*/}
-    {filteredData.length > 0 ? (
-      <CDataTable 
-        items={filteredData}
+    {filteredData.length > 0 ? (<>
+      <CustomTable 
+        fetchAddr="/queryRequests.php"
+        onFetch={processData}
+        fetchArgs={{expand:true}}
         fields={fields}
-        stripped
-        hover
-        bordered
-        size="sm"
         scopedSlots={{
           checkbox: (item) => (
             <td>
-              <input type="checkbox" checked={item.selected} onChange={(e) => handleRowSelect(item.id, e.target.checked)}  />
+              <input type="checkbox" checked={selected[item.RequestItemID]} onChange={(e) => handleRowSelect(item.RequestItemID, e.target.checked)}  />
             </td>
           ),
-        }}
-        /> ) :  ( <div> <p>  </p> </div> )} {/* aramada bir şey bulamazsa hiçbir şey bastırılmasın. */}
+        }}/>
+        </>) :  ( <div> <p>  </p> </div> )} {/* aramada bir şey bulamazsa hiçbir şey bastırılmasın. */}
         </div>
     </div>
   );

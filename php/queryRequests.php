@@ -4,57 +4,86 @@ include 'connect.php';
 
 if($_SERVER['REQUEST_METHOD'] != 'POST') return;
 
-$sql1 = "SELECT
-        pr.RequestID,
-        pr.CreationDate,
-        prd.RequestDeadline,
-        prd.RequestDescription,
-        prd.RequestedBy,
-        prd.ManufacturingUnitID,
-        u.UserName,
-        pr.RequestStatus
-        FROM PurchaseRequests pr
-        JOIN PurchaseRequestDetails prd
-        ON pr.RequestID = prd.RequestID
-        JOIN Users u
-        ON prd.RequestedBy = u.UserID
-        WHERE pr.IsDeleted = 0
-        AND prd.IsDeleted = 0
-        ";
+$requestCols =  "pr.RequestID,
+                 pr.CreationDate,
+                 prd.RequestDeadline,
+                 prd.RequestDescription,
+                 prd.RequestedBy,
+                 prd.ManufacturingUnitID,
+                 u.UserName,
+                 pr.RequestStatus";
+
+$requestJoins = "JOIN PurchaseRequestDetails prd
+                 ON pr.RequestID = prd.RequestID
+                 JOIN Users u
+                 ON prd.RequestedBy = u.UserID";
+
+$materialCols = "pri.ItemID RequestItemID,
+                 pri.MaterialID,
+                 pri.RequestedAmount,
+                 pri.OrderedAmount,
+                 pri.ProvidedAmount,
+                 pri.ItemStatus,
+                 m.MaterialName,
+                 mi.Quantity,
+                 ms.UnitID,
+                 ms.MaterialNo,
+                 ms.SuckerNo";
+
+$materialJoins = "JOIN (SELECT MaterialID, MAX(LastUpdated) AS LastUpdated FROM MaterialInventory GROUP BY MaterialID) mi_max
+                  ON mi_max.MaterialID = pri.MaterialID
+                  JOIN MaterialInventory mi
+                  ON mi.LastUpdated = mi_max.LastUpdated AND mi.MaterialID = pri.MaterialID
+                  JOIN Materials m
+                  ON m.MaterialID = pri.MaterialID
+                  JOIN MaterialSpecs ms
+                  ON ms.MaterialID = pri.MaterialID";
+
+$sql1 = "WITH Result AS (SELECT
+         $requestCols
+         FROM PurchaseRequests pr
+         $requestJoins
+         WHERE pr.IsDeleted = 0
+         AND prd.IsDeleted = 0
+         ";
 
 $sql2 = "SELECT
-         pri.ItemID RequestItemID,
-         pri.MaterialID,
-         pri.RequestedAmount,
-         pri.OrderedAmount,
-         pri.ProvidedAmount,
-         pri.ItemStatus,
-         m.MaterialName,
-         mi.Quantity,
-         ms.UnitID,
-         ms.MaterialNo,
-         ms.SuckerNo
+         $materialCols
          FROM PurchaseRequestItems pri
-         JOIN MaterialInventory mi
-         ON mi.MaterialID = pri.MaterialID
-         JOIN Materials m
-         ON m.MaterialID = pri.MaterialID
-         JOIN MaterialSpecs ms
-         ON ms.MaterialID = pri.MaterialID
+         $materialJoins
          WHERE pri.IsDeleted = 0
          AND ms.IsDeleted = 0
          ";
 
 $input = json_decode(file_get_contents("php://input"), true);
 
+if($input["expand"]) $sql1 = "WITH Result AS (SELECT
+                              $requestCols,
+                              $materialCols
+                              FROM PurchaseRequests pr
+                              $requestJoins
+                              JOIN PurchaseRequestItems pri
+                              ON pri.RequestID = pr.RequestID
+                              $materialJoins
+                              WHERE pr.IsDeleted = 0
+                              AND prd.IsDeleted = 0
+                              AND pri.IsDeleted = 0
+                              AND ms.IsDeleted = 0
+                              ";
+
 $data = [];
 
-$offset = "";
+$offset = ") SELECT * FROM Result";
 
 if($input["offset"]) {
     $offsetAmt = $input["offset"][0];
     $fetchAmt = $input["offset"][1];
-    $offset = " ORDER BY (SELECT NULL) OFFSET $offsetAmt ROWS FETCH NEXT $fetchAmt ROWS ONLY";
+    $offset = "), 
+               Count AS (SELECT COUNT(*) MaxRows FROM Result)
+               SELECT * FROM Result, Count
+               ORDER BY (SELECT NULL)
+               OFFSET $offsetAmt ROWS
+               FETCH NEXT $fetchAmt ROWS ONLY";
 }
 
 if($input["filters"]) {
@@ -102,20 +131,18 @@ $dataFinal = [];
 
 foreach($data as $r) {
     $id = $r["RequestID"];
-    $query = $sql2 . " AND pri.RequestID = $id";
-    $stmt = sqlsrv_query($conn, $query);
-    if(!$stmt) {
-        die(json_encode(sqlsrv_errors(), true));
+    if(!$input["expand"]) {
+        $query = $sql2 . " AND pri.RequestID = $id";
+        $stmt = sqlsrv_query($conn, $query);
+        if(!$stmt) {
+            die(json_encode(sqlsrv_errors(), true));
+        }
+        $mData =[];
+        while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+            $mData[] = $row;
+        }
+        $r["Materials"] = $mData;
     }
-    $mData =[];
-    while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-        $mData[$row["MaterialID"]] = $row;
-    }
-    $mDataFinal = [];
-    foreach($mData as $m) {
-        $mDataFinal[] = $m;
-    }
-    $r["Materials"] = $mDataFinal;
     $dataFinal[] = $r;
 }
 

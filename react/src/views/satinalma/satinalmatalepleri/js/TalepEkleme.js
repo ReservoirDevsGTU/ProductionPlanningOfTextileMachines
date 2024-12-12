@@ -6,10 +6,10 @@ import { CInput } from '@coreui/react';
 import axios from 'axios';
 import baseURL from './baseURL.js';
 import * as XLSX from "xlsx";
+import CustomTable from '../../CustomTable.js';
 
 const TalepEkleme = ({ editID }) => {
   const [selectedMaterials, setSelectedMaterials] = useState([]); // Seçili malzemeler listesi
-  const [allMaterials, setAllMaterials] = useState([]); // Tüm malzemeler listesi
   const [users, setUsers] = useState([]);
   const [selectedButton, setSelectedButton] = useState('secili'); // Varsayılan olarak "Seçili Malzemeler"
   const [searchTerm, setSearchTerm] = useState(''); // Arama çubuğu için
@@ -116,13 +116,6 @@ const TalepEkleme = ({ editID }) => {
         .catch((error) => console.error('Error fetching request details:', error));
     }
   
-    // Fetch all materials for adding new materials if needed
-    axios.post(baseURL + '/queryMaterials.php', {offset: [100, 10]})
-      .then((response) => {
-        setAllMaterials(response.data);
-      })
-      .catch((error) => console.error('Error fetching materials:', error));
-  
     // Fetch users for the requester dropdown
     axios.get(baseURL + '/listUsers.php')
       .then((response) => {
@@ -130,12 +123,6 @@ const TalepEkleme = ({ editID }) => {
       })
       .catch((error) => console.error('Error fetching users:', error));
   }, [editID]);
-
-  // Arama çubuğuna göre filtrelenmiş malzeme listesi
-  const filteredMaterials = (selectedButton === 'secili' ? selectedMaterials : allMaterials).filter(material =>
-    material.MaterialName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    material.MaterialID.toString().includes(searchTerm)
-  );
 
   const showTemplateModal = () => {
     setTemplateModal(true);
@@ -363,46 +350,40 @@ const TalepEkleme = ({ editID }) => {
       </div>
     </div>
 
-      {/* Malzeme Tablosu */}
-      <table className="material-table">
-        <thead>
-          <tr>
-            <th>Malzeme No</th>
-            <th>Malzeme Adı</th>
-            <th>Toplam Stok</th>
-            <th>Birim</th>
-            {selectedButton === 'secili' && <th>Miktar</th>}
-            <th>İşlem</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredMaterials.map((material) => (
-            <tr key={material.MaterialID}>
-              <td>{material.MaterialNo}</td>
-              <td>{material.MaterialName}</td>
-              <td>{material.Quantity}</td> {/*backendden gelen stoğu gösteriyoruz. */}
-              <td>{material.UnitID}</td>
-              {selectedButton === 'secili' && (
-                <td>
-                  <input
-                    type="number"
-                    value={material.RequestedAmount || ''}
-                    onChange={(e) => handleQuantityChange(material.MaterialID, e.target.value)}
-                    min="1"
-                  />
-                </td>
+      <CustomTable
+        data={selectedButton === 'secili' ? selectedMaterials : false}
+        fetchAddr="/queryMaterials.php"
+        fields={[
+          {label: 'Malzeme No', key: 'MaterialNo'},
+          {label: 'Malzeme Adi', key: 'MaterialName'},
+          {label: 'Toplam Stok', key: 'Quantity'},
+          (selectedButton === 'secili' ? {label: 'Miktar', key: 'miktar'} : {label:'', key: 'empty', width: '0%'}),
+          {label: 'Birim', key: 'UnitID'},
+          {label: 'Islem', key: 'islem'},
+        ]}
+        scopedSlots={{
+          'empty': () => (<td/>),
+          'miktar': (item) => (
+            <td>
+              <input
+                type="number"
+                value={item.RequestedAmount || ''}
+                onChange={(e) => handleQuantityChange(item.MaterialID, e.target.value)}
+                min="1"
+              />
+            </td>
+          ),
+          'islem': (item) => (
+            <td>
+              {selectedButton === 'secili' ? (
+                <button onClick={() => handleRemoveMaterial(item.MaterialID)}>Sil</button>
+                  ) : (
+                <button onClick={() => handleMaterialSelect(item)}>Seç</button>
               )}
-              <td>
-                {selectedButton === 'secili' ? (
-                  <button onClick={() => handleRemoveMaterial(material.MaterialID)}>Sil</button>
-                ) : (
-                  <button onClick={() => handleMaterialSelect(material)}>Seç</button>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+            </td>
+          )
+        }}
+      />
     </div>
   );
 };
