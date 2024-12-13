@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import '../css/TalepEkleme.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useHistory } from 'react-router-dom';
-import { CInput } from '@coreui/react';
+import { CInput, CSelect } from '@coreui/react';
 import axios from 'axios';
 import baseURL from './baseURL.js';
 import * as XLSX from "xlsx";
@@ -277,7 +277,7 @@ const TalepEkleme = ({ editID }) => {
       <div className="termin-requester">
         <div className="form-group">
           <label>Termin Tarihi</label>
-          <input
+          <CInput
             type="date"
             name="date"
             value={requestDetails.date}
@@ -287,7 +287,7 @@ const TalepEkleme = ({ editID }) => {
         </div>
         <div className="form-group requester-container">
           <label>Talep Eden</label>
-          <select
+          <CSelect
             name="requester"
             value={requestDetails.requester}
             onChange={handleInputChange}
@@ -299,7 +299,7 @@ const TalepEkleme = ({ editID }) => {
                 {user.UserName}
               </option>
             ))}
-          </select>
+          </CSelect>
         </div>
       </div>
 

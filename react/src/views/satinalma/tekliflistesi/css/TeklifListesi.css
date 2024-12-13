@@ -95,3 +95,74 @@
     color: white;
   }
   
+
+  .teklif-listesi-container {
+    padding: 20px;
+  }
+   
+  .supplier-container {
+    margin-bottom: 15px;
+  }
+  
+  .supplier-button {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #f8f9fa;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  .supplier-button:hover {
+    background-color: #e2e6ea;
+    color: #000;
+  }
+  
+  .chevron-icon {
+    margin-left: 10px;
+  }
+  
+  .email-container {
+    padding: 10px;
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-top: 10px;
+  }
+  
+  .email-item {
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .email-checkbox {
+    margin-right: 10px;
+  }
+  
+  
+
+  .modal-header-title {
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    margin: 0;
+    padding: 10px;
+  }
+
+  .c-modal-body-scrollable {
+    max-height: 500px; /* Kaydırma için maksimum yüksekliği belirtiyoruz */
+    overflow-y: auto; /* Yatay kaydırmayı engelleyip dikey kaydırmayı aktif ediyoruz */
+    padding: 15px;
+    background-color: #fff; /* İsteğe bağlı, modal içeriği için arka plan rengi */
+    border-radius: 5px; /* Köşeleri yuvarlat */
+    border: 1px solid #ddd; /* Hafif çerçeve */
+  }
+  
