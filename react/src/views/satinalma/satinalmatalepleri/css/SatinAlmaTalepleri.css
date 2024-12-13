@@ -10,25 +10,30 @@
   border: 1px solid #333;
 }
 
-.talep-ekle-buton-css {
-    color: rgb(0, 128, 255); /* Yazı rengi mavi */
-    background-color: transparent; /* Arka plan transparan */
-    border: 1px solid rgb(0, 128, 255); /* Mavi çerçeve */
-    padding: 10px 15px;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.3s, color 0.3s; /* Geçiş efekti */
-  }
-  
-  .talep-ekle-buton-css:hover {
-    background-color: rgb(0, 55, 255); /* Hover üzerinde arka plan mavi */
-    color: white; /* Yazı rengi beyaz */
-  }
-  
-  .talep-ekle-buton-css:active {
-    background-color: rgb(0, 55, 255); /* Butona basıldığında koyu mavi */
-    color: white; /* Yazı beyaz */
-  }
+.button {
+  cursor: pointer;
+  padding: 10px 15px;
+  border-radius: 5px;
+  border: 1px solid rgb(117, 184, 250) !important;  /* Mavi çerçeve */
+  background-color: transparent; /* Arka plan transparan */
+  color: rgb(82, 159, 236) !important; /* Yazılar kesinlikle mavi olacak */
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.button:hover {
+  background-color: rgb(0, 162, 255); /* Hover arka plan mavi */
+  color: white !important; /* Hover yazılar beyaz */
+  border-color: rgb(0, 162, 255); /* Çerçeve mavi kalır */
+}
+
+.button:active {
+  background-color: rgb(84, 111, 206); /* Aktif durumunda daha koyu mavi arka plan */
+  color: white !important; /* Yazılar beyaz */
+  border-color: rgb(84, 111, 206); /* Çerçeve daha koyu mavi */
+}
+
+
+
   
   .talep-ekle-container {
     display: flex;
@@ -67,32 +72,40 @@
     background-color: #f2f2f2;
   }
   
-  .duzenle-butonlari {
-    margin-right: 5px;
-    padding: 8px;
-    font-size: 16px;
-    border: none;
-    cursor: pointer;
-  }
-  
-  .duzenle-butonlari-duzenle {
-    background-color: #007bff;
-    color: white;
-  }
-  
-  .duzenle-butonlari-sil {
-    background-color: #dc3545;
-    color: white;
-  }
-  
-  .duzenle-butonlari-yazdir {
-    background-color: #ffc107;
-    color: white;
-  }
-  
-  .duzenle-butonlari:hover {
-    opacity: 0.8;
-  }
+.duzenle-butonlari {
+  margin-right: 5px;
+  padding: 4px 8px; /* Daha az iç boşluk (padding) */
+  font-size: 12px; /* Daha küçük yazı boyutu */
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 50px; /* Minimum genişlik */
+  width: auto; /* İçeriğe göre genişlik */
+  max-width: 100px; /* Maksimum genişlik */
+}
+
+.duzenle-butonlari-duzenle {
+  background-color: #007bff;
+  color: white;
+}
+
+.duzenle-butonlari-sil {
+  background-color: #dc3545;
+  color: white;
+}
+
+.duzenle-butonlari-yazdir {
+  background-color: #ffc107;
+  color: white;
+}
+
+.duzenle-butonlari:hover {
+  opacity: 0.8;
+}
+
   
   .search-bar {
     width: 300px !important;
@@ -163,3 +176,23 @@
 
 
 
+.toggle-button {
+  cursor: pointer;
+  padding: 6px 8px; /* Buton boyutu */
+  border-radius: 5px;
+  border: 1px solid #333 !important; /* Siyah çerçeve */
+  background-color: transparent; /* Arka plan transparan */
+  color: #333 !important; /* Yazı (ikon) rengi siyah */
+  display: inline-flex; /* Simgeyi ortalamak için flex */
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.toggle-button:hover {
+  background-color: transparent; /* Hover durumunda arka plan siyah */
+}
+
+.toggle-button:active {
+  background-color: #555; /* Aktif durumda arka plan koyu gri */
+}

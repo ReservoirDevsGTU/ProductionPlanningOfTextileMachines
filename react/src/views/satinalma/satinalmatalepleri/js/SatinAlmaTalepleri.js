@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faTrashAlt, faPrint, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faTrashAlt, faPrint, faChevronDown, faChevronUp, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { useHistory } from 'react-router-dom';
-import { CInput, CProgress, CCollapse, CCardBody } from '@coreui/react';
+import { CInput, CProgress, CCollapse, CCardBody, CButton } from '@coreui/react';
 import '../css/SatinAlmaTalepleri.css';
 import TalepEkleme from './TalepEkleme';
 import axios from 'axios';
@@ -51,9 +51,10 @@ const SatinAlmaTalepleri = () => {
       {!showTalepEkleme ? (
         <div>
           <div className="talep-ekle-container">
-            <button onClick={handleTalepEkleClick} className="talep-ekle-buton-css">
-              + Talep Ekle
-            </button>
+            <CButton className="button" onClick={handleTalepEkleClick} >
+              <FontAwesomeIcon icon={faPlus} style={{ marginRight: '8px'}} />
+              Talep Ekle
+            </CButton>
 
             <div className="search-bar-container">
               <CInput
@@ -81,9 +82,9 @@ const SatinAlmaTalepleri = () => {
             scopedSlots={{
               'show_materials': (item) => (
                 <td>
-                  <button onClick={() => toggleRow(item.RequestID)}>
+                  <CButton className="toggle-button" onClick={() => toggleRow(item.RequestID)}>
                     <FontAwesomeIcon icon={expandedRows[item.RequestID] ? faChevronUp : faChevronDown} />
-                  </button>
+                  </CButton>
                 </td>
               ),
               'details': (item) => (
@@ -101,21 +102,21 @@ const SatinAlmaTalepleri = () => {
                 </CCardBody></CCollapse>),
               'edit_buttons': (item) => (
                 <td>
-                  <button
+                  <CButton
                     className="duzenle-butonlari duzenle-butonlari-duzenle"
                     onClick={() => handleEditClick(item)}
                   >
                     <FontAwesomeIcon icon={faEdit} />
-                  </button>
-                  <button
+                  </CButton>
+                  <CButton
                     className="duzenle-butonlari duzenle-butonlari-sil"
                     onClick={() => handleDeleteClick(item)}
                   >
                     <FontAwesomeIcon icon={faTrashAlt} />
-                  </button>
-                  <button className="duzenle-butonlari duzenle-butonlari-yazdir">
+                  </CButton>
+                  <CButton className="duzenle-butonlari duzenle-butonlari-yazdir">
                     <FontAwesomeIcon icon={faPrint} />
-                  </button>
+                  </CButton>
                 </td>
               ),
               'progress': (item) => (

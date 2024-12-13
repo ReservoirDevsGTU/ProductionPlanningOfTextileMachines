@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom'; // React Router v5 kullanımı
 import '../css/TeklifSiparisListe.css';
-import { CDataTable, CInput, CPagination} from '@coreui/react';
+import { CButton, CDataTable, CInput, CPagination} from '@coreui/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faList, faShoppingCart } from '@fortawesome/free-solid-svg-icons';
 import CustomTable from '../../CustomTable.js'
@@ -75,18 +75,18 @@ const fields = [
       <div className='header-section'> {/* butonlar ve searchbar divi */}
 
       <div className='left-button'>
-        <button className='left-button-css' onClick={() => alert('Yeni Teklif Oluştur')}>
+        <CButton className='left-button-css' onClick={() => alert('Yeni Teklif Oluştur')}>
           <FontAwesomeIcon icon={faPlus} style={{ marginRight: '8px'}} />
-          Yeni Teklif Oluştur </button>
+          Yeni Teklif Oluştur </CButton>
       </div>
 
       <div className='right-section'>
-        <button className='middle-button-css' onClick={() => history.push('/satinalma/teklif-isteme')}>
+        <CButton className='middle-button-css' onClick={() => history.push('/satinalma/teklif-isteme')}>
         <FontAwesomeIcon icon={faList} style={{ marginRight: '8px'}} />
-          Talepten Teklif Oluştur </button>      
-        <button className='right-button-css' onClick={() => alert('Talepten Sipariş')}>
+          Talepten Teklif Oluştur </CButton>      
+        <CButton className='right-button-css' onClick={() => alert('Talepten Sipariş')}>
         <FontAwesomeIcon icon={faShoppingCart} style={{ marginRight: '8px'}} />
-          Talepten Sipariş </button>
+          Talepten Sipariş </CButton>
       </div>
 
       </div> 

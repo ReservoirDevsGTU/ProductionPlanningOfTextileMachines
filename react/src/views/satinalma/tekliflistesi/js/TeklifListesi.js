@@ -1,11 +1,10 @@
 import CustomTable from '../../CustomTable.js'
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { CButtonToolbar, CInput, CButton } from '@coreui/react';
+import { CInput, CButton } from '@coreui/react';
 import '../css/TeklifListesi.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFileExcel, faListAlt, faPaperPlane, faPrint, faShoppingCart, faTasks } from '@fortawesome/free-solid-svg-icons';
-import { faCheckCircle } from '@fortawesome/free-regular-svg-icons';
+import { faFileExcel, faPaperPlane, faPrint, faShoppingCart, faTasks } from '@fortawesome/free-solid-svg-icons';
 
 
 
