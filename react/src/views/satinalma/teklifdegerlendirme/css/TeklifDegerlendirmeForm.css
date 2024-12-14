@@ -1,0 +1,70 @@
+/* Genel Container */
+.form-container {
+    width: 80%;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Başlık kısmı */
+  .form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .form-header h1 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  /* Form aksiyonları */
+  .form-actions {
+    display: flex;
+    gap: 15px;
+  }
+  
+  .form-actions button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .print-button {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  .save-button {
+    background-color: #2196F3;
+    color: white;
+  }
+  
+  .cancel-button {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  /* Button hover efektleri */
+  .form-actions button:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+  }
+  
+  /* İçerik alanı */
+  .form-content {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    min-height: 300px;
+  }
+  

@@ -1,7 +1,9 @@
 import React, { useState } from "react";
+import { useHistory } from "react-router-dom"; // history import et
 import "../css/TeklifDegerlendirme.css";
 
 const TeklifDegerlendirme = () => {
+  const history = useHistory(); // history kullanımı
   // Örnek veri
   const teklifData = [
     {
@@ -10,25 +12,25 @@ const TeklifDegerlendirme = () => {
       gonderen: "Kullanıcı A",
       durum: "Onay Bekliyor",
       malzemeler: [
-        { 
-          no: "001", 
-          adi: "Malzeme 1", 
-          talepMiktari: 5, 
-          teklifMiktari: 5, 
-          stok: 1, 
-          birim: "Adet", 
+        {
+          no: "001",
+          adi: "Malzeme 1",
+          talepMiktari: 5,
+          teklifMiktari: 5,
+          stok: 1,
+          birim: "Adet",
           talepler: [
             { talepNo: "T001", talepTarihi: "01.11.2024", talepEden: "Kullanıcı X", talepMiktari: 5, birim: "Adet", durum: "Beklemede" },
             { talepNo: "T002", talepTarihi: "02.11.2024", talepEden: "Kullanıcı Y", talepMiktari: 10, birim: "Adet", durum: "Onaylandı" }
           ]
         },
-        { 
-          no: "002", 
-          adi: "Malzeme 2", 
-          talepMiktari: 10, 
-          teklifMiktari: 8, 
-          stok: 4, 
-          birim: "Metre", 
+        {
+          no: "002",
+          adi: "Malzeme 2",
+          talepMiktari: 10,
+          teklifMiktari: 8,
+          stok: 4,
+          birim: "Metre",
           talepler: [
             { talepNo: "T003", talepTarihi: "01.12.2024", talepEden: "Kullanıcı Z", talepMiktari: 8, birim: "Metre", durum: "Beklemede" }
           ]
@@ -60,9 +62,13 @@ const TeklifDegerlendirme = () => {
     teklif.grupNo.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleSelect = (grupNo) => {
+    // TeklifDegerlendirmeForm sayfasına yönlendirme yap
+    history.push('./teklif-degerlendirme-form/${grupNo}');
+  };
+
   return (
     <div className="teklif-degerlendirme-container">
-
       <div className="header-title">
         <h1>Teklif Değerlenirme</h1>
         <hr />
@@ -85,7 +91,7 @@ const TeklifDegerlendirme = () => {
       <table className="main-table">
         <thead>
           <tr>
-            <th></th>
+            <th></th> {/* Açılabilir ok için ilk sütun */}
             <th>Teklif Grup NO</th>
             <th>Değerlendirmeye Alınma Tarihi</th>
             <th>Değerlendirmeye Gönderen</th>
@@ -110,7 +116,10 @@ const TeklifDegerlendirme = () => {
                 <td>{teklif.gonderen}</td>
                 <td>{teklif.durum}</td>
                 <td>
-                  <button className="select-button">
+                  <button
+                    className="select-button"
+                    onClick={handleSelect} // Seç butonuna tıklandığında yönlendirme yapılacak
+                  >
                     Seç
                   </button>
                 </td>
@@ -121,6 +130,7 @@ const TeklifDegerlendirme = () => {
                     <table className="sub-table">
                       <thead>
                         <tr>
+                          <th></th> {/* Açılabilir ok için ilk sütun */}
                           <th>Malzeme No</th>
                           <th>Malzeme Adı</th>
                           <th>Talep Miktarı</th>

@@ -63,6 +63,10 @@ const TeklifListesi = React.lazy(() => import('./views/satinalma/tekliflistesi/j
 // teklif degerlendirme
 const TeklifDegerlendirme = React.lazy(() => import('./views/satinalma/teklifdegerlendirme/js/TeklifDegerlendirme'));
 
+// teklif değerlendirme formu
+const TeklifDegerlendirmeForm = React.lazy(() => import('./views/satinalma/teklifdegerlendirme/js/TeklifDegerlendirmeForm'));
+
+
 const routes = [
   { path: '/', exact: true, name: 'Home' },
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
@@ -129,7 +133,9 @@ const routes = [
 
   // teklif degerlendirme
   { path: '/satinalma/teklif-degerlendirme', name: 'Teklif Değerlendirme', component: TeklifDegerlendirme },
-
+   
+  // teklif değerlendirme formu
+  { path: '/satinalma/teklif-degerlendirme-form', name: 'Teklif Değerlendirme Formu', component: TeklifDegerlendirmeForm },
 ];
 
 export default routes;

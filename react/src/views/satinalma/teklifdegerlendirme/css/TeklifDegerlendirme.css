@@ -49,6 +49,7 @@
     border: 1px solid #ddd;
     padding: 8px;
     text-align: left;
+    word-wrap: break-word;
   }
   
   .main-table th {
