@@ -59,7 +59,7 @@ const SatinAlmaTalepleri = () => {
             <div className="search-bar-container">
               <CInput
                 type="text"
-                placeholder="Talep No, Talep Eden veya Açıklama Giriniz..."
+                placeholder="Arama Yapın..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="search-bar"

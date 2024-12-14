@@ -22,26 +22,34 @@ const TeklifListesi = () => {
       {
         name: 'XXX Tedarikçi',
         emails: [
-          { address: 'info@xxx.com', selected: true },
-          { address: 'sales.person1@xxx.com', selected: true },
-          { address: 'sales.person2@xxx.com', selected: true },
+          { address: 'info@xxx.com' },
+          { address: 'sales.person1@xxx.com' },
+          { address: 'sales.person2@xxx.com' },
         ],
       },
       {
         name: 'XXY Tedarikçi',
         emails: [
-          { address: 'contact@xxy.com', selected: true },
-          { address: 'sales@xxy.com', selected: false },
+          { address: 'contact@xxy.com' },
+          { address: 'sales@xxy.com'  },
         ],
       },
       {
         name: 'XYY Tedarikçi',
         emails: [
-          { address: 'support@xyy.com', selected: true },
-          { address: 'info@xyy.com', selected: false },
+          { address: 'support@xyy.com' },
+          { address: 'info@xyy.com' },
         ],
       },
     ]);
+
+    
+    const setPaperPlaneButton = () => {
+      setModal(true);
+    }
+
+
+
 
 
     const processData = (newData) => {
@@ -163,7 +171,7 @@ const TeklifListesi = () => {
               </div>
 
               <div className="button-group-right">
-                <CButton className="blue-button" onClick={() => setModal(true)}>
+                <CButton className="blue-button" onClick={() => setPaperPlaneButton()}>
                   <FontAwesomeIcon icon={faPaperPlane} />
                 </CButton>
                 <CButton className="blue-button" >
@@ -175,66 +183,10 @@ const TeklifListesi = () => {
                 </CButton>
               </div>
             </div>
+        
 
 
-
-            {/* MODAL */}
-            <CModal show={modal} onClose={handleModalClose}>
-
-              <CModalHeader closeButton>
-                <h1 className="modal-header-title">Teklif Gönderme Formu</h1>
-              </CModalHeader>
-              <CModalBody className="c-modal-body-scrollable">
-                {supplierData.map((supplier, supplierIndex) => (
-                  <div key={supplierIndex} className="supplier-container">
-                    <CButton
-                      onClick={() => toggleSupplier(supplierIndex)}
-                      className="supplier-button"
-                    >
-                      {supplier.name}
-                      <FontAwesomeIcon
-                        icon={
-                          expandedSuppliers[supplierIndex]
-                            ? faChevronUp
-                            : faChevronDown
-                        }
-                        className="chevron-icon"
-                      />
-                    </CButton>
-                    <CCollapse show={expandedSuppliers[supplierIndex]}>
-                      <div className="email-container">
-                        {supplier.emails.map((email, emailIndex) => (
-                          <div key={emailIndex} className="email-item">
-                            <label>
-                              <input
-                                type="checkbox"
-                                checked={email.selected}
-                                onChange={() =>
-                                  toggleEmailSelection(supplierIndex, emailIndex)
-                                }
-                                className="email-checkbox"
-                              />
-                              {email.address}
-                            </label>
-                          </div>
-                        ))}
-                      </div>
-                    </CCollapse>
-                  </div>
-                ))}
-              </CModalBody>
-              <CModalFooter>
-                <CButton color='danger' onClick={handleModalClose}>
-                  Vazgeç
-                </CButton>
-                
-                <CButton color='primary'>
-                  Gönder
-                </CButton>
-
-              </CModalFooter>
-            </CModal>
-
+            
 
 
 
@@ -266,6 +218,66 @@ const TeklifListesi = () => {
                 </>) : (<div> <p> </p> </div>)
                 };
             </div>
+
+            {/* MODAL */}
+            { modal && (<CModal size='md' show={modal} onClose={handleModalClose} centered>
+
+
+            <CModalHeader closeButton>
+              <h1 className="modal-header-title">Teklif Gönderme Formu</h1>
+            </CModalHeader>
+            <CModalBody className="c-modal-body-scrollable">
+              {supplierData.map((supplier, supplierIndex) => (
+                <div key={supplierIndex} className="supplier-container">
+                  <CButton
+                    onClick={() => toggleSupplier(supplierIndex)}
+                    className="supplier-button"
+                  >
+                    {supplier.name}
+                    <FontAwesomeIcon
+                      icon={
+                        expandedSuppliers[supplierIndex]
+                          ? faChevronUp
+                          : faChevronDown
+                      }
+                      className="chevron-icon"
+                    />
+                  </CButton>
+                  <CCollapse show={expandedSuppliers[supplierIndex]}>
+                    <div className="email-container">
+                      {supplier.emails.map((email, emailIndex) => (
+                        <div key={emailIndex} className="email-item">
+                          <label>
+                            <input
+                              type="checkbox"
+                              checked={email.selected}
+                              onChange={() =>
+                                toggleEmailSelection(supplierIndex, emailIndex)
+                              }
+                              className="email-checkbox"
+                            />
+                            {email.address}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </CCollapse>
+                </div>
+              ))}
+            </CModalBody>
+            <CModalFooter>
+              <CButton color='danger' onClick={handleModalClose}>
+                Vazgeç
+              </CButton>
+              
+              <CButton color='primary'>
+                Gönder
+              </CButton>
+
+            </CModalFooter>
+            </CModal> )}
+
+
 
             
         </div>

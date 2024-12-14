@@ -57,53 +57,53 @@
 
 
   .tablo {
-    width: 100%;
-    margin-top: 20px;
-    border-collapse: collapse;
+    width: 100% !important;
+    margin-top: 20px !important;
+    border-collapse: collapse !important;
   }
   
   .tablo th, .tablo td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
+    padding: 12px !important;
+    text-align: left !important;
+    border-bottom: 1px solid #ddd !important;
   }
   
   .tablo th {
-    background-color: #f2f2f2;
+    background-color: #f2f2f2 !important;
   }
   
 .duzenle-butonlari {
-  margin-right: 5px;
-  padding: 4px 8px; /* Daha az iç boşluk (padding) */
-  font-size: 12px; /* Daha küçük yazı boyutu */
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 50px; /* Minimum genişlik */
-  width: auto; /* İçeriğe göre genişlik */
-  max-width: 100px; /* Maksimum genişlik */
+  margin-right: 5px !important;
+  padding: 4px 8px !important; /* Daha az iç boşluk (padding) */
+  font-size: 16px !important; /* Daha küçük yazı boyutu */
+  border: none !important;
+  cursor: pointer !important;
+  border-radius: 5px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 50px !important; /* Minimum genişlik */
+  width: auto !important; /* İçeriğe göre genişlik */
+  min-height: 40px !important;
 }
 
 .duzenle-butonlari-duzenle {
-  background-color: #007bff;
-  color: white;
+  background-color: #007bff !important;
+  color: white !important;
 }
 
 .duzenle-butonlari-sil {
-  background-color: #dc3545;
-  color: white;
+  background-color: #dc3545 !important;
+  color: white !important;
 }
 
 .duzenle-butonlari-yazdir {
-  background-color: #ffc107;
-  color: white;
+  background-color: #ffc107 !important;
+  color: white !important;
 }
 
 .duzenle-butonlari:hover {
-  opacity: 0.8;
+  opacity: 0.8 !important;
 }
 
   
@@ -112,8 +112,8 @@
     padding: 8px !important;
     border: 1px solid #ddd !important;
     border-radius: 5px !important;
-    outline: none;
-    transition: border-color 0.3s;
+    outline: none !important;
+    transition: border-color 0.3s !important;
   }
   
 
