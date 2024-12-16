@@ -1,0 +1,168 @@
+.teklif-listesi-container{
+  padding: 20px;
+}
+
+.header-title{
+  margin-bottom: 20px;
+}
+
+.header-title hr {
+  border: 1px solid #333;
+}
+
+
+.header-section{
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.search-bar-section {
+display: flex; 
+justify-content: flex-end; 
+margin-bottom: 20px; 
+}
+
+.search-bar-section .seach-bar {
+width: 300px; 
+max-width: 100%; 
+padding: 8px; 
+border: 1px solid #ccc; 
+border-radius: 5px; 
+}
+
+
+.button-toolbar {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center; 
+  margin-bottom: 20px;
+}
+
+.button-group-left,
+.button-group-right {
+  display: flex; 
+  gap: 10px; 
+}
+
+
+
+button {
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 10px 15px;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  color: #333;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.blue-button {
+  border: 1px solid rgb(117, 184, 250) !important;
+  color: rgb(82, 159, 236) !important;
+  padding: 10px 15px;
+  width: auto;
+  height: 40px;
+}
+
+.blue-button:hover {
+  background-color: rgb(0, 162, 255) !important;
+  color: white !important;
+}
+
+.blue-button:active {
+  background-color: rgb(84, 111, 206) !important;
+  color: white !important;
+}
+
+.green-button {
+  border: 1px solid #50c878 !important;
+  color: #34a853 !important;
+  padding: 10px 15px;
+  width: auto;
+  height: 40px;
+}
+
+.green-button:hover {
+  background-color: #34a853 !important;
+  color: white !important;
+}
+
+.green-button:active {
+  background-color: #247239 !important;
+  color: white !important;
+}
+
+
+.teklif-listesi-container {
+  padding: 20px;
+}
+ 
+.supplier-container {
+  margin-bottom: 15px ;
+}
+
+.supplier-button {
+  width: 100% ;
+  display: flex;
+  justify-content: space-between ;
+  align-items: center ;
+  padding: 10px;
+  background-color: #f8f9fa !important;
+  color: #333 !important;
+  border: 1px solid #ccc !important;
+  border-radius: 5px ;
+  cursor: pointer ;
+  font-size: 14px ;
+  font-weight: bold ;
+  transition: background-color 0.3s ease, color 0.3s ease ;
+}
+
+.supplier-button:hover {
+  background-color: #e2e6ea !important;
+  color: #000 !important;
+}
+
+.chevron-icon {
+  margin-left: 10px ;
+}
+
+.email-container {
+  padding: 10px ;
+  background-color: #f8f9fa !important;
+  border: 1px solid #ddd !important;
+  border-radius: 5px ;
+  margin-top: 10px ;
+}
+
+.email-item {
+  margin-bottom: 8px ;
+  display: flex ;
+  align-items: center ;
+}
+
+.email-checkbox {
+  margin-right: 10px ;
+}
+
+
+
+.modal-header-title {
+  font-size: 20px ;
+  font-weight: bold ;
+  text-align: center ;
+  margin: 0 ;
+  padding: 10px ;
+}
+
+.c-modal-body-scrollable {
+  max-height: 500px; /* Kaydırma için maksimum yüksekliği belirtiyoruz */
+  overflow-y: auto ; /* Yatay kaydırmayı engelleyip dikey kaydırmayı aktif ediyoruz */
+  padding: 15px ;
+  background-color: #fff !important; /* İsteğe bağlı, modal içeriği için arka plan rengi */
+  border-radius: 5px ; /* Köşeleri yuvarlat */
+  border: 1px solid #ddd !important; /* Hafif çerçeve */
+  pointer-events: auto ; /* Tıklama olaylarını engellemediğinden emin olun */
+}
