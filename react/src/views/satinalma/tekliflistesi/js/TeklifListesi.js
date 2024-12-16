@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { CInput, CButton, CCollapse } from '@coreui/react';
+import { CInput, CButton, CCollapse, CModal, CModalHeader, CModalBody, CModalFooter } from '@coreui/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faFileExcel,
@@ -22,6 +22,94 @@ const TeklifListesi = () => {
   const [modal, setModal] = useState(false);
   const [expandedSuppliers, setExpandedSuppliers] = useState({});
   const [supplierData, setSupplierData] = useState([
+    {
+      name: 'XXX Tedarikçi',
+      emails: [
+        { address: 'info@xxx.com', selected: true },
+        { address: 'sales.person1@xxx.com', selected: true },
+        { address: 'sales.person2@xxx.com', selected: true },
+      ],
+    },
+    {
+      name: 'XXY Tedarikçi',
+      emails: [
+        { address: 'contact@xxy.com', selected: true },
+        { address: 'sales@xxy.com', selected: true },
+      ],
+    },
+    {
+      name: 'XYY Tedarikçi',
+      emails: [
+        { address: 'support@xyy.com', selected: true },
+        { address: 'info@xyy.com', selected: true },
+      ],
+    },
+    {
+      name: 'XXX Tedarikçi',
+      emails: [
+        { address: 'info@xxx.com', selected: true },
+        { address: 'sales.person1@xxx.com', selected: true },
+        { address: 'sales.person2@xxx.com', selected: true },
+      ],
+    },
+    {
+      name: 'XXY Tedarikçi',
+      emails: [
+        { address: 'contact@xxy.com', selected: true },
+        { address: 'sales@xxy.com', selected: true },
+      ],
+    },
+    {
+      name: 'XYY Tedarikçi',
+      emails: [
+        { address: 'support@xyy.com', selected: true },
+        { address: 'info@xyy.com', selected: true },
+      ],
+    },
+    {
+      name: 'XXX Tedarikçi',
+      emails: [
+        { address: 'info@xxx.com', selected: true },
+        { address: 'sales.person1@xxx.com', selected: true },
+        { address: 'sales.person2@xxx.com', selected: true },
+      ],
+    },
+    {
+      name: 'XXY Tedarikçi',
+      emails: [
+        { address: 'contact@xxy.com', selected: true },
+        { address: 'sales@xxy.com', selected: true },
+      ],
+    },
+    {
+      name: 'XYY Tedarikçi',
+      emails: [
+        { address: 'support@xyy.com', selected: true },
+        { address: 'info@xyy.com', selected: true },
+      ],
+    },
+    {
+      name: 'XXX Tedarikçi',
+      emails: [
+        { address: 'info@xxx.com', selected: true },
+        { address: 'sales.person1@xxx.com', selected: true },
+        { address: 'sales.person2@xxx.com', selected: true },
+      ],
+    },
+    {
+      name: 'XXY Tedarikçi',
+      emails: [
+        { address: 'contact@xxy.com', selected: true },
+        { address: 'sales@xxy.com', selected: true },
+      ],
+    },
+    {
+      name: 'XYY Tedarikçi',
+      emails: [
+        { address: 'support@xyy.com', selected: true },
+        { address: 'info@xyy.com', selected: true },
+      ],
+    },
     {
       name: 'XXX Tedarikçi',
       emails: [
@@ -144,7 +232,7 @@ const TeklifListesi = () => {
     { key: 'requestno', label: 'Talep No' },
     { key: 'offerrequester', label: 'Teklif İsteyen' },
     { key: 'status', label: 'Durum' },
-    { key: 'button', label: <CButton>Seç</CButton> },
+    { key: 'button', label: 'Seç' },
   ];
 
   return (
@@ -227,125 +315,55 @@ const TeklifListesi = () => {
         )}
       </div>
 
-      {modal && (
-        <div
-          style={{
-            position: 'fixed',
-            top: '0',
-            left: '0',
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 1050,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#fff',
-              padding: '20px',
-              borderRadius: '5px',
-              width: '400px',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              textAlign: 'center',
-            }}
-          >
-            <h1 style={{ marginBottom: '20px', fontSize: '20px', fontWeight: 'bold' }}>
-              Teklif Gönderme Formu
-            </h1>
-            <div style={{ marginBottom: '20px' }}>
-              {supplierData.map((supplier, supplierIndex) => (
-                <div key={supplierIndex} style={{ marginBottom: '15px' }}>
-                  <button
-                    onClick={() => toggleSupplier(supplierIndex)}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      width: '100%',
-                      padding: '10px',
-                      backgroundColor: '#f8f9fa',
-                      border: '1px solid #ccc',
-                      borderRadius: '5px',
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      fontWeight: 'bold',
-                    }}
-                  >
-                    {supplier.name}
-                    <FontAwesomeIcon
-                      icon={expandedSuppliers[supplierIndex] ? faChevronUp : faChevronDown}
-                    />
-                  </button>
-                  {expandedSuppliers[supplierIndex] && (
-                    <div
-                      style={{
-                        padding: '10px',
-                        backgroundColor: '#f8f9fa',
-                        border: '1px solid #ddd',
-                        borderRadius: '5px',
-                        marginTop: '10px',
-                      }}
-                    >
-                      {supplier.emails.map((email, emailIndex) => (
-                        <div
-                          key={emailIndex}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            marginBottom: '8px',
-                          }}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={email.selected}
-                            onChange={() =>
-                              toggleEmailSelection(supplierIndex, emailIndex)
-                            }
-                            style={{ marginRight: '10px' }}
-                          />
-                          {email.address}
-                        </div>
-                      ))}
+      <CModal show={modal} onClose={handleModalClose} size="md" centered>
+        <CModalHeader closeButton>
+          <h5 style={{fontWeight: 'bold', fontSize:'24px'}}>Teklif Gönderme Formu</h5>
+        </CModalHeader>
+
+        <CModalBody style={{maxHeight: '500px', overflowY: 'auto'}}>
+          {supplierData.map((supplier, supplierIndex) => (
+            <div key={supplierIndex} style={{ marginBottom: '15px' }}>
+              <CButton
+                color="light"
+                className="w-100 d-flex justify-content-between align-items-center"
+                onClick={() => toggleSupplier(supplierIndex)}
+              >
+              <span style={{  color: "", fontSize: "16px" }}>
+                {supplier.name}
+              </span>
+
+                <FontAwesomeIcon
+                  style={{color: 'black'}}
+                  icon={expandedSuppliers[supplierIndex] ? faChevronUp : faChevronDown}
+                />
+              </CButton>
+
+              <CCollapse show={expandedSuppliers[supplierIndex]}>
+                <div style={{ padding: '10px', backgroundColor: '#f8f9fa', borderRadius: '5px' }}>
+                  {supplier.emails.map((email, emailIndex) => (
+                    <div key={emailIndex} className="d-flex align-items-center mb-2">
+                      <input
+                        type="checkbox"
+                        checked={email.selected}
+                        onChange={() => toggleEmailSelection(supplierIndex, emailIndex)}
+                        style={{ marginRight: '10px' }}
+                      />
+                      {email.address}
                     </div>
-                  )}
+                  ))}
                 </div>
-              ))}
+              </CCollapse>
             </div>
-            <div>
-              <button
-                onClick={handleModalClose}
-                style={{
-                  backgroundColor: '#6c757d',
-                  color: '#fff',
-                  padding: '10px 20px',
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: 'pointer',
-                  marginRight: '10px',
-                }}
-              >
-                Vazgeç
-              </button>
-              <button
-                style={{
-                  backgroundColor: '#007bff',
-                  color: '#fff',
-                  padding: '10px 20px',
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: 'pointer',
-                }}
-              >
-                Gönder
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          ))}
+        </CModalBody>
+
+        <CModalFooter>
+          <CButton color="danger"  onClick={handleModalClose}>
+            Vazgeç
+          </CButton>
+          <CButton color="info" >Gönder</CButton>
+        </CModalFooter>
+      </CModal>
     </div>
   );
 };

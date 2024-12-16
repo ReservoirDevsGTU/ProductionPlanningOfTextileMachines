@@ -74,7 +74,7 @@ const TeklifSiparisListe = () => {
         }}
       >
         <CButton
-          onClick={() => alert('Yeni Teklif Oluştur')}
+          onClick={() => history.push('/satinalma/teklif-isteme')}
           color='info'
           variant='outline'
           size='lg'
