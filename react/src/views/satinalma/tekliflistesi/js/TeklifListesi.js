@@ -225,14 +225,14 @@ const TeklifListesi = () => {
       sorter: false,
       filter: false,
     },
-    { key: 'supplier', label: 'Tedarikçi' },
-    { key: 'offerDate', label: 'Teklif Tarihi' },
+    { key: 'SupplierName', label: 'Tedarikçi' },
+    { key: 'CreationDate', label: 'Teklif Tarihi' },
     { key: 'offergroupno', label: 'Teklif Grup No' },
-    { key: 'offerno', label: 'Teklif No' },
-    { key: 'requestno', label: 'Talep No' },
-    { key: 'offerrequester', label: 'Teklif İsteyen' },
-    { key: 'status', label: 'Durum' },
-    { key: 'button', label: 'Seç' },
+    { key: 'OfferID', label: 'Teklif No' },
+    { key: 'RequestID', label: 'Talep No' },
+    { key: 'RequestedBy', label: 'Teklif İsteyen' },
+    { key: 'OfferStatus', label: 'Durum' },
+    { key: 'button', label: <CButton>Seç</CButton> },
   ];
 
   return (
@@ -292,9 +292,8 @@ const TeklifListesi = () => {
       <div>
         {filteredData.length > 0 ? (
           <CustomTable
-            fetchAddr="/queryRequests.php"
+            fetchAddr="/queryOffers.php"
             onFetch={processData}
-            fetchArgs={{ expand: true }}
             fields={fields}
             scopedSlots={{
               checkbox: (item) => (

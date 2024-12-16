@@ -4,7 +4,7 @@ include 'connect.php';
 
 if($_SERVER['REQUEST_METHOD'] != 'POST') return;
 
-$sql1 = "SELECT
+$sql1 = "WITH Result AS (SELECT
         po.OfferID,
         po.CreationDate,
         pod.OfferDeadline,
@@ -40,10 +40,15 @@ $data = [];
 
 $offset = "";
 
-if ($input["offset"]) {
-    $offsetAmt = $input["offset"][0];
-    $fetchAmt = $input["offset"][1];
-    $offset = " ORDER BY (SELECT NULL) OFFSET $offsetAmt ROWS FETCH NEXT $fetchAmt ROWS ONLY";
+if(isset($input["offset"], $input["fetch"])) {
+    $offsetAmt = $input["offset"];
+    $fetchAmt = $input["fetch"];
+    $offset = "), 
+               Count AS (SELECT COUNT(*) MaxRows FROM Result)
+               SELECT * FROM Result, Count
+               ORDER BY (SELECT NULL)
+               OFFSET $offsetAmt ROWS
+               FETCH NEXT $fetchAmt ROWS ONLY";
 }
 
 if($input["filters"]) {

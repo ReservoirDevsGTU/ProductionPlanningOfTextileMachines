@@ -46,6 +46,6 @@ if($input) {
     else {
         die(json_encode(sqlsrv_errors(), true));
     }
-    sqlsrv_close($conn);
 }
+sqlsrv_close($conn);
 ?>
