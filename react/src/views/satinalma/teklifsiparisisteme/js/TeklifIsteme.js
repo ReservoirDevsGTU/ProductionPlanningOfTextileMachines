@@ -4,6 +4,7 @@ import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import baseURL from "../../satinalmatalepleri/js/baseURL.js";
 import axios from "axios";
 import { CButton, CNav, CNavItem, CNavLink, CTabContent, CTabPane, CTabs } from '@coreui/react';
+import CustomTable from '../../CustomTable.js';
 
 
 const TeklifIsteme = () => {
@@ -22,7 +23,6 @@ const TeklifIsteme = () => {
   const [selectAllChecked, setSelectAllChecked] = useState(false);
 
   const [selectedMaterials, setSelectedMaterials] = useState([]);
-  const [allMaterials, setAllMaterials] = useState([]);
   const [users, setUsers] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedMaterialToDelete, setSelectedMaterialToDelete] = useState(null);
@@ -32,15 +32,6 @@ const TeklifIsteme = () => {
       try {
         const suppliersResponse = await axios.get(baseURL + "/getAllSuppliers.php");
         setSuppliers(suppliersResponse.data);
-
-        const materialsResponse = await axios.post(baseURL + "/queryRequests.php", {
-          offset: [100, 10],
-        });
-        const materialsData = materialsResponse.data.reduce(
-          (acc, cur) => acc.concat(cur.Materials),
-          []
-        );
-        setAllMaterials(materialsData);
 
         const usersResponse = await axios.get(baseURL + "/listUsers.php");
         setUsers(usersResponse.data);
@@ -92,31 +83,6 @@ const TeklifIsteme = () => {
     };
     console.log("Saved Request Data:", requestData);
     alert("Teklif bilgileri kaydedildi!");
-  };
-
-  const handleAddMaterial = () => {
-    const toAdd = allMaterials.filter((material) => material.isChecked);
-    const hasErrors = toAdd.some((material) => !material.OfferedAmount || material.OfferedAmount <= 0);
-
-    if (hasErrors) {
-      alert("Lütfen seçilen malzemeler için geçerli bir teklif miktarı giriniz.");
-    } else if (toAdd.length === 0) {
-      alert("Hiç malzeme seçmediniz.");
-    } else {
-      setSelectedMaterials((prev) => [
-        ...prev,
-        ...toAdd.filter((m) => !prev.some((prevMaterial) => prevMaterial.id === m.id)),
-      ]);
-      alert("Malzemeler seçili listeye eklendi.");
-    }
-  };
-
-  const handleCheckboxChangeMaterial = (id, checked) => {
-    setAllMaterials((prev) =>
-      prev.map((material) =>
-        material.RequestItemID === id ? { ...material, isChecked: checked } : material
-      )
-    );
   };
 
   const handleRemoveMaterial = () => {
@@ -369,20 +335,19 @@ const TeklifIsteme = () => {
           <CTabContent>
             {/* Seçili Malzemeler */}
             <CTabPane data-tab="selected">
-              <table style={{ marginTop:"20px", width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr>
-                    <th>Sil</th>
-                    <th>Malzeme No</th>
-                    <th>Malzeme Adı</th>
-                    <th>Teklif Miktarı</th>
-                    <th>Talep Miktarı</th>
-                    <th>Birim</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {selectedMaterials.map((material) => (
-                    <tr key={material.RequestItemID}>
+
+        <CustomTable style={{ marginTop:"20px", width: "100%", borderCollapse: "collapse" }}
+          data={selectedMaterials.filter(m=>m.final)}
+          fields={[
+            {label: "Sil", key: "delete"},
+            {label: "Malzeme No", key: "MaterialNo"},
+            {label: "Malzeme Adi", key: "MaterialName"},
+            {label: "Teklif Miktari", key: "OfferedAmount"},
+            {label: "Talep Miktari", key: "RequestedAmount"},
+            {label: "Birim", key: "UnitID"},
+          ]}
+          scopedSlots={{
+            delete: (material) => (
                       <td>
                         <button
                           onClick={() => {
@@ -399,54 +364,51 @@ const TeklifIsteme = () => {
                           <FontAwesomeIcon icon={faTrash} />
                         </button>
                       </td>
-                      <td>{material.MaterialNo}</td>
-                      <td>{material.MaterialName}</td>
-                      <td>{material.OfferedAmount}</td>
-                      <td>{material.RequestedAmount}</td>
-                      <td>{material.UnitID}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            ),
+          }}
+        />
             </CTabPane>
 
             {/* Tüm Malzemeler */}
             <CTabPane data-tab="all">
             <div>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr>
-                    <th></th>
-                    <th>Malzeme No</th>
-                    <th>Malzeme Adı</th>
-                    <th>Teklif Miktarı</th>
-                    <th>Talep Miktarı</th>
-                    <th>Birim</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {allMaterials.map((material) => (
-                    <tr key={material.RequestItemID}>
+        <CustomTable style={{ width: "100%", borderCollapse: "collapse" }}
+          fetchAddr="/queryRequests.php"
+          fetchArgs={{ expand: true }}
+          fields={[
+            {label: "", key: "select"},
+            {label: "Malzeme No", key: "MaterialNo"},
+            {label: "Malzeme Adi", key: "MaterialName"},
+            {label: "Teklif Miktari", key: "offeredAmount"},
+            {label: "Talep Miktari", key: "RequestedAmount"},
+            {label: "Birim", key: "UnitID"},
+          ]}
+          scopedSlots={{
+            select: (material) => (
                       <td>
                         <input
                           type="checkbox"
-                          checked={material.isChecked || false}
+                          disabled={selectedMaterials.find(m => m.RequestItemID === material.RequestItemID)?.final !== undefined}
+                          checked={selectedMaterials.find(m => m.RequestItemID === material.RequestItemID) !== undefined}
                           onChange={(e) =>
-                            handleCheckboxChangeMaterial(material.RequestItemID, e.target.checked)
+                            setSelectedMaterials((prev) =>
+                              e.target.checked ? prev.concat([{...material, OfferedAmount: 1}])
+                              : prev.filter(m => m.RequestItemID !== material.RequestItemID))
                           }
                         />
                       </td>
-                      <td>{material.MaterialNo}</td>
-                      <td>{material.MaterialName}</td>
+            ),
+            offeredAmount: (material) => (
                       <td>
                         <input
                           type="number"
-                          value={material.OfferedAmount || ""}
+                          disabled={selectedMaterials.find(m => m.RequestItemID === material.RequestItemID)?.final !== undefined}
+                          value={selectedMaterials.find(m => m.RequestItemID === material.RequestItemID)?.OfferedAmount}
                           onChange={(e) =>
-                            setAllMaterials((prev) =>
+                            setSelectedMaterials((prev) =>
                               prev.map((m) =>
                                 m.RequestItemID === material.RequestItemID
-                                  ? { ...m, OfferedAmount: e.target.value }
+                                  ? { ...m, OfferedAmount: Number(e.target.value) }
                                   : m
                               )
                             )
@@ -459,18 +421,15 @@ const TeklifIsteme = () => {
                           }}
                         />
                       </td>
-                      <td>{material.RequestedAmount}</td>
-                      <td>{material.UnitID}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            ),
+          }}
+        />
 
               <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "20px" }}>
                 <CButton
                   color="info"
                   variant="outline"
-                  onClick={handleAddMaterial}
+                  onClick={() => setSelectedMaterials((prev) => prev.map(m=>({...m, final: true})))}
                   style={{
                     padding: "10px 20px",
                     cursor: "pointer",

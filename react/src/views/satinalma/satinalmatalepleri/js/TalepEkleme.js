@@ -358,7 +358,7 @@ const TalepEkleme = ({ editID }) => {
           { label: "İşlem", key: "islem" },
         ]}
         scopedSlots={{
-          miktar: (item) => (
+          miktar: (item) => selectedButton === "secili" ? (
             <td>
               <input
                 type="number"
@@ -373,7 +373,7 @@ const TalepEkleme = ({ editID }) => {
                 }}
               />
             </td>
-          ),
+          ) : (<td/>),
           islem: (item) => (
             <td>
               {selectedButton === "secili" ? (

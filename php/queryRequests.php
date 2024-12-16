@@ -75,9 +75,9 @@ $data = [];
 
 $offset = ") SELECT * FROM Result";
 
-if($input["offset"]) {
-    $offsetAmt = $input["offset"][0];
-    $fetchAmt = $input["offset"][1];
+if(isset($input["offset"], $input["fetch"])) {
+    $offsetAmt = $input["offset"];
+    $fetchAmt = $input["fetch"];
     $offset = "), 
                Count AS (SELECT COUNT(*) MaxRows FROM Result)
                SELECT * FROM Result, Count
@@ -86,7 +86,7 @@ if($input["offset"]) {
                FETCH NEXT $fetchAmt ROWS ONLY";
 }
 
-if($input["filters"]) {
+if(isset($input["filters"])) {
     foreach($input["filters"] as $f) {
         $filteredQuery = $sql1;
         if($f["RequestID"]) {
@@ -109,7 +109,7 @@ if($input["filters"]) {
         while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
             $row["RequestDeadline"] = $row["RequestDeadline"]->format("Y-m-d");
             $row["CreationDate"] = $row["CreationDate"]->format("Y-m-d");
-            $data[$row["RequestID"]] = $row;
+            $data[] = $row;
         }
         sqlsrv_free_stmt($stmt);
     }
@@ -122,7 +122,7 @@ else {
     while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
         $row["RequestDeadline"] = $row["RequestDeadline"]->format("Y-m-d");
         $row["CreationDate"] = $row["CreationDate"]->format("Y-m-d");
-        $data[$row["RequestID"]] = $row;
+        $data[] = $row;
     }
     sqlsrv_free_stmt($stmt);
 }
@@ -130,8 +130,8 @@ else {
 $dataFinal = [];
 
 foreach($data as $r) {
-    $id = $r["RequestID"];
     if(!$input["expand"]) {
+        $id = $r["RequestID"];
         $query = $sql2 . " AND pri.RequestID = $id";
         $stmt = sqlsrv_query($conn, $query);
         if(!$stmt) {

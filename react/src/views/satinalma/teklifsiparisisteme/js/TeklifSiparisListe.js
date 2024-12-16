@@ -35,21 +35,6 @@ const TeklifSiparisListe = () => {
     setAllSelected(!data.find((i) => !selected[i.RequestItemID]));
   };
 
-  const filteredData = (data) =>
-    selected.concat(
-      data.filter((item) => {
-        const search = searchTerm.toLowerCase();
-        return (
-          item.RequestID.toString().toLowerCase().includes(search) ||
-          item.CreationDate.toLowerCase().includes(search) ||
-          item.UserName.toLowerCase().includes(search) ||
-          item.RequestDeadline.toLowerCase().includes(search) ||
-          item.MaterialID.toString().toLowerCase().includes(search) ||
-          item.MaterialName.toLowerCase().includes(search)
-        );
-      })
-    );
-
   const fields = [
     {
       key: 'checkbox',
@@ -150,31 +135,25 @@ const TeklifSiparisListe = () => {
       </div>
 
       <div>
-        {filteredData.length > 0 ? (
-          <CustomTable
-            fetchAddr="/queryRequests.php"
-            onFetch={processData}
-            fetchArgs={{ expand: true }}
-            fields={fields}
-            scopedSlots={{
-              checkbox: (item) => (
-                <td>
-                  <input
-                    type="checkbox"
-                    checked={selected[item.RequestItemID]}
-                    onChange={(e) =>
-                      handleRowSelect(item.RequestItemID, e.target.checked)
-                    }
-                  />
-                </td>
-              ),
-            }}
-          />
-        ) : (
-          <div>
-            <p> </p>
-          </div>
-        )}
+        <CustomTable
+          fetchAddr="/queryRequests.php"
+          onFetch={processData}
+          fetchArgs={{ expand: true }}
+          fields={fields}
+          scopedSlots={{
+            checkbox: (item) => (
+              <td>
+                <input
+                  type="checkbox"
+                  checked={selected[item.RequestItemID]}
+                  onChange={(e) =>
+                    handleRowSelect(item.RequestItemID, e.target.checked)
+                  }
+                />
+              </td>
+            ),
+          }}
+        />
       </div>
     </div>
   );

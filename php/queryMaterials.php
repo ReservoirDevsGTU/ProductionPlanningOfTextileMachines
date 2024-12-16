@@ -26,9 +26,9 @@ $data = [];
 
 $offset = ") SELECT * FROM Result";
 
-if($input["offset"]) {
-    $offsetAmt = $input["offset"][0];
-    $fetchAmt = $input["offset"][1];
+if(isset($input["offset"], $input["fetch"])) {
+    $offsetAmt = $input["offset"];
+    $fetchAmt = $input["fetch"];
     $offset = "), 
                Count AS (SELECT COUNT(*) MaxRows FROM Result)
                SELECT * FROM Result, Count
@@ -37,7 +37,7 @@ if($input["offset"]) {
                FETCH NEXT $fetchAmt ROWS ONLY";
 }
 
-if($input["filters"]) {
+if(isset($input["filters"])) {
     foreach($input["filters"] as $f) {
         $filteredQuery = $sql;
         if($f["MaterialID"]) {

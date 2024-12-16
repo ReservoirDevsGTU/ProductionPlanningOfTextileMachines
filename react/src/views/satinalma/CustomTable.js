@@ -12,29 +12,26 @@ const CustomTable = ({data, fields, fetchAddr, fetchArgs, onFetch, scopedSlots, 
 
   const fetchData = async () => {
     setLoading(true);
-    const startRow = (page - 1) * pageLength;
+    const startRow = Math.max((page - 1) * pageLength, 0);
+    let mr = 0;
     try {
-      const response = await axios.post(baseURL + fetchAddr, {...fetchArgs, offset: [startRow, pageLength]});
+      const response = await axios.post(baseURL + fetchAddr, {...fetchArgs, offset: startRow, fetch: pageLength});
+      let dd = response.data;
+      mr = dd[0].MaxRows;
       if(onFetch) {
-        const processed = onFetch(response.data);
+        const processed = onFetch(dd);
         if(processed) {
-          setDisplayData(processed);
-          setMaxRows(processed[0].MaxRows);
-        }
-        else {
-          setDisplayData(response.data);
-          setMaxRows(response.data[0].MaxRows);
+          dd = processed;
+          mr = processed[0].MaxRows;
         }
       }
-      else {
-        setDisplayData(response.data);
-        setMaxRows(response.data[0].MaxRows);
-      }
+      setMaxRows(mr);
+      setDisplayData(dd);
     }
     catch (error) {
       console.error("error while fetching: " + error);
     }
-    if(page === 0 && maxRows > 0) setPage(1);
+    if(page === 0 && mr > 0) setPage(1);
     setLoading(false);
   };
 
@@ -43,7 +40,7 @@ const CustomTable = ({data, fields, fetchAddr, fetchArgs, onFetch, scopedSlots, 
     if(data) {
       setDisplayData(data.slice(startRow, Math.min(page * pageLength, data.length)));
       setMaxRows(data.length);
-      if(page === 0 && maxRows > 0) setPage(1);
+      if(page === 0 && data.length > 0) setPage(1);
     }
     else if(fetchAddr) {
       fetchData();
