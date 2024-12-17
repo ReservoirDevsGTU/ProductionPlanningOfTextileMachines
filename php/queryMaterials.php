@@ -52,27 +52,27 @@ $columnsSelected = substr($columnsSelected, 1);
 if(isset($input["offset"], $input["fetch"])) {
     $offsetAmt = $input["offset"];
     $fetchAmt = $input["fetch"];
-    $offset = "), 
-               Count AS (SELECT COUNT(*) MaxRows FROM Result)
-               SELECT * FROM Result, Count
-               ORDER BY (SELECT NULL)
-               OFFSET $offsetAmt ROWS
-               FETCH NEXT $fetchAmt ROWS ONLY";
+    $sqlOffset = "), 
+                  Count AS (SELECT COUNT(*) MaxRows FROM Result)
+                  SELECT * FROM Result, Count
+                  ORDER BY (SELECT NULL)
+                  OFFSET $offsetAmt ROWS
+                  FETCH NEXT $fetchAmt ROWS ONLY";
 }
 
 if(isset($input["filters"])) {
     foreach($input["filters"] as $f) {
         if($f["MaterialID"]) {
             $d = implode(',', $f["MaterialID"]);
-            $sqlFilters = $sqlFilters . " AND m.MaterialID IN ($d)";
+            $sqlFilters .= " AND m.MaterialID IN ($d)";
         }
         if($f["MaterialNo"]) {
             $d = implode('\', \'', $f["MaterialNo"]);
-            $sqlFilters = $sqlFilters . " AND ms.MaterialNo IN ('$d')";
+            $sqlFilters .= " AND ms.MaterialNo IN ('$d')";
         }
         if($f["MaterialName"]) {
             $d = implode('\', \'', $f["MaterialName"]);
-            $sqlFilters = $sqlFilters . " AND m.MaterialName IN ('$d')";
+            $sqlFilters .= " AND m.MaterialName IN ('$d')";
         }
     }
 }
@@ -91,7 +91,7 @@ if(isset($input["search"]) and strlen($input["search"]["term"]) > 0) {
     }
 }
 
-$sql = $sqlStart . " " . $columnsSelected ." " . $sqlJoins ." " . $sqlFilters. " " . $offset;
+$sql = $sqlStart . " " . $columnsSelected ." " . $sqlJoins ." " . $sqlFilters. " " . $sqlOffset;
 
 $stmt = sqlsrv_query($conn, $sql);
 if(!$stmt) {

@@ -348,7 +348,7 @@ const TalepEkleme = ({ editID }) => {
 
       <CustomTable
         data={selectedButton === "secili" ? selectedMaterials : false}
-        update={searchTerm}
+        update={searchTerm || !templateModal}
         fetchAddr="/queryMaterials.php"
         fetchArgs={{columns:["MaterialID"], search: {term: searchTerm, fields: ["MaterialNo", "MaterialName"]}}}
         fields={[
