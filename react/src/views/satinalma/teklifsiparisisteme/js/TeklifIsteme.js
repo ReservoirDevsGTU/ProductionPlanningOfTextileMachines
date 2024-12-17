@@ -17,9 +17,8 @@ const TeklifIsteme = () => {
   const [materialsTab, setMaterialsTab] = useState("selected");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const [suppliers, setSuppliers] = useState([]);
+  const [supplierPage, setSupplierPage] = useState([]);
   const [selectedSuppliers, setSelectedSuppliers] = useState([]);
-  const [selectedCheckboxes, setSelectedCheckboxes] = useState([]);
   const [selectAllChecked, setSelectAllChecked] = useState(false);
 
   const [selectedMaterials, setSelectedMaterials] = useState([]);
@@ -30,9 +29,6 @@ const TeklifIsteme = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const suppliersResponse = await axios.get(baseURL + "/getAllSuppliers.php");
-        setSuppliers(suppliersResponse.data);
-
         const usersResponse = await axios.get(baseURL + "/listUsers.php");
         setUsers(usersResponse.data);
       } catch (error) {
@@ -48,23 +44,17 @@ const TeklifIsteme = () => {
     setQuoteDate(today);
   }, []);
 
-  const handleCheckboxChangeSupplier = (supplierId) => {
-    setSelectedCheckboxes((prevSelected) =>
-      prevSelected.includes(supplierId)
-        ? prevSelected.filter((id) => id !== supplierId)
-        : [...prevSelected, supplierId]
-    );
-  };
-
   const handleSelectAllSuppliers = () => {
+    if(!selectAllChecked) {
+      setSelectedSuppliers((prev) =>
+        supplierPage.reduce((acc, cur) => acc.find(s => s.SupplierID === cur.SupplierID) ? acc : [...acc, cur], prev));
+    }
     setSelectAllChecked(!selectAllChecked);
-    setSelectedCheckboxes(!selectAllChecked ? suppliers.map((s) => s.SupplierID) : []);
   };
 
   const handleAddSelectedSuppliers = () => {
-    const selected = suppliers.filter((s) => selectedCheckboxes.includes(s.SupplierID));
-    setSelectedSuppliers((prevSelected) => [...prevSelected, ...selected]);
-    setSelectedCheckboxes([]);
+    setSelectedSuppliers((prev) => 
+      prev.map(s => ({...s, final: true})));
   };
 
   const handleRemoveSupplier = (supplierId) => {
@@ -212,28 +202,21 @@ const TeklifIsteme = () => {
             <CTabContent>
               {/* Seçili Tedarikçiler */}
               <CTabPane data-tab="selected">
-                <table style={{ marginTop:"20px", width: "100%", borderCollapse: "collapse" }}>
-                  <thead>
-                    <tr>
-                      <th>Tedarikçi Kodu</th>
-                      <th>Tedarikçi Adı</th>
-                      <th>Telefon</th>
-                      <th>E-Posta</th>
-                      <th>Adres</th>
-                      <th>Kaldır</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {selectedSuppliers.map((supplier) => (
-                      <tr key={supplier.SupplierID}>
-                        <td>{supplier.SupplierID}</td>
-                        <td>{supplier.SupplierName}</td>
-                        <td>{supplier.SupplierTelNo}</td>
-                        <td>{supplier.SupplierEmail}</td>
-                        <td>{supplier.SupplierAddress}</td>
+                <CustomTable style={{ marginTop:"20px", width: "100%", borderCollapse: "collapse" }}
+                  data={selectedSuppliers.filter(s=>s?.final !== undefined)}
+                  fields={[
+                    {label: "Tedarikçi Kodu", key: "SupplierID"},
+                    {label: "Tedarikçi Adı", key: "SupplierName"},
+                    {label: "Telefon", key: "SupplierTelNo"},
+                    {label: "E-Posta", key: "SupplierEmail"},
+                    {label: "Adres", key: "SupplierAddress"},
+                    {label: "Kaldır", key: "delete"},
+                  ]}
+                  scopedSlots={{
+                    delete: (supplier) => (
                         <td>
                           <button
-                            onClick={() => handleRemoveSupplier(supplier.SupplierID)}
+                            onClick={() => setSelectedSuppliers((prev) => prev.filter(s => s.SupplierID !== supplier.SupplierID))}
                             style={{
                               backgroundColor: "transparent",
                               border: "none",
@@ -244,51 +227,45 @@ const TeklifIsteme = () => {
                             <FontAwesomeIcon icon={faTrash} />
                           </button>
                         </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    )
+                  }}/>
               </CTabPane>
 
               {/* Tüm Tedarikçiler */}
               <CTabPane data-tab="all">
               <div>
-                <table style={{ marginTop: "20px", width: "100%", borderCollapse: "collapse" }}>
-                  <thead>
-                    <tr>
-                      <th>
+                <CustomTable style={{ marginTop: "20px", width: "100%", borderCollapse: "collapse" }}
+                  fetchAddr="/getAllSuppliers.php"
+                  onFetch={(data) => setSupplierPage(data)}
+                  fields={[
+                    {label: (
                         <input
                           type="checkbox"
                           checked={selectAllChecked}
                           onChange={handleSelectAllSuppliers}
                         />
-                      </th>
-                      <th>Tedarikçi Kodu</th>
-                      <th>Tedarikçi Adı</th>
-                      <th>Telefon</th>
-                      <th>E-Posta</th>
-                      <th>Adres</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {suppliers.map((supplier) => (
-                      <tr key={supplier.SupplierID}>
+                    ), key: "select"},
+                    {label: "Tedarikçi Kodu", key: "SupplierID"},
+                    {label: "Tedarikçi Adı", key: "SupplierName"},
+                    {label: "Telefon", key: "SupplierTelNo"},
+                    {label: "E-Posta", key: "SupplierEmail"},
+                    {label: "Adres", key: "SupplierAddress"},
+                  ]}
+                  scopedSlots= {{
+                    select: (supplier) => (
                         <td>
                           <input
                             type="checkbox"
-                            checked={selectedCheckboxes.includes(supplier.SupplierID)}
-                            onChange={() => handleCheckboxChangeSupplier(supplier.SupplierID)}
+                            disabled={selectedSuppliers.find(s => s.SupplierID === supplier.SupplierID)?.final !== undefined}
+                            checked={selectedSuppliers.find(s => s.SupplierID === supplier.SupplierID) !== undefined}
+                            onChange={(e) =>
+                            setSelectedSuppliers((prev) =>
+                              e.target.checked ? prev.concat([supplier])
+                              : prev.filter(s => s.SupplierID !== supplier.SupplierID))}
                           />
                         </td>
-                        <td>{supplier.SupplierID}</td>
-                        <td>{supplier.SupplierName}</td>
-                        <td>{supplier.SupplierTelNo}</td>
-                        <td>{supplier.SupplierEmail}</td>
-                        <td>{supplier.SupplierAddress}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    ),
+                  }}/>
 
                 {/* Buton Sağ Alt Köşede ve Hafif Sola Kaydırılmış */}
                 <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "20px" }}>

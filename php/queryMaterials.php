@@ -4,27 +4,50 @@ include 'connect.php';
 
 if($_SERVER['REQUEST_METHOD'] != 'POST') return;
 
-$sql = "WITH Result AS (SELECT
-        m.MaterialID,
-        m.MaterialName,
-        mi.Quantity,
-        ms.MaterialNo,
-        ms.SuckerNo,
-        ms.UnitID
-        FROM Materials m
-        JOIN MaterialInventory mi
-        ON m.MaterialID = mi.MaterialID
-        JOIN MaterialSpecs ms
-        ON m.MaterialID = ms.MaterialID
-        WHERE m.IsDeleted = 0
-        AND ms.IsDeleted = 0
-        ";
+$columns = array(
+    "MaterialID" => "m.MaterialID",
+    "MaterialName" => "m.MaterialName",
+    "Quantity" => "mi.Quantity",
+    "MaterialNo" => "ms.MaterialNo",
+    "SuckerNo" => "ms.SuckerNo",
+    "UnitID" => "ms.UnitID",
+);
+
+$sqlStart = "WITH Result AS (SELECT";
+
+$columnsSelected = "";
+
+$sqlJoins = "FROM Materials m
+             JOIN (SELECT MaterialID, MAX(LastUpdated) AS LastUpdated FROM MaterialInventory GROUP BY MaterialID) mi_max
+             ON mi_max.MaterialID = m.MaterialID
+             JOIN MaterialInventory mi
+             ON mi.LastUpdated = mi_max.LastUpdated AND mi.MaterialID = m.MaterialID
+             JOIN MaterialSpecs ms
+             ON m.MaterialID = ms.MaterialID";
+
+$sqlFilters = "WHERE m.IsDeleted = 0
+               AND ms.IsDeleted = 0";
+
+$sqlOffset = ") SELECT * FROM Result";
 
 $input = json_decode(file_get_contents("php://input"), true);
 
 $data = [];
 
-$offset = ") SELECT * FROM Result";
+if(isset($input["columns"])) {
+    foreach($input["columns"] as $colkey) {
+        if(isset($columns[$colkey])) {
+            $columnsSelected = $columnsSelected . ", " . $columns[$colkey];
+        }
+    }
+}
+else {
+    foreach($columns as $col) {
+        $columnsSelected = $columnsSelected . ", " . $col;
+    }
+}
+
+$columnsSelected = substr($columnsSelected, 1);
 
 if(isset($input["offset"], $input["fetch"])) {
     $offsetAmt = $input["offset"];
@@ -52,34 +75,21 @@ if(isset($input["filters"])) {
             $d = implode('\', \'', $f["MaterialName"]);
             $filteredQuery = $filteredQuery . " AND m.MaterialName IN ('$d')";
         }
-        $stmt = sqlsrv_query($conn, $filteredQuery . $offset);
-        if(!$stmt) {
-            die(json_encode(sqlsrv_errors(), true));
-        }
-        while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-            $data[$row["MaterialID"]] = $row;
-        }
-        sqlsrv_free_stmt($stmt);
     }
-}
-else {
-    $stmt = sqlsrv_query($conn, $sql . $offset);
-    if(!$stmt) {
-        die(json_encode(sqlsrv_errors(), true));
-    }
-    while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-        $data[$row["MaterialID"]] = $row;
-    }
-    sqlsrv_free_stmt($stmt);
 }
 
-$dataFinal = [];
+$sql = $sqlStart . " " . $columnsSelected ." " . $sqlJoins ." " . $offset;
 
-foreach($data as $m) {
-    $dataFinal[] = $m;
+$stmt = sqlsrv_query($conn, $sql);
+if(!$stmt) {
+    die(json_encode(sqlsrv_errors(), true));
 }
+while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+    $data[] = $row;
+}
+sqlsrv_free_stmt($stmt);
 
 sqlsrv_close($conn);
 
-echo json_encode($dataFinal);
+echo json_encode($data);
 ?>

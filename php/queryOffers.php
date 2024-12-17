@@ -6,6 +6,7 @@ if($_SERVER['REQUEST_METHOD'] != 'POST') return;
 
 $sql1 = "WITH Result AS (SELECT
         po.OfferID,
+        po.OfferGroupID,
         po.CreationDate,
         pod.OfferDeadline,
         pod.OfferDescription,

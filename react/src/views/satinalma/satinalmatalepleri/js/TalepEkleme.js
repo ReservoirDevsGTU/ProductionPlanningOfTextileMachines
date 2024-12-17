@@ -349,6 +349,7 @@ const TalepEkleme = ({ editID }) => {
       <CustomTable
         data={selectedButton === "secili" ? selectedMaterials : false}
         fetchAddr="/queryMaterials.php"
+        fetchArgs={{columns:["MaterialID"]}}
         fields={[
           { label: "Malzeme No", key: "MaterialNo" },
           { label: "Malzeme Adı", key: "MaterialName" },

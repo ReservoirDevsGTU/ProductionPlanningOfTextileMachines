@@ -15,7 +15,11 @@ const CustomTable = ({data, fields, fetchAddr, fetchArgs, onFetch, scopedSlots, 
     const startRow = Math.max((page - 1) * pageLength, 0);
     let mr = 0;
     try {
-      const response = await axios.post(baseURL + fetchAddr, {...fetchArgs, offset: startRow, fetch: pageLength});
+      let columns = fields.map(f=>f.key);
+      if(fetchArgs && fetchArgs.columns) {
+        fetchArgs.columns.forEach((c)=>{if(!columns.find(e => e === c)) columns = columns.concat([c]);});
+      }
+      const response = await axios.post(baseURL + fetchAddr, {...fetchArgs, offset: startRow, fetch: pageLength, columns: columns});
       let dd = response.data;
       mr = dd[0].MaxRows;
       if(onFetch) {

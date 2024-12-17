@@ -28,7 +28,7 @@ const TheSidebar = () => {
       onShowChange={(val) => dispatch({type: 'set', sidebarShow: val })}
     >
       <CSidebarBrand className="d-md-down-none" to="/">
-        <ProSMHIcon/>
+        <ProSMHIcon style={{margin: 10}}/>
       </CSidebarBrand>
       <CSidebarNav>
 

@@ -227,12 +227,11 @@ const TeklifListesi = () => {
     },
     { key: 'SupplierName', label: 'Tedarikçi' },
     { key: 'CreationDate', label: 'Teklif Tarihi' },
-    { key: 'offergroupno', label: 'Teklif Grup No' },
+    { key: 'OfferGroupID', label: 'Teklif Grup No' },
     { key: 'OfferID', label: 'Teklif No' },
     { key: 'RequestID', label: 'Talep No' },
     { key: 'RequestedBy', label: 'Teklif İsteyen' },
     { key: 'OfferStatus', label: 'Durum' },
-    { key: 'button', label: <CButton>Seç</CButton> },
   ];
 
   return (
