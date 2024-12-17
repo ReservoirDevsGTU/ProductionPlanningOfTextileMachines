@@ -62,23 +62,36 @@ if(isset($input["offset"], $input["fetch"])) {
 
 if(isset($input["filters"])) {
     foreach($input["filters"] as $f) {
-        $filteredQuery = $sql;
         if($f["MaterialID"]) {
             $d = implode(',', $f["MaterialID"]);
-            $filteredQuery = $filteredQuery . " AND m.MaterialID IN ($d)";
+            $sqlFilters = $sqlFilters . " AND m.MaterialID IN ($d)";
         }
         if($f["MaterialNo"]) {
             $d = implode('\', \'', $f["MaterialNo"]);
-            $filteredQuery = $filteredQuery . " AND ms.MaterialNo IN ('$d')";
+            $sqlFilters = $sqlFilters . " AND ms.MaterialNo IN ('$d')";
         }
         if($f["MaterialName"]) {
             $d = implode('\', \'', $f["MaterialName"]);
-            $filteredQuery = $filteredQuery . " AND m.MaterialName IN ('$d')";
+            $sqlFilters = $sqlFilters . " AND m.MaterialName IN ('$d')";
         }
     }
 }
 
-$sql = $sqlStart . " " . $columnsSelected ." " . $sqlJoins ." " . $offset;
+if(isset($input["search"]) and strlen($input["search"]["term"]) > 0) {
+    $term = $input["search"]["term"];
+    $search = "";
+    foreach($input["search"]["fields"] as $f) {
+        if(isset($columns[$f])) {
+            $search .= " OR $columns[$f] LIKE '%$term%'";
+        }
+    }
+    if(strlen($search) > 0) {
+        $search = substr($search, 3);
+        $sqlFilters .= " AND ($search)";
+    }
+}
+
+$sql = $sqlStart . " " . $columnsSelected ." " . $sqlJoins ." " . $sqlFilters. " " . $offset;
 
 $stmt = sqlsrv_query($conn, $sql);
 if(!$stmt) {
