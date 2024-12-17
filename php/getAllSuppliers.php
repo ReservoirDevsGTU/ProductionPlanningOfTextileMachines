@@ -3,28 +3,26 @@
  * Usage is by calling getAllSuppliers
  * Parameters:
  *   conn => connection object to the database
- *   page => the page number (1-based)
- *   pageSize => the number of items per page
+ *   offset => the number of rows to skip
+ *   fetch => the number of rows to fetch
  * Return:
- *   A nested array that includes suppliers' details for the specified page
+ *   A nested array that includes suppliers' details for the specified range
  *   Every item of that array is a discrete supplier
  */
+
 include 'connect.php';
 include 'headers.php';
 
-function getAllSuppliers($conn, $page, $pageSize) {
-  # Calculate offset based on the current page and page size
-  $offset = ($page - 1) * $pageSize;
-
-  # Fetching suppliers with paging
-  $query = "SELECT * FROM Suppliers WHERE IsDeleted = 0 
-            ORDER BY SupplierID 
+function getAllSuppliers($conn, $offset, $fetch) {
+  # Fetching suppliers with offset and fetch
+  $query = "SELECT * FROM Suppliers WHERE IsDeleted = 0
+            ORDER BY SupplierID
             OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
-  $params = array($offset, $pageSize);
+  $params = array($offset, $fetch);
   $stmt = sqlsrv_query($conn, $query, $params);
 
   if ($stmt === false) {
-    die(print_r(sqlsrv_errors(), true));
+    die(json_encode(sqlsrv_errors(), true));
   }
 
   $suppliers = array();
@@ -35,10 +33,14 @@ function getAllSuppliers($conn, $page, $pageSize) {
   return $suppliers;
 }
 
-# Example usage: Fetching page 1 with 10 items per page
-$page = isset($_GET['page']) ? intval($_GET['page']) : 1; // Default to page 1
-$pageSize = isset($_GET['pageSize']) ? intval($_GET['pageSize']) : 10; // Default page size 10
+# Read input from JSON
+$input = json_decode(file_get_contents("php://input"), true);
 
-$suppliers = getAllSuppliers($conn, $page, $pageSize);
+# Extract offset and fetch from the input
+$offset = isset($input['offset']) ? (int)$input['offset'] : 0;   // Default to 0 if not provided
+$fetch  = isset($input['fetch']) ? (int)$input['fetch'] : 10;   // Default fetch size is 10 if not provided
+
+$suppliers = getAllSuppliers($conn, $offset, $fetch);
+
 echo json_encode($suppliers);
 ?>
