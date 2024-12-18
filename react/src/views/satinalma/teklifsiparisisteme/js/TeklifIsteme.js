@@ -84,11 +84,47 @@ const TeklifIsteme = (props) => {
       CreatedBy: requester,
       RequestedBy: requester,
       OfferDescription: description,
+      OfferDate: quoteDate,
       OfferDeadline: deadlineDate,
       Suppliers: selectedSuppliers.map(s => ({SupplierID: s.SupplierID})),
-      Materials: selectedMaterials,
+      Materials: selectedMaterials.reduce((acc, cur) => {
+        if(cur.RequestItemID === 0) {
+          acc = acc.concat([{
+            MaterialID: cur.MaterialID,
+            RequestItemID: 0,
+            RequestedAmount: cur.RequestedAmount,
+            OfferedAmount: cur.OfferedAmount
+          }]);
+        }
+        else {
+          const items = editItems.filter(i => i.MaterialID === cur.MaterialID);
+          let remain = Number(cur.OfferedAmount);
+          if(items) {
+            let totalRequest = items.reduce((acc, cur) => acc + Number(cur.RequestedAmount), 0);
+            items.forEach(i => {
+              acc = acc.concat([{
+                MaterialID: i.MaterialID,
+                RequestItemID: i.RequestItemID,
+                RequestedAmount: i.RequestedAmount,
+                OfferedAmount: remain * Number(i.RequestedAmount) / totalRequest
+                }]);
+            });
+            remain = Math.max(0, remain - totalRequest);
+          }
+          if(remain > 0) {
+            acc = acc.concat([{
+              MaterialID: cur.MaterialID,
+              RequestItemID: 0,
+              RequestedAmount: remain,
+              OfferedAmount: remain
+            }]);
+          }
+        }
+        return acc;
+      }, [])
     };
     console.log("Saved Request Data:", requestData);
+    axios.post(baseURL + "/createOffer.php", requestData);
     alert("Teklif bilgileri kaydedildi!");
   };
 
