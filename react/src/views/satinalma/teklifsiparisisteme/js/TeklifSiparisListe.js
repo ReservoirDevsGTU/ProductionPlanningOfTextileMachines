@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { CButton, CInput } from '@coreui/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -15,24 +15,23 @@ const TeklifSiparisListe = () => {
   const [data, setData] = useState([]);
 
   const processData = (newData) => {
-    setAllSelected(!newData.find((i) => !selected[i.RequestItemID]));
+    setAllSelected(!newData.find((i) => !selected.find(j => j.RequestItemID === i.RequestItemID)));
     setData(newData);
   };
 
   const handleSelectedAll = (isChecked) => {
-    const updatedSelected = data.reduce((acc, cur) => {
-      return { ...acc, [cur.RequestItemID]: isChecked };
-    }, {});
-    setSelected(updatedSelected);
-    setAllSelected(isChecked);
+    data.forEach(i => handleRowSelect(i, isChecked));
   };
 
+  const updateAllSelected = () => {
+    setAllSelected(!data.find((i) => !selected.find(j => j.RequestItemID === i.RequestItemID)));
+  };
+
+  useEffect(updateAllSelected, [selected]);
+
   const handleRowSelect = (item, isChecked) => {
-    setSelected((prevSelected) => ({
-      ...prevSelected,
-      [item]: isChecked,
-    }));
-    setAllSelected(!data.find((i) => !selected[i.RequestItemID]));
+    setSelected((prev) => isChecked ? [ ...prev, item]
+     : prev.filter(i => i.RequestItemID !== item.RequestItemID));
   };
 
   const fields = [
@@ -88,7 +87,7 @@ const TeklifSiparisListe = () => {
             color='primary'
             variant='outline'
             size='lg'
-            onClick={() => history.push('/satinalma/teklif-isteme')}
+            onClick={() => history.push({pathname: '/satinalma/teklif-isteme', editItems: selected})}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -145,9 +144,9 @@ const TeklifSiparisListe = () => {
               <td>
                 <input
                   type="checkbox"
-                  checked={selected[item.RequestItemID]}
+                  checked={selected.find(i => i.RequestItemID === item.RequestItemID)}
                   onChange={(e) =>
-                    handleRowSelect(item.RequestItemID, e.target.checked)
+                    handleRowSelect(item, e.target.checked)
                   }
                 />
               </td>

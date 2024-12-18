@@ -7,7 +7,7 @@ import { CButton, CNav, CNavItem, CNavLink, CTabContent, CTabPane, CTabs } from 
 import CustomTable from '../../CustomTable.js';
 
 
-const TeklifIsteme = () => {
+const TeklifIsteme = (props) => {
   const [quoteDate, setQuoteDate] = useState("");
   const [deadlineDate, setDeadlineDate] = useState("");
   const [requester, setRequester] = useState(-1);
@@ -26,6 +26,8 @@ const TeklifIsteme = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedMaterialToDelete, setSelectedMaterialToDelete] = useState(null);
 
+  const editItems = props.location.editItems;
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -38,6 +40,19 @@ const TeklifIsteme = () => {
 
     fetchData();
   }, []);
+
+  useEffect(() => {
+    setSelectedMaterials(editItems ? editItems.reduce((acc, cur) => {
+      let exist = acc.find(i => i.MaterialID === cur.MaterialID);
+      if(exist) {
+        exist.RequestedAmount = Number(cur.RequestedAmount) + Number(exist.RequestedAmount);
+        exist.OfferedAmount = Number(cur.RequestedAmount) + Number(exist.OfferedAmount);
+      }
+      else acc = acc.concat([{...cur, final: true, OfferedAmount: cur.RequestedAmount}]);
+      return acc;
+    }, []) : []);}, [editItems]);
+
+  useEffect(()=>console.log(setSelectedMaterials(prev => prev.sort((a, b) => a.MaterialID - b.MaterialID))), [selectedMaterials]);
 
   useEffect(() => {
     const today = new Date().toISOString().split("T")[0];
@@ -67,8 +82,10 @@ const TeklifIsteme = () => {
     const requestData = {
       OfferGroupID: quoteGroupNo,
       CreatedBy: requester,
-      Description: description,
-      Suppliers: selectedSuppliers,
+      RequestedBy: requester,
+      OfferDescription: description,
+      OfferDeadline: deadlineDate,
+      Suppliers: selectedSuppliers.map(s => ({SupplierID: s.SupplierID})),
       Materials: selectedMaterials,
     };
     console.log("Saved Request Data:", requestData);
@@ -77,7 +94,7 @@ const TeklifIsteme = () => {
 
   const handleRemoveMaterial = () => {
     setSelectedMaterials((prev) =>
-      prev.filter((m) => m.RequestItemID !== selectedMaterialToDelete.RequestItemID)
+      prev.filter((m) => m.MaterialID !== selectedMaterialToDelete.MaterialID)
     );
     setShowModal(false);
   };
@@ -319,7 +336,7 @@ const TeklifIsteme = () => {
             {label: "Sil", key: "delete"},
             {label: "Malzeme No", key: "MaterialNo"},
             {label: "Malzeme Adi", key: "MaterialName"},
-            {label: "Teklif Miktari", key: "OfferedAmount"},
+            {label: "Teklif Miktari", key: "offeredAmount"},
             {label: "Talep Miktari", key: "RequestedAmount"},
             {label: "Birim", key: "UnitID"},
           ]}
@@ -342,6 +359,29 @@ const TeklifIsteme = () => {
                         </button>
                       </td>
             ),
+            offeredAmount: (material) => (
+                      <td>
+                        <input
+                          type="number"
+                          value={material.OfferedAmount}
+                          onChange={(e) =>
+                            setSelectedMaterials((prev) =>
+                              prev.map((m) =>
+                                m.MaterialID === material.MaterialID
+                                  ? { ...m, OfferedAmount: Number(e.target.value), RequestedAmount: m.RequestItemID === 0 ? Number(e.target.value) : m.RequestedAmount}
+                                  : m
+                              )
+                            )
+                          }
+                          style={{
+                            padding: "5px",
+                            border: "1px solid #ccc",
+                            borderRadius: "4px",
+                            width: "100px",
+                          }}
+                        />
+                      </td>
+            ),
           }}
         />
             </CTabPane>
@@ -350,14 +390,14 @@ const TeklifIsteme = () => {
             <CTabPane data-tab="all">
             <div>
         <CustomTable style={{ width: "100%", borderCollapse: "collapse" }}
-          fetchAddr="/queryRequests.php"
-          fetchArgs={{ expand: true }}
+          fetchAddr="/queryMaterials.php"
+          fetchArgs={{columns: ["MaterialID"]}}
           fields={[
             {label: "", key: "select"},
             {label: "Malzeme No", key: "MaterialNo"},
             {label: "Malzeme Adi", key: "MaterialName"},
-            {label: "Teklif Miktari", key: "offeredAmount"},
-            {label: "Talep Miktari", key: "RequestedAmount"},
+            {label: "Miktar", key: "offeredAmount"},
+            {label: "Toplam Stok", key: "Quantity"},
             {label: "Birim", key: "UnitID"},
           ]}
           scopedSlots={{
@@ -365,12 +405,12 @@ const TeklifIsteme = () => {
                       <td>
                         <input
                           type="checkbox"
-                          disabled={selectedMaterials.find(m => m.RequestItemID === material.RequestItemID)?.final !== undefined}
-                          checked={selectedMaterials.find(m => m.RequestItemID === material.RequestItemID) !== undefined}
+                          disabled={selectedMaterials.find(m => m.MaterialID === material.MaterialID)?.final !== undefined}
+                          checked={selectedMaterials.find(m => m.MaterialID === material.MaterialID) !== undefined}
                           onChange={(e) =>
                             setSelectedMaterials((prev) =>
-                              e.target.checked ? prev.concat([{...material, OfferedAmount: 1}])
-                              : prev.filter(m => m.RequestItemID !== material.RequestItemID))
+                              e.target.checked ? prev.concat([{...material, OfferedAmount: 1, RequestItemID: 0}])
+                              : prev.filter(m => m.MaterialID !== material.MaterialID))
                           }
                         />
                       </td>
@@ -379,12 +419,12 @@ const TeklifIsteme = () => {
                       <td>
                         <input
                           type="number"
-                          disabled={selectedMaterials.find(m => m.RequestItemID === material.RequestItemID)?.final !== undefined}
-                          value={selectedMaterials.find(m => m.RequestItemID === material.RequestItemID)?.OfferedAmount}
+                          disabled={selectedMaterials.find(m => m.MaterialID === material.MaterialID)?.final !== undefined}
+                          value={selectedMaterials.find(m => m.MaterialID === material.MaterialID)?.OfferedAmount || ""}
                           onChange={(e) =>
                             setSelectedMaterials((prev) =>
                               prev.map((m) =>
-                                m.RequestItemID === material.RequestItemID
+                                m.MaterialID === material.MaterialID
                                   ? { ...m, OfferedAmount: Number(e.target.value) }
                                   : m
                               )
@@ -406,7 +446,7 @@ const TeklifIsteme = () => {
                 <CButton
                   color="info"
                   variant="outline"
-                  onClick={() => setSelectedMaterials((prev) => prev.map(m=>({...m, final: true})))}
+                  onClick={() => setSelectedMaterials((prev) => prev.map(m=>({...m, RequestedAmount: m.OfferedAmount, final: true})))}
                   style={{
                     padding: "10px 20px",
                     cursor: "pointer",
