@@ -64,7 +64,7 @@ const TeklifDegerlendirme = () => {
 
   const handleSelect = (grupNo) => {
     // TeklifDegerlendirmeForm sayfasına yönlendirme yap
-    history.push('./teklif-degerlendirme-form/${grupNo}');
+    history.push('./teklif-degerlendirme-form'); //  teklif-degerlendirme-form/${grupNo}
   };
 
   return (
@@ -118,7 +118,7 @@ const TeklifDegerlendirme = () => {
                 <td>
                   <button
                     className="select-button"
-                    onClick={handleSelect} // Seç butonuna tıklandığında yönlendirme yapılacak
+                    onClick={handleSelect} // Seç butonuna tıklandığında yönlendirme yapılacak ( onClick={handleSelect(teklif.grupNo)} )
                   >
                     Seç
                   </button>

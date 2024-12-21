@@ -67,4 +67,41 @@
     border-radius: 8px;
     min-height: 300px;
   }
+
+  .table-container {
+    overflow-x: auto;
+  }
+  
+  .malzeme-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  
+  .malzeme-table th,
+  .malzeme-table td {
+    border: 1px solid #ccc;
+    text-align: center;
+    padding: 8px;
+    min-width: 100px;
+    
+  }
+  
+  .malzeme-table th {
+    background-color: #004080;
+    color: white;
+  }
+  
+  .malzeme-table .highlight {
+    background-color: #dfffe0;
+  }
+  
+  .malzeme-table tbody tr:nth-child(odd) {
+    background-color: #f9f9f9;
+  }
+  
+  .malzeme-table tbody tr:nth-child(even) {
+    background-color: #e8f4fc;
+  }
+  
   
