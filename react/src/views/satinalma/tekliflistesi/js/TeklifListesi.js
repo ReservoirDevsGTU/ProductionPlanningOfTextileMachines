@@ -15,13 +15,20 @@ import CustomTable from '../../CustomTable.js';
 
 const TeklifListesi = () => {
   const history = useHistory();
-  const [allSelected, setAllSelected] = useState(false);
-  const [selected, setSelected] = useState([]);
+  const [selected, setSelected] = useState({});
+  const [allSelected, setAllSelected] = useState(false);  
   const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [modal, setModal] = useState(false);
   const [expandedRows, setExpandedRows] = useState({});
   const [expandedSuppliers, setExpandedSuppliers] = useState({});
+
+  const [evaluationModal, setEvaluationModal] = useState(false);
+  const [selectedSuppliers, setSelectedSuppliers] = useState([]);
+  const [evaluator, setEvaluator] = useState('');
+  const [explanation, setExplanation] = useState('');
+  const [cancelOthers, setCancelOthers] = useState(false);  
+
   const [supplierData, setSupplierData] = useState([
     {
       name: 'XXX Tedarikçi',
@@ -135,6 +142,22 @@ const TeklifListesi = () => {
     },
   ]);
 
+  const isSingleSelected = Object.values(selected).filter(Boolean).length === 1;
+
+
+  const openEvaluationModal = () => {
+    const selectedOffers = data.filter(item => selected[item.RowID]);
+    
+    if (selectedOffers.length === 0) {
+      alert('Lütfen değerlendirmeye almak için teklif seçiniz');
+      return;
+    }
+  
+    const suppliers = [...new Set(selectedOffers.map(offer => offer.SupplierName))];
+    setSelectedSuppliers(suppliers);
+    setEvaluationModal(true);
+  };
+
   const toggleRow = (rowId) => {
     setExpandedRows((prevRows) => ({
       ...prevRows,
@@ -151,22 +174,22 @@ const TeklifListesi = () => {
     setData(newData);
   };
 
+  const handleRowSelect = (itemId, isChecked) => {
+    setSelected(prev => ({
+      ...prev,
+      [itemId]: isChecked
+    }));
+    setAllSelected(false);
+  };
+  
   const handleSelectedAll = (isChecked) => {
-    const updatedSelected = data.reduce((acc, cur) => {
-      return { ...acc, [cur.RequestItemID]: isChecked };
-    }, {});
-    setSelected(updatedSelected);
+    const newSelected = {};
+    data.forEach(item => {
+      newSelected[item.RowID] = isChecked;
+    });
+    setSelected(newSelected);
     setAllSelected(isChecked);
   };
-
-  const handleRowSelect = (item, isChecked) => {
-    setSelected((prevSelected) => ({
-      ...prevSelected,
-      [item]: isChecked,
-    }));
-    setAllSelected(!data.find((i) => !selected[i.RequestItemID]));
-  };
-
   const filteredData = (data) =>
     selected.concat(
       data.filter((item) => {
@@ -241,6 +264,7 @@ const TeklifListesi = () => {
     //{ key: 'RequestID', label: 'Talep No' },
     { key: 'RequesterName', label: 'Teklif İsteyen' },
     { key: 'OfferStatus', label: 'Durum' },
+    { key: 'select', label:'Seç'}
   ];
 
   return (
@@ -263,7 +287,7 @@ const TeklifListesi = () => {
             <FontAwesomeIcon icon={faShoppingCart} style={{ marginRight: '8px' }} />
             Sipariş Oluştur
           </CButton>
-          <CButton color="info" variant='outline' size='lg'>
+          <CButton color="info" variant='outline' size='lg' onClick={openEvaluationModal}>
             <FontAwesomeIcon icon={faTasks} style={{ marginRight: '8px' }} />
             Değerlendirmeye Al
           </CButton>
@@ -272,10 +296,10 @@ const TeklifListesi = () => {
           <CButton color="info" variant='outline' size='lg' onClick={setPaperPlaneButton}>
             <FontAwesomeIcon icon={faPaperPlane} />
           </CButton>
-          <CButton color="info" variant='outline' size='lg'>
+          <CButton color="info" variant='outline' size='lg' disabled={!isSingleSelected}>
             <FontAwesomeIcon icon={faPrint} />
           </CButton>
-          <CButton color="success" variant='outline' size='lg'>
+          <CButton color="success" variant='outline' size='lg' disabled={!isSingleSelected}>
             <FontAwesomeIcon icon={faFileExcel} style={{ marginRight: '8px' }} />
             Teklif Aktar
           </CButton>
@@ -325,10 +349,14 @@ const TeklifListesi = () => {
                     <CustomTable
                       fields={[
                         { label: 'Malzeme No', key: 'MaterialNo' },
-                        { label: 'Sucker No', key: 'SuckerNo' },
-                        { label: 'Malzeme Adi', key: 'MaterialName' },
-                        { label: 'Miktar', key: 'RequestedAmount' },
+                        { label: 'Malzeme Adı', key: 'MaterialName' },
+                        { label: 'İstenilen Miktar', key: 'RequestedAmount' },
+                        { label: 'Teklif Miktarı', key: 'OfferAmount' },
                         { label: 'Birim', key: 'UnitID' },
+                        { label: 'Birim Fiyatı', key: 'UnitPrice' },
+                        { label: 'Kur', key: 'exchangerate' },
+                        { label: 'Durum', key: 'status' },
+
                       ]}
                       data={item.Materials}
                     />
@@ -339,9 +367,16 @@ const TeklifListesi = () => {
                 <td>
                   <input
                     type="checkbox"
-                    checked={selected[item.RequestItemID]}
-                    onChange={(e) => handleRowSelect(item.RequestItemID, e.target.checked)}
+                    checked={!!selected[item.RowID]}
+                    onChange={(e) => handleRowSelect(item.RowID, e.target.checked)}
                   />
+                </td>
+              ),
+              'select' : (item) => (
+                <td>
+                  <CButton shape='square' variant='outline' color='primary' onClick={() => history.push(`/satinalma/teklif-form/${item.OfferID}`)}>
+                    Seç
+                  </CButton>
                 </td>
               ),
             }}
@@ -402,6 +437,71 @@ const TeklifListesi = () => {
           <CButton color="info" >Gönder</CButton>
         </CModalFooter>
       </CModal>
+
+
+
+      <CModal show={evaluationModal} onClose={() => setEvaluationModal(false)} size="md" centered>
+        <CModalHeader closeButton>
+          <h5 style={{fontWeight: 'bold', fontSize:'24px'}}>Değerlendirmeye Alma Formu</h5>
+        </CModalHeader>
+
+        <CModalBody>
+          <div className="mb-3">
+            <label className="form-label">Değerlendiren:</label>
+            <select className="form-select"
+              style={{
+                padding: '8px 12px',
+                fontSize: '16px',
+                border: '1px solid #ced4da',
+                borderRadius: '4px',
+                backgroundColor: '#fff',
+                width: '100%',
+              }}>
+              {selectedSuppliers.map((supplier, index) => (
+                <option key={index} value={supplier}>{supplier}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label">Açıklama:</label>
+            <textarea
+              className="form-control"
+              value={explanation}
+              onChange={(e) => setExplanation(e.target.value)}
+              placeholder="Açıklama..."
+              rows={4}
+            />
+          </div>
+
+          <div className="form-check">
+            <input
+              type="checkbox"
+              className="form-check-input"
+              checked={cancelOthers}
+              onChange={(e) => setCancelOthers(e.target.checked)}
+              id="cancelOthers"
+            />
+            <label className="form-check-label" htmlFor="cancelOthers">
+              Aynı Teklif Grubundaki Diğer Bekleyen Teklifleri İptal Et
+            </label>
+          </div>
+
+          <div className="mt-2" style={{border: '1px dashed #ccc', padding: '10px', borderRadius: '5px'}}>
+            <small className="text-muted">
+              Bu seçenek seçildiğinde aynı teklif gruplarındaki işleme alınmayan diğer teklifler iptal edilecektir.
+            </small>
+          </div>
+        </CModalBody>
+
+        <CModalFooter>
+          <CButton color="danger" onClick={() => setEvaluationModal(false)}>
+            Vazgeç
+          </CButton>
+          <CButton color="primary">Gönder</CButton>
+        </CModalFooter>
+      </CModal>
+
     </div>
   );
 };
