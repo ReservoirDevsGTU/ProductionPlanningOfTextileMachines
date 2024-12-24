@@ -2,8 +2,6 @@
 include 'connect.php';
 include 'headers.php';
 
-if($_SERVER['REQUEST_METHOD'] != 'POST') return;
-
 $input = json_decode(file_get_contents("php://input"), true);
 
 function genQuery($input, $table, &$selectedColumns, &$selectedJoins, &$selectedFilters, &$subTablesNoExpand, &$postProcessList) {
@@ -159,6 +157,8 @@ function getTableData($conn, $input, $table) {
 function query($table) {
     global $conn, $input;
     
+    if($_SERVER['REQUEST_METHOD'] != 'POST') return;
+
     echo json_encode(getTableData($conn, $input, $table));
 }
 ?>
