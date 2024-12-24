@@ -38,7 +38,7 @@ const TalepOnayla = () => {
         .then((response) => setSelectedMaterials(response.data || []))
         .catch((error) => console.error("Error fetching request materials:", error));
 
-      axios.get(`${baseURL}/listUsers.php`)
+      axios.post(`${baseURL}/queryUsers.php`)
         .then((response) => setUsers(response.data))
         .catch((error) => console.error("Error fetching users:", error));
     }

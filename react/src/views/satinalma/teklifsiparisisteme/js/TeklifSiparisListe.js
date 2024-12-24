@@ -51,7 +51,7 @@ const TeklifSiparisListe = () => {
     { key: 'CreationDate', label: 'Talep Tarihi' },
     { key: 'UserName', label: 'Talep Eden' },
     { key: 'RequestDeadline', label: 'Termin Tarihi' },
-    { key: 'MaterialID', label: 'Malzeme No' },
+    { key: 'MaterialNo', label: 'Malzeme No' },
     { key: 'MaterialName', label: 'Malzeme Adı' },
   ];
 
@@ -137,7 +137,9 @@ const TeklifSiparisListe = () => {
         <CustomTable
           fetchAddr="/queryRequests.php"
           onFetch={processData}
-          fetchArgs={{ expand: true }}
+          fetchArgs={{subTables: {Materials: { expand: true }}}}
+          searchTerm={searchTerm}
+          searchFields={["UserName", "MaterialNo", "MaterialName"]}
           fields={fields}
           scopedSlots={{
             checkbox: (item) => (

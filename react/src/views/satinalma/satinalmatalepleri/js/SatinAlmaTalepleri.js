@@ -87,6 +87,8 @@ const SatinAlmaTalepleri = () => {
           <CustomTable
             update={showModal === false}
             fetchAddr="/queryRequests.php"
+            searchTerm={searchTerm}
+            searchFields={["RequestID", "UserName", "PurchaseDescription"]}
             fields={[
               { label: '', key: 'show_materials' },
               { label: 'Duzenle', key: 'edit_buttons' },

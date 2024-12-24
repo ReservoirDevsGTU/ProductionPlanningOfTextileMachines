@@ -1,120 +1,81 @@
 <?php
-include 'headers.php';
-include 'connect.php';
+include "query.php";
 
-if($_SERVER['REQUEST_METHOD'] != 'POST') return;
+$offerItemTable = array("primary" => "OfferItemID",
+                        "subTableJoinOn" => "poi.OfferID",
+                        "columns" => array("OfferItemID" => "poi.ItemID",
+                                           "OfferID" => "poi.OfferID",
+                                           "ConformationStatus" => "poi.ConformationStatus",
+                                           "RequestItemID" => "poi.RequestItemID",
+                                           "RequestID" => "pri.RequestID",
+                                           "MaterialID" => "poi.MaterialID",
+                                           "RequestedAmount" => "poi.RequestedAmount",
+                                           "OfferedAmount" => "poi.OfferedAmount",
+                                           "OfferedPrice" => "poi.OfferedPrice",
+                                           "ItemStatus" => "poi.ItemStatus",
+                                           "MaterialName" => "m.MaterialName",
+                                           "Quantity" => "mi.Quantity",
+                                           "UnitID" => "ms.UnitID",
+                                           "MaterialNo" => "ms.MaterialNo",
+                                           "SuckerNo" => "ms.SuckerNo"
+                                          ),
+                        "name" => "PurchaseOfferItems poi",
+                        "joins" => "JOIN (SELECT MaterialID, MAX(LastUpdated) AS LastUpdated FROM MaterialInventory GROUP BY MaterialID) mi_max
+                                    ON mi_max.MaterialID = poi.MaterialID
+                                    JOIN MaterialInventory mi
+                                    ON mi.LastUpdated = mi_max.LastUpdated AND mi.MaterialID = poi.MaterialID
+                                    JOIN Materials m
+                                    ON m.MaterialID = poi.MaterialID
+                                    JOIN MaterialSpecs ms
+                                    ON ms.MaterialID = poi.MaterialID
+                                    JOIN PurchaseRequestItems pri
+                                    ON pri.ItemID = poi.RequestItemID",
+                        "filters" => "poi.IsDeleted = 0
+                                      AND ms.IsDeleted = 0",
+);
 
-$sql1 = "WITH Result AS (SELECT
-        po.OfferID,
-        po.OfferGroupID,
-        po.CreationDate,
-        pod.OfferDeadline,
-        pod.OfferDescription,
-        pod.RequestedBy,
-        s.SupplierName,
-        s.SupplierEmail,
-        po.OfferStatus
-        FROM PurchaseOffers po
-        JOIN PurchaseOfferDetails pod
-        ON po.OfferID = pod.OfferID
-        JOIN Suppliers s
-        ON pod.SupplierID = s.SupplierID
-        WHERE po.IsDeleted = 0
-        AND pod.IsDeleted = 0";
-$sql2 = "SELECT
-         poi.ItemID OfferItemID,
-         poi.MaterialID,
-         poi.RequestedAmount,
-         poi.OfferedAmount,
-         poi.OfferedPrice,
-         poi.ConformationStatus,
-         poi.ItemStatus,
-         m.MaterialName
-         FROM PurchaseOfferItems poi
-         JOIN Materials m
-         ON poi.MaterialID = m.MaterialID
-         WHERE poi.IsDeleted = 0";
-
-$input = json_decode(file_get_contents("php://input"), true);
-
-$data = [];
-
-$offset = "";
-
-if(isset($input["offset"], $input["fetch"])) {
-    $offsetAmt = $input["offset"];
-    $fetchAmt = $input["fetch"];
-    $offset = "), 
-               Count AS (SELECT COUNT(*) MaxRows FROM Result)
-               SELECT * FROM Result, Count
-               ORDER BY (SELECT NULL)
-               OFFSET $offsetAmt ROWS
-               FETCH NEXT $fetchAmt ROWS ONLY";
+function dateToText($date) {
+    return $date->format("Y-m-d");
 }
 
-if($input["filters"]) {
-    foreach($input["filters"] as $f) {
-        $filteredQuery = $sql1;
-        if($f["OfferID"]) {
-            $d = implode(',', $f["OfferID"]);
-            $filteredQuery = $filteredQuery . " AND po.OfferID IN ($d)";
-        }
-        if($f["RequestedBy"]) {
-            $d = implode(',', $f["RequestedBy"]);
-            $filteredQuery = $filteredQuery . " AND pod.RequestedBy IN ($d)";
-        }
-        if($f["SupplierName"]) {
-            $d = implode('\', \'', $f["SupplierName"]);
-            $filteredQuery = $filteredQuery . " AND s.SupplierName IN ('$d')";
-        }
-        $filteredQuery = $filteredQuery . $offset;
-        $stmt = sqlsrv_query($conn, $filteredQuery);
-        if(!$stmt) {
-            die(json_encode(sqlsrv_errors(), true));
-        }
-        while($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-            $row["OfferDeadline"] = $row["OfferDeadline"]->format("Y-m-d");
-            $row["CreationDate"] = $row["CreationDate"]->format("Y-m-d");
-            $data[$row["OfferID"]] = $row;
-        }
-        sqlsrv_free_stmt($stmt);
-    }
-} 
-else {
-    $stmt = sqlsrv_query($conn, $sql1 . $offset);
-    if(!$stmt) {
-        die(json_encode(sqlsrv_errors(), true));
-    }
-    while($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-        $row["OfferDeadline"] = $row["OfferDeadline"]->format("Y-m-d");
-        $row["CreationDate"] = $row["CreationDate"]->format("Y-m-d");
-        $data[$row["OfferID"]] = $row;
-    }
-    sqlsrv_free_stmt($stmt);
-}
+$offerDetailTable = array("primary" => "DetailID",
+                          "subTableJoinOn" => "pod.OfferID",
+                          "columns" => array("DetailID" => "pod.DetailID",
+                                             "OfferID" => "pod.OfferID",
+                                             "OfferDate" => "pod.OfferDate",
+                                             "OfferDeadline" => "pod.OfferDeadline",
+                                             "RequestedBy" => "u1.UserID",
+                                             "RequesterName" => "u1.UserName",
+                                             "OfferDescription" => "pod.OfferDescription",
+                                             "SupplierID" => "pod.SupplierID",
+                                             "SupplierName" => "s.SupplierName",
+                                             "DetailStatus" => "pod.DetailStatus",
+                                            ),
+                          "name" => "PurchaseOfferDetails pod",
+                          "joins" => "JOIN Users u1 ON u1.UserID = pod.RequestedBy
+                                      JOIN Suppliers s ON s.SupplierID = pod.SupplierID",
+                          "filters" => "pod.IsDeleted = 0",
+                          "postProcess" => array("OfferDate" => "dateToText",
+                                                 "OfferDeadline" => "dateToText"
+                                                ),
+);
 
-$dataFinal = [];
+$offerTable = array("primary" => "OfferID",
+                    "columns" => array("OfferID" => "po.OfferID",
+                                       "OfferGroupID" => "po.OfferGroupID",
+                                       "CreatedBy" => "po.CreatedBy",
+                                       "CreatorName" => "u.UserName",
+                                       "CreationDate" => "po.CreationDate",
+                                       "OfferStatus" => "po.OfferStatus",
+                                      ),
+                    "name" => "PurchaseOffers po",
+                    "joins" => "JOIN Users u ON u.UserID = po.CreatedBy",
+                    "filters" => "po.IsDeleted = 0",
+                    "subTables" => array("Materials" => $offerItemTable,
+                                         "Details" => $offerDetailTable
+                                        ),
+                    "postProcess" => array("CreationDate" => "dateToText"),
+);
 
-foreach($data as $o) {
-    $id = $o["OfferID"];
-    $query = $sql2 . " AND poi.OfferID = $id";
-    $stmt = sqlsrv_query($conn, $query);
-    if(!$stmt) {
-        die(json_encode(sqlsrv_errors(), true));
-    }
-    $mData =[];
-    while($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-        $mData[$row["MaterialID"]] = $row;
-    }
-    $mDataFinal = [];
-    foreach($mData as $m) {
-        $mDataFinal[] = $m;
-    }
-    $o["Materials"] = $mDataFinal;
-    $dataFinal[] = $o;
-}
-
-sqlsrv_close($conn);
-
-echo json_encode($dataFinal);
+query($offerTable);
 ?>

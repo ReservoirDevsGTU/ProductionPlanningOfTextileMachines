@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { CInput, CButton, CCollapse, CModal, CModalHeader, CModalBody, CModalFooter } from '@coreui/react';
+import { CInput, CButton, CCollapse, CModal, CCardBody, CModalHeader, CModalBody, CModalFooter } from '@coreui/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faFileExcel,
@@ -20,6 +20,7 @@ const TeklifListesi = () => {
   const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [modal, setModal] = useState(false);
+  const [expandedRows, setExpandedRows] = useState({});
   const [expandedSuppliers, setExpandedSuppliers] = useState({});
   const [supplierData, setSupplierData] = useState([
     {
@@ -134,6 +135,13 @@ const TeklifListesi = () => {
     },
   ]);
 
+  const toggleRow = (rowId) => {
+    setExpandedRows((prevRows) => ({
+      ...prevRows,
+      [rowId]: !prevRows[rowId],
+    }));
+  };
+
   const setPaperPlaneButton = () => {
     setModal(true);
   };
@@ -225,12 +233,13 @@ const TeklifListesi = () => {
       sorter: false,
       filter: false,
     },
+    { key: 'show_materials', label: '' },
     { key: 'SupplierName', label: 'Tedarikçi' },
     { key: 'CreationDate', label: 'Teklif Tarihi' },
     { key: 'OfferGroupID', label: 'Teklif Grup No' },
     { key: 'OfferID', label: 'Teklif No' },
-    { key: 'RequestID', label: 'Talep No' },
-    { key: 'RequestedBy', label: 'Teklif İsteyen' },
+    //{ key: 'RequestID', label: 'Talep No' },
+    { key: 'RequesterName', label: 'Teklif İsteyen' },
     { key: 'OfferStatus', label: 'Durum' },
   ];
 
@@ -292,9 +301,40 @@ const TeklifListesi = () => {
         {filteredData.length > 0 ? (
           <CustomTable
             fetchAddr="/queryOffers.php"
+            fetchArgs={{subTables:{Materials: {expand: false}, Details: {expand:true}}}}
+            searchTerm={searchTerm}
+            searchFields={["SupplierName", "OfferGroupID", "OfferID"]}
             onFetch={processData}
             fields={fields}
             scopedSlots={{
+              'show_materials': (item) => (
+                <td>
+                  <CButton
+                    size='lg'
+                    variant='outline'
+                    color='secondary'
+                    children={<FontAwesomeIcon style={{color: 'black'}} icon={expandedRows[item.RowID] ? faChevronUp : faChevronDown} />}
+                    onClick={() => toggleRow(item.RowID)}
+                  >
+                  </CButton>
+                </td>
+              ),
+              'details': (item) => (
+                <CCollapse show={expandedRows[item.RowID]}>
+                  <CCardBody>
+                    <CustomTable
+                      fields={[
+                        { label: 'Malzeme No', key: 'MaterialNo' },
+                        { label: 'Sucker No', key: 'SuckerNo' },
+                        { label: 'Malzeme Adi', key: 'MaterialName' },
+                        { label: 'Miktar', key: 'RequestedAmount' },
+                        { label: 'Birim', key: 'UnitID' },
+                      ]}
+                      data={item.Materials}
+                    />
+                  </CCardBody>
+                </CCollapse>
+              ),
               checkbox: (item) => (
                 <td>
                   <input

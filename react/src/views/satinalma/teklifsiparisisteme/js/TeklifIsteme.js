@@ -31,7 +31,7 @@ const TeklifIsteme = (props) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const usersResponse = await axios.get(baseURL + "/listUsers.php");
+        const usersResponse = await axios.post(baseURL + "/queryUsers.php");
         setUsers(usersResponse.data);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -288,7 +288,7 @@ const TeklifIsteme = (props) => {
               <CTabPane data-tab="all">
               <div>
                 <CustomTable style={{ marginTop: "20px", width: "100%", borderCollapse: "collapse" }}
-                  fetchAddr="/getAllSuppliers.php"
+                  fetchAddr="/querySuppliers.php"
                   onFetch={(data) => setSupplierPage(data)}
                   fields={[
                     {label: (
