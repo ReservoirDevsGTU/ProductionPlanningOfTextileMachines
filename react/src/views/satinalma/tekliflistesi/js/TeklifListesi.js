@@ -351,7 +351,7 @@ const TeklifListesi = () => {
                         { label: 'Malzeme No', key: 'MaterialNo' },
                         { label: 'Malzeme Adı', key: 'MaterialName' },
                         { label: 'İstenilen Miktar', key: 'RequestedAmount' },
-                        { label: 'Teklif Miktarı', key: 'OfferAmount' },
+                        { label: 'Teklif Miktarı', key: 'OfferedAmount' },
                         { label: 'Birim', key: 'UnitID' },
                         { label: 'Birim Fiyatı', key: 'UnitPrice' },
                         { label: 'Kur', key: 'exchangerate' },
