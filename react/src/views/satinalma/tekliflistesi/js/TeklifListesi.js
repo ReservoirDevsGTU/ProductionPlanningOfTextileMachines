@@ -12,6 +12,8 @@ import {
   faChevronUp,
 } from '@fortawesome/free-solid-svg-icons';
 import CustomTable from '../../CustomTable.js';
+import axios from 'axios'; 
+import baseURL from '../../satinalmatalepleri/js/baseURL.js';
 
 const TeklifListesi = () => {
   const history = useHistory();
@@ -146,7 +148,7 @@ const TeklifListesi = () => {
 
 
   const openEvaluationModal = () => {
-    const selectedOffers = data.filter(item => selected[item.RowID]);
+    const selectedOffers = Object.keys(selected).filter(id => selected[id]);
     
     if (selectedOffers.length === 0) {
       alert('Lütfen değerlendirmeye almak için teklif seçiniz');
@@ -157,6 +159,13 @@ const TeklifListesi = () => {
     setSelectedSuppliers(suppliers);
     setEvaluationModal(true);
   };
+
+  const sendToEvaluation = () => {
+    axios.post(baseURL + "/sendToEvaluation.php", {
+        OfferID: Object.keys(selected).filter(id => selected[id]),
+        cancelOthers: cancelOthers
+    });
+  }
 
   const toggleRow = (rowId) => {
     setExpandedRows((prevRows) => ({
@@ -170,7 +179,7 @@ const TeklifListesi = () => {
   };
 
   const processData = (newData) => {
-    setAllSelected(!newData.find((i) => !selected[i.RequestItemID]));
+    setAllSelected(!newData.find((i) => !selected[i.OfferID]));
     setData(newData);
   };
 
@@ -185,7 +194,7 @@ const TeklifListesi = () => {
   const handleSelectedAll = (isChecked) => {
     const newSelected = {};
     data.forEach(item => {
-      newSelected[item.RowID] = isChecked;
+      newSelected[item.OfferID] = isChecked;
     });
     setSelected(newSelected);
     setAllSelected(isChecked);
@@ -367,8 +376,8 @@ const TeklifListesi = () => {
                 <td>
                   <input
                     type="checkbox"
-                    checked={!!selected[item.RowID]}
-                    onChange={(e) => handleRowSelect(item.RowID, e.target.checked)}
+                    checked={!!selected[item.OfferID]}
+                    onChange={(e) => handleRowSelect(item.OfferID, e.target.checked)}
                   />
                 </td>
               ),
@@ -498,7 +507,7 @@ const TeklifListesi = () => {
           <CButton color="danger" onClick={() => setEvaluationModal(false)}>
             Vazgeç
           </CButton>
-          <CButton color="primary">Gönder</CButton>
+          <CButton color="primary" onClick={sendToEvaluation}>Gönder</CButton>
         </CModalFooter>
       </CModal>
 
