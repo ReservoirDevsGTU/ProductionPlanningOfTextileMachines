@@ -292,7 +292,7 @@ const TeklifListesi = () => {
         }}
       >
         <div style={{ display: 'flex', gap: '10px' }}>
-          <CButton color="info" variant='outline' size='lg'>
+          <CButton color="info" variant='outline' size='lg' onClick={() => history.push('/satinalma/siparis-form')}>
             <FontAwesomeIcon icon={faShoppingCart} style={{ marginRight: '8px' }} />
             Sipariş Oluştur
           </CButton>

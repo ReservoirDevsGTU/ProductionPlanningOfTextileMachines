@@ -1,51 +1,10 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom"; // history import et
 import "../css/TeklifDegerlendirme.css";
+import CustomTable from '../../CustomTable.js';
 
 const TeklifDegerlendirme = () => {
   const history = useHistory(); // history kullanımı
-  // Örnek veri
-  const teklifData = [
-    {
-      grupNo: "XXX",
-      tarih: "01.12.2024",
-      gonderen: "Kullanıcı A",
-      durum: "Onay Bekliyor",
-      malzemeler: [
-        {
-          no: "001",
-          adi: "Malzeme 1",
-          talepMiktari: 5,
-          teklifMiktari: 5,
-          stok: 1,
-          birim: "Adet",
-          talepler: [
-            { talepNo: "T001", talepTarihi: "01.11.2024", talepEden: "Kullanıcı X", talepMiktari: 5, birim: "Adet", durum: "Beklemede" },
-            { talepNo: "T002", talepTarihi: "02.11.2024", talepEden: "Kullanıcı Y", talepMiktari: 10, birim: "Adet", durum: "Onaylandı" }
-          ]
-        },
-        {
-          no: "002",
-          adi: "Malzeme 2",
-          talepMiktari: 10,
-          teklifMiktari: 8,
-          stok: 4,
-          birim: "Metre",
-          talepler: [
-            { talepNo: "T003", talepTarihi: "01.12.2024", talepEden: "Kullanıcı Z", talepMiktari: 8, birim: "Metre", durum: "Beklemede" }
-          ]
-        },
-      ],
-    },
-    {
-      grupNo: "YYY",
-      tarih: "02.12.2024",
-      gonderen: "Kullanıcı B",
-      durum: "Onaylandı",
-      malzemeler: [],
-    },
-  ];
-
   const [expandedRow, setExpandedRow] = useState(null);
   const [expandedMalzeme, setExpandedMalzeme] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -58,10 +17,6 @@ const TeklifDegerlendirme = () => {
     setExpandedMalzeme(expandedMalzeme === malzemeIndex ? null : malzemeIndex);
   };
 
-  const filteredData = teklifData.filter((teklif) =>
-    teklif.grupNo.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   const handleSelect = (grupNo) => {
     // TeklifDegerlendirmeForm sayfasına yönlendirme yap
     history.push('./teklif-degerlendirme-form'); //  teklif-degerlendirme-form/${grupNo}
@@ -70,7 +25,7 @@ const TeklifDegerlendirme = () => {
   return (
     <div className="teklif-degerlendirme-container">
       <div className="header-title">
-        <h1>Teklif Değerlenirme</h1>
+        <h1>Teklif Değerlendirme</h1>
         <hr />
       </div>
       {/* Yazdırma Butonu */}
@@ -88,33 +43,92 @@ const TeklifDegerlendirme = () => {
       </div>
 
       {/* Ana Tablo */}
-      <table className="main-table">
-        <thead>
-          <tr>
-            <th></th> {/* Açılabilir ok için ilk sütun */}
-            <th>Teklif Grup NO</th>
-            <th>Değerlendirmeye Alınma Tarihi</th>
-            <th>Değerlendirmeye Gönderen</th>
-            <th>Durum</th>
-            <th></th> {/* Seç butonu için yeni sütun */}
-          </tr>
-        </thead>
-        <tbody>
-          {filteredData.map((teklif, index) => (
-            <React.Fragment key={index}>
-              <tr>
+      <CustomTable 
+        addTableClasses = "main-table"
+        fetchAddr="/queryOffers.php"
+        fetchArgs={{subTables: {Materials: {expand: false, subTables: {Requests: {expand: false}}}}}}
+        searchTerm={searchTerm}
+        searchFields={["OfferGroupID"]}
+        fields={[
+            {key: "expand", label: ""},
+            {key: "OfferGroupID", label: "Teklif Grup NO"},
+            {key: "TODO", label: "Degerlendirmeye Alma Tarihi"},
+            {key: "TODO", label: "Degerlendirmeye Gonderen"},
+            {key: "OfferStatus", label: "Durum"},
+            {key: "select", label: ""}
+        ]}
+        scopedSlots={{
+          details: (item) => (
+            expandedRow === item.RowID ?
+              (<CustomTable
+                addTableClasses = "sub-table"
+                data={item.Materials.reduce((acc, cur) => {
+                          const exist = acc.findIndex(e => e.MaterialID === cur.MaterialID);
+                          const requests = cur.Requests.map(r => ({...r, RequestedAmount: cur.OfferRequestedAmount, UnitID: cur.UnitID}));
+                          if(exist !== -1) {
+                            acc[exist].OfferedAmount = Number(cur.OfferedAmount)
+                                                         + Number(acc[exist].OfferedAmount);
+                            acc[exist].OfferRequestedAmount = Number(cur.OfferRequestedAmount)
+                                                         + Number(acc[exist].OfferRequestedAmount);
+                            acc[exist].OfferedPrice = Number(cur.OfferedPrice)
+                                                      + Number(acc[exist].OfferedPrice);
+                            acc[exist].Requests = acc[exist].Requests.concat(requests);
+                          }
+                          else {
+                            acc = acc.concat([{...cur, Requests: requests}]);
+                          }
+                          return acc;
+                        }, [])}
+                fields={[
+                    {key: "expand", label: ""},
+                    {key: "MaterialNo", label: "Malzeme No"},
+                    {key: "MaterialName", label: "Malzeme Adi"},
+                    {key: "OfferRequestedAmount", label: "Talep Miktari"},
+                    {key: "OfferedAmount", label: "Teklif Miktari"},
+                    {key: "Quantity", label: "Stok"},
+                    {key: "UnitID", label: "Birim"}
+                ]}
+                scopedSlots={{
+                  details: (item) => (
+                      expandedMalzeme === item.MaterialID ?
+                        (<CustomTable
+                            addTableClasses="talep-table"
+                            data={item.Requests}
+                            fields={[
+                              {key: "RequestID", label: "Talep No"},
+                              {key: "CreationDate", label: "Talep Tarihi"},
+                              {key: "UserName", label: "Talep Eden"},
+                              {key: "RequestedAmount", label: "Talep Miktari"},
+                              {key: "UnitID", label: "Birim"},
+                              {key: "RequestStatus", label: "Durum"},
+                            ]}
+                         />) : (<div/>)
+                  ),
+                  expand: (item) => (
+                    <td>
+                      <button
+                        className="expand-button"
+                        onClick={() => toggleMalzemeRow(item.MaterialID)}
+                      >
+                        {expandedMalzeme === item.MaterialID ? "▼" : "▶"}
+                      </button>
+                    </td>
+                  )
+                }}
+               />
+              ) : (<div/>)
+          ),
+          expand: (item) => (
                 <td>
                   <button
                     className="expand-button"
-                    onClick={() => toggleRow(index)}
+                    onClick={() => toggleRow(item.RowID)}
                   >
-                    {expandedRow === index ? "▼" : "▶"}
+                    {expandedRow === item.RowID ? "▼" : "▶"}
                   </button>
                 </td>
-                <td>{teklif.grupNo}</td>
-                <td>{teklif.tarih}</td>
-                <td>{teklif.gonderen}</td>
-                <td>{teklif.durum}</td>
+          ),
+          select: (item) => (
                 <td>
                   <button
                     className="select-button"
@@ -123,82 +137,10 @@ const TeklifDegerlendirme = () => {
                     Seç
                   </button>
                 </td>
-              </tr>
-              {expandedRow === index && teklif.malzemeler.length > 0 && (
-                <tr>
-                  <td colSpan="6">
-                    <table className="sub-table">
-                      <thead>
-                        <tr>
-                          <th></th> {/* Açılabilir ok için ilk sütun */}
-                          <th>Malzeme No</th>
-                          <th>Malzeme Adı</th>
-                          <th>Talep Miktarı</th>
-                          <th>Teklif Miktarı</th>
-                          <th>Stok</th>
-                          <th>Birim</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {teklif.malzemeler.map((malzeme, i) => (
-                          <React.Fragment key={i}>
-                            <tr>
-                              <td>
-                                <button
-                                  className="expand-button"
-                                  onClick={() => toggleMalzemeRow(i)}
-                                >
-                                  {expandedMalzeme === i ? "▼" : "▶"}
-                                </button>
-                              </td>
-                              <td>{malzeme.no}</td>
-                              <td>{malzeme.adi}</td>
-                              <td>{malzeme.talepMiktari}</td>
-                              <td>{malzeme.teklifMiktari}</td>
-                              <td>{malzeme.stok}</td>
-                              <td>{malzeme.birim}</td>
-                            </tr>
-                            {expandedMalzeme === i && malzeme.talepler.length > 0 && (
-                              <tr>
-                                <td colSpan="7">
-                                  <table className="talep-table">
-                                    <thead>
-                                      <tr>
-                                        <th>Talep NO</th>
-                                        <th>Talep Tarihi</th>
-                                        <th>Talep Eden</th>
-                                        <th>Talep Miktarı</th>
-                                        <th>Birim</th>
-                                        <th>Durum</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      {malzeme.talepler.map((talep, j) => (
-                                        <tr key={j}>
-                                          <td>{talep.talepNo}</td>
-                                          <td>{talep.talepTarihi}</td>
-                                          <td>{talep.talepEden}</td>
-                                          <td>{talep.talepMiktari}</td>
-                                          <td>{talep.birim}</td>
-                                          <td>{talep.durum}</td>
-                                        </tr>
-                                      ))}
-                                    </tbody>
-                                  </table>
-                                </td>
-                              </tr>
-                            )}
-                          </React.Fragment>
-                        ))}
-                      </tbody>
-                    </table>
-                  </td>
-                </tr>
-              )}
-            </React.Fragment>
-          ))}
-        </tbody>
-      </table>
+          ),
+          TODO: () => (<td>TO DO</td>)
+        }}
+      />
     </div>
   );
 };

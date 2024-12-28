@@ -1,7 +1,31 @@
 <?php
 include "query.php";
 
-$offerItemTable = array("primary" => "OfferItemID",
+$requestTable = array("primary" => "RequestID",
+                        "subTableJoinOn" => "pr.OfferID",
+                      "columns" => array("RequestID" => "pr.RequestID",
+                                         "CreationDate" => "pr.CreationDate",
+                                         "RequestDeadline" => "prd.RequestDeadline",
+                                         "RequestDescription" => "prd.RequestDescription",
+                                         "RequestedBy" => "prd.RequestedBy",
+                                         "ManufacturingUnitID" => "prd.ManufacturingUnitID",
+                                         "UserName" => "u.UserName",
+                                         "RequestStatus" => "pr.RequestStatus"
+                                        ),
+                      "name" => "PurchaseRequests pr",
+                      "joins" => "JOIN PurchaseRequestDetails prd
+                                  ON pr.RequestID = prd.RequestID
+                                  JOIN Users u
+                                  ON prd.RequestedBy = u.UserID",
+                      "filters" => "pr.IsDeleted = 0
+                                    AND prd.IsDeleted = 0",
+                      "postProcess" => array("CreationDate" => "dateToText",
+                                             "RequestDeadline" => "dateToText",
+                                            ),
+                      "subTables" => [],
+);
+
+$offerItemTable = array("primary" => "RequestID",
                         "subTableJoinOn" => "poi.OfferID",
                         "columns" => array("OfferItemID" => "poi.ItemID",
                                            "OfferID" => "poi.OfferID",
@@ -32,6 +56,7 @@ $offerItemTable = array("primary" => "OfferItemID",
                                     ON pri.ItemID = poi.RequestItemID",
                         "filters" => "poi.IsDeleted = 0
                                       AND ms.IsDeleted = 0",
+                        "subTables" => array("Requests" => $requestTable)
 );
 
 function dateToText($date) {

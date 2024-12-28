@@ -86,7 +86,7 @@ function getTableData($conn, $input, $table) {
     $selectedFilters = "";
     $tail = "), Count AS (SELECT COUNT(*) MaxRows FROM Result)
              SELECT * FROM Result, Count
-             ORDER BY (SELECT NULL)";
+             ORDER BY Result." . $table["primary"];
 
     $subTablesNoExpand = [];
     $postProcessList = [];

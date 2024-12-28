@@ -3,7 +3,7 @@ import { CDataTable, CPagination } from '@coreui/react';
 import axios from 'axios';
 import baseURL from './satinalmatalepleri/js/baseURL.js';
 
-const CustomTable = ({data, fields, fetchAddr, fetchArgs, onFetch, scopedSlots, update, searchTerm, searchFields}) => {
+const CustomTable = ({addTableClasses, data, fields, fetchAddr, fetchArgs, onFetch, scopedSlots, update, searchTerm, searchFields}) => {
   const [displayData, setDisplayData] = useState(["dummy"]);
   const [page, setPage] = useState(1);
   const [pageLength, setPageLength] = useState(5);
@@ -59,6 +59,7 @@ const CustomTable = ({data, fields, fetchAddr, fetchArgs, onFetch, scopedSlots, 
 
   return (<>
       <CDataTable
+        addTableClasses={addTableClasses}
         fields={fields}
         items={displayData}
         itemsPerPage={pageLength}
