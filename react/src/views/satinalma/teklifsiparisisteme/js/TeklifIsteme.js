@@ -45,10 +45,10 @@ const TeklifIsteme = (props) => {
     setSelectedMaterials(editItems ? editItems.reduce((acc, cur) => {
       let exist = acc.find(i => i.MaterialID === cur.MaterialID);
       if(exist) {
-        exist.RequestedAmount = Number(cur.RequestedAmount) + Number(exist.RequestedAmount);
+        exist.OfferRequestedAmount = Number(cur.OfferRequestedAmount) + Number(exist.OfferRequestedAmount);
         exist.OfferedAmount = Number(cur.RequestedAmount) + Number(exist.OfferedAmount);
       }
-      else acc = acc.concat([{...cur, final: true, OfferedAmount: cur.RequestedAmount}]);
+      else acc = acc.concat([{...cur, final: true, OfferedAmount: cur.OfferRequestedAmount}]);
       return acc;
     }, []) : []);}, [editItems]);
 
@@ -91,22 +91,22 @@ const TeklifIsteme = (props) => {
         if(cur.RequestItemID === 0) {
           acc = acc.concat([{
             MaterialID: cur.MaterialID,
-            RequestItemID: 0,
-            RequestedAmount: cur.RequestedAmount,
+            RequestItemID: null,
+            OfferRequestedAmount: cur.OfferRequestedAmount,
             OfferedAmount: cur.OfferedAmount
           }]);
         }
         else {
           const items = editItems.filter(i => i.MaterialID === cur.MaterialID);
-          let remain = Number(cur.OfferedAmount);
+          var remain = Number(cur.OfferedAmount);
           if(items) {
-            let totalRequest = items.reduce((acc, cur) => acc + Number(cur.RequestedAmount), 0);
+            const totalRequest = items.reduce((acc, cur) => acc + Number(cur.RequestedAmount), 0);
             items.forEach(i => {
               acc = acc.concat([{
                 MaterialID: i.MaterialID,
                 RequestItemID: i.RequestItemID,
-                RequestedAmount: i.RequestedAmount,
-                OfferedAmount: remain * Number(i.RequestedAmount) / totalRequest
+                OfferRequestedAmount: i.OfferRequestedAmount,
+                OfferedAmount: remain >= totalRequest ? i.OfferRequestedAmount : remain * Number(i.OfferRequestedAmount) / totalRequest
                 }]);
             });
             remain = Math.max(0, remain - totalRequest);
@@ -114,8 +114,8 @@ const TeklifIsteme = (props) => {
           if(remain > 0) {
             acc = acc.concat([{
               MaterialID: cur.MaterialID,
-              RequestItemID: 0,
-              RequestedAmount: remain,
+              RequestItemID: null,
+              OfferRequestedAmount: remain,
               OfferedAmount: remain
             }]);
           }
@@ -373,7 +373,7 @@ const TeklifIsteme = (props) => {
             {label: "Malzeme No", key: "MaterialNo"},
             {label: "Malzeme Adi", key: "MaterialName"},
             {label: "Teklif Miktari", key: "offeredAmount"},
-            {label: "Talep Miktari", key: "RequestedAmount"},
+            {label: "Talep Miktari", key: "OfferRequestedAmount"},
             {label: "Birim", key: "UnitID"},
           ]}
           scopedSlots={{
@@ -404,7 +404,7 @@ const TeklifIsteme = (props) => {
                             setSelectedMaterials((prev) =>
                               prev.map((m) =>
                                 m.MaterialID === material.MaterialID
-                                  ? { ...m, OfferedAmount: Number(e.target.value), RequestedAmount: m.RequestItemID === 0 ? Number(e.target.value) : m.RequestedAmount}
+                                  ? { ...m, OfferedAmount: Number(e.target.value), OfferRequestedAmount: m.RequestItemID === 0 ? Number(e.target.value) : m.OfferRequestedAmount}
                                   : m
                               )
                             )
@@ -482,7 +482,7 @@ const TeklifIsteme = (props) => {
                 <CButton
                   color="info"
                   variant="outline"
-                  onClick={() => setSelectedMaterials((prev) => prev.map(m=>({...m, RequestedAmount: m.OfferedAmount, final: true})))}
+                  onClick={() => setSelectedMaterials((prev) => prev.map(m=>({...m, OfferRequestedAmount: m.OfferedAmount, final: true})))}
                   style={{
                     padding: "10px 20px",
                     cursor: "pointer",

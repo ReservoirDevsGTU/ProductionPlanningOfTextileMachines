@@ -270,7 +270,7 @@ const TeklifListesi = () => {
     { key: 'CreationDate', label: 'Teklif Tarihi' },
     { key: 'OfferGroupID', label: 'Teklif Grup No' },
     { key: 'OfferID', label: 'Teklif No' },
-    //{ key: 'RequestID', label: 'Talep No' },
+    { key: 'request_id', label: 'Talep No' },
     { key: 'RequesterName', label: 'Teklif İsteyen' },
     { key: 'OfferStatus', label: 'Durum' },
     { key: 'select', label:'Seç'}
@@ -340,6 +340,13 @@ const TeklifListesi = () => {
             onFetch={processData}
             fields={fields}
             scopedSlots={{
+              'request_id': (item) => (
+                <td>
+                  {item.Materials?.length > 0 ? Object.keys(item.Materials.reduce((acc, cur) => {
+                      if(typeof cur.RequestID === 'number') acc = {...acc, [cur.RequestID]: 1}
+                      return acc;
+                    }, {})).join(', ') : '-'}
+                </td>),
               'show_materials': (item) => (
                 <td>
                   <CButton
@@ -359,7 +366,7 @@ const TeklifListesi = () => {
                       fields={[
                         { label: 'Malzeme No', key: 'MaterialNo' },
                         { label: 'Malzeme Adı', key: 'MaterialName' },
-                        { label: 'İstenilen Miktar', key: 'RequestedAmount' },
+                        { label: 'İstenilen Miktar', key: 'OfferRequestedAmount' },
                         { label: 'Teklif Miktarı', key: 'OfferedAmount' },
                         { label: 'Birim', key: 'UnitID' },
                         { label: 'Birim Fiyatı', key: 'unit_price' },
@@ -367,7 +374,21 @@ const TeklifListesi = () => {
                         { label: 'Durum', key: 'ItemStatus' },
 
                       ]}
-                      data={item.Materials}
+                      data={item.Materials?.reduce((acc, cur) => {
+                          const exist = acc.findIndex(e => e.MaterialID === cur.MaterialID);
+                          if(exist !== -1) {
+                            acc[exist].OfferedAmount = Number(cur.OfferedAmount)
+                                                         + Number(acc[exist].OfferedAmount);
+                            acc[exist].OfferRequestedAmount = Number(cur.OfferRequestedAmount)
+                                                         + Number(acc[exist].OfferRequestedAmount);
+                            acc[exist].OfferedPrice = Number(cur.OfferedPrice)
+                                                      + Number(acc[exist].OfferedPrice);
+                          }
+                          else {
+                            acc = acc.concat([{...cur}]);
+                          }
+                          return acc;
+                        }, [])}
                       scopedSlots={{
                         'unit_price': (item) => (<td>{item.OfferedPrice ?
                               Math.round(Number.EPSILON + 100 * item.OfferedPrice / item.OfferedAmount) / 100

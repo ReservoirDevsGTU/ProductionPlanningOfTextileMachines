@@ -27,14 +27,13 @@ if($input) {
             $input["ManufacturingUnitID"]
         ));
         sqlsrv_free_stmt($stmt1);
-        $sql2 = "INSERT INTO PurchaseRequestItems(ItemID, RequestID, MaterialID, RequestedAmount, OrderedAmount, ProvidedAmount, ItemStatus, IsDeleted)
+        $sql2 = "INSERT INTO PurchaseRequestItems(ItemID, RequestID, MaterialID, RequestedAmount, ProvidedAmount, ItemStatus, IsDeleted)
         VALUES((SELECT ISNULL(MAX(ItemID)+1,1) FROM PurchaseRequestItems), ?, ?, ?, ?, ?, 1, 0)";
         foreach($input["Materials"] as $m) {
             $stmt2 = sqlsrv_query($conn, $sql2, array(
                 $id,
                 $m["MaterialID"],
                 $m["RequestedAmount"],
-                $m["OrderedAmount"],
                 $m["ProvidedAmount"]
             ));
             sqlsrv_free_stmt($stmt2);

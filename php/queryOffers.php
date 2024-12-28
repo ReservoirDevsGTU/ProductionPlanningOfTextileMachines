@@ -9,7 +9,7 @@ $offerItemTable = array("primary" => "OfferItemID",
                                            "RequestItemID" => "poi.RequestItemID",
                                            "RequestID" => "pri.RequestID",
                                            "MaterialID" => "poi.MaterialID",
-                                           "RequestedAmount" => "poi.RequestedAmount",
+                                           "OfferRequestedAmount" => "poi.OfferRequestedAmount",
                                            "OfferedAmount" => "poi.OfferedAmount",
                                            "OfferedPrice" => "poi.OfferedPrice",
                                            "ItemStatus" => "poi.ItemStatus",
@@ -28,7 +28,7 @@ $offerItemTable = array("primary" => "OfferItemID",
                                     ON m.MaterialID = poi.MaterialID
                                     JOIN MaterialSpecs ms
                                     ON ms.MaterialID = poi.MaterialID
-                                    JOIN PurchaseRequestItems pri
+                                    LEFT JOIN PurchaseRequestItems pri
                                     ON pri.ItemID = poi.RequestItemID",
                         "filters" => "poi.IsDeleted = 0
                                       AND ms.IsDeleted = 0",
