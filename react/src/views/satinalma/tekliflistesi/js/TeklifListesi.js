@@ -362,12 +362,18 @@ const TeklifListesi = () => {
                         { label: 'İstenilen Miktar', key: 'RequestedAmount' },
                         { label: 'Teklif Miktarı', key: 'OfferedAmount' },
                         { label: 'Birim', key: 'UnitID' },
-                        { label: 'Birim Fiyatı', key: 'UnitPrice' },
-                        { label: 'Kur', key: 'exchangerate' },
-                        { label: 'Durum', key: 'status' },
+                        { label: 'Birim Fiyatı', key: 'unit_price' },
+                        { label: 'Kur', key: 'exchange_rate' },
+                        { label: 'Durum', key: 'ItemStatus' },
 
                       ]}
                       data={item.Materials}
+                      scopedSlots={{
+                        'unit_price': (item) => (<td>{item.OfferedPrice ?
+                              Math.round(Number.EPSILON + 100 * item.OfferedPrice / item.OfferedAmount) / 100
+                              : '?'}</td>),
+                        'exchange_rate': () => (<td>USD (placeholder)</td>)
+                      }}
                     />
                   </CCardBody>
                 </CCollapse>
