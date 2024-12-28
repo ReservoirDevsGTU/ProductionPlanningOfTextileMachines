@@ -103,5 +103,12 @@
   .malzeme-table tbody tr:nth-child(even) {
     background-color: #e8f4fc;
   }
+  .total-price {
+    margin-top: 20px;
+    text-align: left;
+    font-weight: bolder;
+    color: #004080;
+  }
+  
   
   
