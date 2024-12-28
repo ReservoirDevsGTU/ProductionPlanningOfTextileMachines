@@ -63,6 +63,10 @@ const TeklifListesi = React.lazy(() => import('./views/satinalma/tekliflistesi/j
 // teklif form
 const TeklifForm = React.lazy(() => import('./views/satinalma/tekliflistesi/js/TeklifForm'));
 
+// sipariş form
+const SiparisForm = React.lazy(() => import('./views/satinalma/tekliflistesi/js/SiparisForm'));
+
+
 
 // teklif degerlendirme
 const TeklifDegerlendirme = React.lazy(() => import('./views/satinalma/teklifdegerlendirme/js/TeklifDegerlendirme'));
@@ -137,6 +141,10 @@ const routes = [
 
   // teklif form
   { path: '/satinalma/teklif-form/:id', name: 'Teklif Form', component: TeklifForm },
+
+  // siparis form
+  { path: '/satinalma/siparis-form', name: 'Siparis Form', component: SiparisForm },
+
 
 
   // teklif degerlendirme
