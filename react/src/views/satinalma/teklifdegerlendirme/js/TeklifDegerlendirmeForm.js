@@ -6,8 +6,9 @@ const TeklifDegerlendirmeForm = () => {
   const history = useHistory();
   const { grupNo } = useParams();
 
-  // Seçili tedarikçileri tutan state
+  // Seçili tedarikçileri ve toplam fiyatı tutan state
   const [selectedTedarikci, setSelectedTedarikci] = useState({});
+  const [totalPrice, setTotalPrice] = useState(0);
 
   const teklifMalzemeleri = [
     {
@@ -22,8 +23,8 @@ const TeklifDegerlendirmeForm = () => {
           teklifMiktar: 5,
           birimFiyat: 15,
           kur: "TL",
-          terminTarihi: "01.12.2024",
-          gecerlilikTarihi: "26.11.2024",
+          terminTarihi: "2025-02-01",
+          gecerlilikTarihi: "2024-11-26",
         },
         {
           ad: "XXY Tedarikçi",
@@ -31,19 +32,83 @@ const TeklifDegerlendirmeForm = () => {
           teklifMiktar: 10,
           birimFiyat: 20,
           kur: "TL",
-          terminTarihi: "04.12.2024",
-          gecerlilikTarihi: "25.11.2024",
+          terminTarihi: "2025-02-03",
+          gecerlilikTarihi: "2024-11-25",
+        },
+      ],
+    },
+    {
+      no: "002",
+      adi: "Malzeme 2",
+      stok: 15,
+      birim: "Kg",
+      tedarikciler: [
+        {
+          ad: "AAA Tedarikçi",
+          istenilenMiktar: 20,
+          teklifMiktar: 20,
+          birimFiyat: 45,
+          kur: "TL",
+          terminTarihi: "2025-02-02",
+          gecerlilikTarihi: "2024-11-28",
+        },
+        {
+          ad: "BBB Tedarikçi",
+          istenilenMiktar: 25,
+          teklifMiktar: 25,
+          birimFiyat: 40,
+          kur: "TL",
+          terminTarihi: "2025-01-03",
+          gecerlilikTarihi: "2024-11-30",
         },
       ],
     },
   ];
 
-  // Checkbox seçim fonksiyonu
-  const handleCheckboxChange = (malzemeNo, tedarikciAd) => {
-    setSelectedTedarikci((prev) => ({
-      ...prev,
-      [malzemeNo]: tedarikciAd,
-    }));
+  const handleCheckboxChange = (malzemeNo, tedarikciAd, birimFiyat) => {
+    setSelectedTedarikci((prev) => {
+      const updatedSelection = { ...prev };
+
+      if (prev[malzemeNo] === tedarikciAd) {
+        // Seçim kaldırılırsa toplam fiyattan düş
+        delete updatedSelection[malzemeNo];
+        setTotalPrice((prevTotal) => prevTotal - birimFiyat);
+      } else {
+        // Yeni seçim yapılırsa toplam fiyata ekle
+        if (prev[malzemeNo]) {
+          setTotalPrice(
+            (prevTotal) =>
+              prevTotal - teklifMalzemeleri
+                .find((malzeme) => malzeme.no === malzemeNo)
+                .tedarikciler.find(
+                  (tedarikci) => tedarikci.ad === prev[malzemeNo]
+                ).birimFiyat
+          );
+        }
+        updatedSelection[malzemeNo] = tedarikciAd;
+        setTotalPrice((prevTotal) => prevTotal + birimFiyat);
+      }
+
+      return updatedSelection;
+    });
+  };
+
+  const getHighlightIndices = (tedarikciler) => {
+    let minFiyat = Math.min(...tedarikciler.map((t) => t.birimFiyat));
+    let enUcuzlar = tedarikciler.filter((t) => t.birimFiyat === minFiyat);
+
+    let fiyatIndex = tedarikciler.indexOf(enUcuzlar[0]);
+
+    let today = new Date();
+    let terminIndex = tedarikciler.reduce((closestIndex, tedarikci, index) => {
+      const currentDateDiff = Math.abs(new Date(tedarikci.terminTarihi) - today);
+      const closestDateDiff = Math.abs(
+        new Date(tedarikciler[closestIndex].terminTarihi) - today
+      );
+      return currentDateDiff < closestDateDiff ? index : closestIndex;
+    }, 0);
+
+    return { fiyatIndex, terminIndex };
   };
 
   return (
@@ -58,8 +123,8 @@ const TeklifDegerlendirmeForm = () => {
           </button>
         </div>
       </div>
-      <div className="table-container">
-        <table className="malzeme-table">
+      <div style={{ overflowX: "auto", maxWidth: "100%" }}>
+        <table className="malzeme-table" style={{ minWidth: "1000px", tableLayout: "auto" }}>
           <thead>
             <tr>
               <th>Malzeme NO</th>
@@ -81,51 +146,53 @@ const TeklifDegerlendirmeForm = () => {
                   <th>Teklif Miktarı</th>
                   <th>Birim Fiyat</th>
                   <th>Kur</th>
-                  <th style={{ width: "150px" }}>Termin Tarihi</th>
-                  <th style={{ width: "150px" }}>Geçerlilik Tarihi</th>
+                  <th>Termin Tarihi</th>
+                  <th>Geçerlilik Tarihi</th>
                   <th>Seç</th>
                 </React.Fragment>
               ))}
             </tr>
           </thead>
           <tbody>
-            {teklifMalzemeleri.map((malzeme, index) => (
-              <tr key={index}>
-                <td>{malzeme.no}</td>
-                <td style={{ width: "200px", whiteSpace: "nowrap", overflow: "hidden" }}>
-                  {malzeme.adi}
-                </td>
-                <td>{malzeme.stok}</td>
-                <td>{malzeme.birim}</td>
-                {malzeme.tedarikciler.map((tedarikci, i) => (
-                  <React.Fragment key={i}>
-                    <td>{tedarikci.istenilenMiktar}</td>
-                    <td>{tedarikci.teklifMiktar}</td>
-                    <td>{tedarikci.birimFiyat}</td>
-                    <td>{tedarikci.kur}</td>
-                    <td style={{ width: "150px", whiteSpace: "nowrap", overflow: "hidden" }}>
-                      {tedarikci.terminTarihi}
-                    </td>
-                    <td style={{ width: "150px", whiteSpace: "nowrap", overflow: "hidden" }}>
-                      {tedarikci.gecerlilikTarihi}
-                    </td>
-                    <td>
-                      <input
-                        type="checkbox"
-                        checked={
-                          selectedTedarikci[malzeme.no] === tedarikci.ad
-                        }
-                        onChange={() =>
-                          handleCheckboxChange(malzeme.no, tedarikci.ad)
-                        }
-                      />
-                    </td>
-                  </React.Fragment>
-                ))}
-              </tr>
-            ))}
+            {teklifMalzemeleri.map((malzeme, index) => {
+              const { fiyatIndex, terminIndex } = getHighlightIndices(malzeme.tedarikciler);
+              return (
+                <tr key={index}>
+                  <td>{malzeme.no}</td>
+                  <td>{malzeme.adi}</td>
+                  <td>{malzeme.stok}</td>
+                  <td>{malzeme.birim}</td>
+                  {malzeme.tedarikciler.map((tedarikci, i) => (
+                    <React.Fragment key={i}>
+                      <td>{tedarikci.istenilenMiktar}</td>
+                      <td>{tedarikci.teklifMiktar}</td>
+                      <td style={{ backgroundColor: i === fiyatIndex ? "yellow" : "inherit" }}>
+                        {tedarikci.birimFiyat}
+                      </td>
+                      <td>{tedarikci.kur}</td>
+                      <td style={{ backgroundColor: i === terminIndex ? "lightgreen" : "inherit" }}>
+                        {tedarikci.terminTarihi}
+                      </td>
+                      <td>{tedarikci.gecerlilikTarihi}</td>
+                      <td>
+                        <input
+                          type="checkbox"
+                          checked={selectedTedarikci[malzeme.no] === tedarikci.ad}
+                          onChange={() =>
+                            handleCheckboxChange(malzeme.no, tedarikci.ad, tedarikci.birimFiyat)
+                          }
+                        />
+                      </td>
+                    </React.Fragment>
+                  ))}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
+      </div>
+      <div className="total-price">
+        <h3>Onaylanan Toplam Fiyat: {totalPrice} TL</h3>
       </div>
     </div>
   );
