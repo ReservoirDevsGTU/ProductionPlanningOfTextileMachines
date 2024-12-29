@@ -393,7 +393,7 @@ const TeklifListesi = () => {
                         'unit_price': (item) => (<td>{item.OfferedPrice ?
                               Math.round(Number.EPSILON + 100 * item.OfferedPrice / item.OfferedAmount) / 100
                               : '?'}</td>),
-                        'exchange_rate': () => (<td>USD (placeholder)</td>)
+                        'exchange_rate': () => (<td>TRY (placeholder)</td>)
                       }}
                     />
                   </CCardBody>

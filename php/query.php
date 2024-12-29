@@ -51,7 +51,7 @@ function genQuery($input, $table, &$selectedColumns, &$selectedJoins, &$selected
         $search = "";
         foreach($input["search"]["fields"] as $f) {
             if(isset($columns[$f])) {
-                $search .= " OR $columns[$f] LIKE '%$term%'";
+                $search .= " OR $f LIKE '%$term%'";
             }
         }
         if(strlen($search) > 0) {
@@ -82,6 +82,7 @@ function genQuery($input, $table, &$selectedColumns, &$selectedJoins, &$selected
 function getTableData($conn, $input, $table) {
     $head = "WITH Result AS (SELECT";
     $selectedColumns = "";
+    $from = "FROM " . $table["name"];
     $selectedJoins = "";
     $selectedFilters = "";
     $tail = "), Count AS (SELECT COUNT(*) MaxRows FROM Result)
@@ -90,6 +91,23 @@ function getTableData($conn, $input, $table) {
 
     $subTablesNoExpand = [];
     $postProcessList = [];
+
+    if(isset($input["distinct"])) {
+        $from = "FROM (SELECT MIN(" . $table["primary"] . ") AS " . $table["primary"];
+        $distinctGroups = "";
+        $tableFullName = strstr($table["name"], " ", true);
+        $tableAlias = substr(strstr($table["name"], " "), 1);
+        foreach($input["distinct"] as $colName) {
+            $distinctGroups .= ", " . $colName;
+        }
+        $from .= $distinctGroups;
+        $from .= " FROM " . $tableFullName;
+        $from .= " WHERE " . str_replace($tableAlias, $tableFullName, $table["filters"]);
+        $from .= " GROUP BY" . substr($distinctGroups, 1) . ") distinctRows";
+        $selectedJoins .= " JOIN " . $table["name"] .
+                          " ON " . $table["columns"][$table["primary"]] . " =" .
+                          " distinctRows." . $table["primary"];
+    }
 
     genQuery($input, $table, $selectedColumns, $selectedJoins, $selectedFilters, $subTablesNoExpand, $postProcessList);
     
@@ -104,7 +122,7 @@ function getTableData($conn, $input, $table) {
         $tail .= " FETCH NEXT " . $input["fetch"] . " ROWS ONLY";
     }
 
-    $sql = $head . " " . $selectedColumns . " FROM " . $table["name"] . " " . $selectedJoins . " WHERE " . $selectedFilters . " " . $tail;
+    $sql = $head . " " . $selectedColumns . " " . $from . " " . $selectedJoins . " WHERE " . $selectedFilters . " " . $tail;
 
     $stmt = sqlsrv_query($conn, $sql);
     
@@ -126,7 +144,8 @@ function getTableData($conn, $input, $table) {
             $ids = [];
 
             foreach($data as $row) {
-                $ids[] = $row[$parentPrimary];
+                if($row[$parentPrimary] !== null)
+                    $ids[] = $row[$parentPrimary];
             }
 
             $subInput = $input["subTables"][$subTable["alias"]];

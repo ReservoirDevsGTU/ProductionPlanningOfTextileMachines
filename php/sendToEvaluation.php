@@ -27,6 +27,6 @@ if($input) {
     if(!$stmt) {
         die(json_encode(sqlsrv_errors(), true));
     }
-    sqlsrv_close($conn);
 }
+sqlsrv_close($conn);
 ?>

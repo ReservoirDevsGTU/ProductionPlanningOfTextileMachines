@@ -13,7 +13,7 @@ if($input) {
                     ?, ?, ?, ?, ?, ?, 0, 0)";
     $sql3 = "INSERT INTO PurchaseOfferItems(ItemID, OfferID, RequestItemID, MaterialID, OfferRequestedAmount, OfferedAmount, ConformationStatus, ItemStatus, IsDeleted)
              VALUES((SELECT ISNULL(MAX(ItemID)+1,1) FROM PurchaseOfferItems),
-                    ?, ?, ?, ?, ?, 0, 0, 0)";
+                    ?, ?, ?, ?, 0, 0, 0, 0)";
     foreach($input["Suppliers"] as $supplier) {
         $stmt = sqlsrv_query($conn, $sql1, array(
             $input["OfferGroupID"],
@@ -36,8 +36,7 @@ if($input) {
                     $id,
                     $material["RequestItemID"],
                     $material["MaterialID"],
-                    $material["RequestedAmount"],
-                    $material["OfferedAmount"],
+                    $material["OfferRequestedAmount"],
                 ));
                 sqlsrv_free_stmt($stmt);
             }

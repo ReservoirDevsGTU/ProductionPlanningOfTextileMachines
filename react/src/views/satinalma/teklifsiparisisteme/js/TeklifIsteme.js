@@ -45,10 +45,10 @@ const TeklifIsteme = (props) => {
     setSelectedMaterials(editItems ? editItems.reduce((acc, cur) => {
       let exist = acc.find(i => i.MaterialID === cur.MaterialID);
       if(exist) {
-        exist.OfferRequestedAmount = Number(cur.OfferRequestedAmount) + Number(exist.OfferRequestedAmount);
-        exist.OfferedAmount = Number(cur.RequestedAmount) + Number(exist.OfferedAmount);
+        exist.OfferRequestedAmount = Number(cur.RequestedAmount) + Number(exist.OfferRequestedAmount);
+        exist.RequestedAmount = Number(cur.RequestedAmount) + Number(exist.RequestedAmount);
       }
-      else acc = acc.concat([{...cur, final: true, OfferedAmount: cur.OfferRequestedAmount}]);
+      else acc = acc.concat([{...cur, final: true, OfferRequestedAmount: cur.RequestedAmount}]);
       return acc;
     }, []) : []);}, [editItems]);
 
@@ -88,25 +88,24 @@ const TeklifIsteme = (props) => {
       OfferDeadline: deadlineDate,
       Suppliers: selectedSuppliers.map(s => ({SupplierID: s.SupplierID})),
       Materials: selectedMaterials.reduce((acc, cur) => {
+        if(!cur.final) return acc;
         if(cur.RequestItemID === 0) {
           acc = acc.concat([{
             MaterialID: cur.MaterialID,
             RequestItemID: null,
             OfferRequestedAmount: cur.OfferRequestedAmount,
-            OfferedAmount: cur.OfferedAmount
           }]);
         }
         else {
           const items = editItems.filter(i => i.MaterialID === cur.MaterialID);
-          var remain = Number(cur.OfferedAmount);
+          var remain = Number(cur.OfferRequestedAmount);
           if(items) {
             const totalRequest = items.reduce((acc, cur) => acc + Number(cur.RequestedAmount), 0);
             items.forEach(i => {
               acc = acc.concat([{
                 MaterialID: i.MaterialID,
                 RequestItemID: i.RequestItemID,
-                OfferRequestedAmount: i.OfferRequestedAmount,
-                OfferedAmount: remain >= totalRequest ? i.OfferRequestedAmount : remain * Number(i.OfferRequestedAmount) / totalRequest
+                OfferRequestedAmount: remain >= totalRequest ? i.RequestedAmount : remain * Number(i.RequestedAmount) / totalRequest
                 }]);
             });
             remain = Math.max(0, remain - totalRequest);
@@ -116,7 +115,6 @@ const TeklifIsteme = (props) => {
               MaterialID: cur.MaterialID,
               RequestItemID: null,
               OfferRequestedAmount: remain,
-              OfferedAmount: remain
             }]);
           }
         }
@@ -372,8 +370,8 @@ const TeklifIsteme = (props) => {
             {label: "Sil", key: "delete"},
             {label: "Malzeme No", key: "MaterialNo"},
             {label: "Malzeme Adi", key: "MaterialName"},
-            {label: "Teklif Miktari", key: "offeredAmount"},
-            {label: "Talep Miktari", key: "OfferRequestedAmount"},
+            {label: "Teklif Miktari", key: "offerRequestedAmount"},
+            {label: "Talep Miktari", key: "RequestedAmount"},
             {label: "Birim", key: "UnitID"},
           ]}
           scopedSlots={{
@@ -395,16 +393,16 @@ const TeklifIsteme = (props) => {
                         </button>
                       </td>
             ),
-            offeredAmount: (material) => (
+            offerRequestedAmount: (material) => (
                       <td>
                         <input
                           type="number"
-                          value={material.OfferedAmount}
+                          value={material.OfferRequestedAmount}
                           onChange={(e) =>
                             setSelectedMaterials((prev) =>
                               prev.map((m) =>
                                 m.MaterialID === material.MaterialID
-                                  ? { ...m, OfferedAmount: Number(e.target.value), OfferRequestedAmount: m.RequestItemID === 0 ? Number(e.target.value) : m.OfferRequestedAmount}
+                                  ? { ...m, OfferRequestedAmount: Number(e.target.value), RequestedAmount: m.RequestItemID === 0 ? Number(e.target.value) : m.RequestedAmount}
                                   : m
                               )
                             )
@@ -432,7 +430,7 @@ const TeklifIsteme = (props) => {
             {label: "", key: "select"},
             {label: "Malzeme No", key: "MaterialNo"},
             {label: "Malzeme Adi", key: "MaterialName"},
-            {label: "Miktar", key: "offeredAmount"},
+            {label: "Miktar", key: "offerRequestedAmount"},
             {label: "Toplam Stok", key: "Quantity"},
             {label: "Birim", key: "UnitID"},
           ]}
@@ -445,23 +443,23 @@ const TeklifIsteme = (props) => {
                           checked={selectedMaterials.find(m => m.MaterialID === material.MaterialID) !== undefined}
                           onChange={(e) =>
                             setSelectedMaterials((prev) =>
-                              e.target.checked ? prev.concat([{...material, OfferedAmount: 1, RequestItemID: 0}])
+                              e.target.checked ? prev.concat([{...material, OfferRequestedAmount: 1, RequestItemID: 0}])
                               : prev.filter(m => m.MaterialID !== material.MaterialID))
                           }
                         />
                       </td>
             ),
-            offeredAmount: (material) => (
+            offerRequestedAmount: (material) => (
                       <td>
                         <input
                           type="number"
                           disabled={selectedMaterials.find(m => m.MaterialID === material.MaterialID)?.final !== undefined}
-                          value={selectedMaterials.find(m => m.MaterialID === material.MaterialID)?.OfferedAmount || ""}
+                          value={selectedMaterials.find(m => m.MaterialID === material.MaterialID)?.OfferRequestedAmount || ""}
                           onChange={(e) =>
                             setSelectedMaterials((prev) =>
                               prev.map((m) =>
                                 m.MaterialID === material.MaterialID
-                                  ? { ...m, OfferedAmount: Number(e.target.value) }
+                                  ? { ...m, OfferRequestedAmount: Number(e.target.value)}
                                   : m
                               )
                             )
@@ -482,7 +480,7 @@ const TeklifIsteme = (props) => {
                 <CButton
                   color="info"
                   variant="outline"
-                  onClick={() => setSelectedMaterials((prev) => prev.map(m=>({...m, OfferRequestedAmount: m.OfferedAmount, final: true})))}
+                  onClick={() => setSelectedMaterials((prev) => prev.map(m=>({...m, RequestedAmount: m.OfferRequestedAmount, final: true})))}
                   style={{
                     padding: "10px 20px",
                     cursor: "pointer",

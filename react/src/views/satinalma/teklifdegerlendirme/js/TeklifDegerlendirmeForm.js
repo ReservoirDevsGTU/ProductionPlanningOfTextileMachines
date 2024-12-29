@@ -1,114 +1,100 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useHistory, useParams } from "react-router-dom";
 import "../css/TeklifDegerlendirmeForm.css";
+import axios from 'axios'; 
+import baseURL from '../../satinalmatalepleri/js/baseURL.js';
 
-const TeklifDegerlendirmeForm = () => {
+const TeklifDegerlendirmeForm = (props) => {
   const history = useHistory();
   const { grupNo } = useParams();
 
   // Seçili tedarikçileri ve toplam fiyatı tutan state
   const [selectedTedarikci, setSelectedTedarikci] = useState({});
   const [totalPrice, setTotalPrice] = useState(0);
+  const [offerItems, setOfferItems] = useState([]);
 
-  const teklifMalzemeleri = [
-    {
-      no: "001",
-      adi: "Malzeme 1",
-      stok: 1,
-      birim: "Adet",
-      tedarikciler: [
-        {
-          ad: "XXX Tedarikçi",
-          istenilenMiktar: 5,
-          teklifMiktar: 5,
-          birimFiyat: 15,
-          kur: "TL",
-          terminTarihi: "2025-02-01",
-          gecerlilikTarihi: "2024-11-26",
-        },
-        {
-          ad: "XXY Tedarikçi",
-          istenilenMiktar: 10,
-          teklifMiktar: 10,
-          birimFiyat: 20,
-          kur: "TL",
-          terminTarihi: "2025-02-03",
-          gecerlilikTarihi: "2024-11-25",
-        },
-      ],
-    },
-    {
-      no: "002",
-      adi: "Malzeme 2",
-      stok: 15,
-      birim: "Kg",
-      tedarikciler: [
-        {
-          ad: "AAA Tedarikçi",
-          istenilenMiktar: 20,
-          teklifMiktar: 20,
-          birimFiyat: 45,
-          kur: "TL",
-          terminTarihi: "2025-02-02",
-          gecerlilikTarihi: "2024-11-28",
-        },
-        {
-          ad: "BBB Tedarikçi",
-          istenilenMiktar: 25,
-          teklifMiktar: 25,
-          birimFiyat: 40,
-          kur: "TL",
-          terminTarihi: "2025-01-03",
-          gecerlilikTarihi: "2024-11-30",
-        },
-      ],
-    },
-  ];
+  const OfferGroupID = props.location.OfferGroupID;
 
-  const handleCheckboxChange = (malzemeNo, tedarikciAd, birimFiyat) => {
-    setSelectedTedarikci((prev) => {
-      const updatedSelection = { ...prev };
-
-      if (prev[malzemeNo] === tedarikciAd) {
-        // Seçim kaldırılırsa toplam fiyattan düş
-        delete updatedSelection[malzemeNo];
-        setTotalPrice((prevTotal) => prevTotal - birimFiyat);
-      } else {
-        // Yeni seçim yapılırsa toplam fiyata ekle
-        if (prev[malzemeNo]) {
-          setTotalPrice(
-            (prevTotal) =>
-              prevTotal - teklifMalzemeleri
-                .find((malzeme) => malzeme.no === malzemeNo)
-                .tedarikciler.find(
-                  (tedarikci) => tedarikci.ad === prev[malzemeNo]
-                ).birimFiyat
-          );
-        }
-        updatedSelection[malzemeNo] = tedarikciAd;
-        setTotalPrice((prevTotal) => prevTotal + birimFiyat);
-      }
-
-      return updatedSelection;
+  const getOffers = async () => {
+    axios.post(baseURL + "/queryOffers.php", {
+        filters: {OfferGroupID: [OfferGroupID]},
+        subTables: {Details: {expand: true}, Materials: {expand: false}}
+    }).then(response => {
+      const data = response.data;
+      setOfferItems(data.reduce((acc, cur) => {
+          cur.Materials.forEach(m => {
+            const exist = acc.findIndex(e => e.MaterialID === m.MaterialID);
+            const supplierData = {
+                SupplierName: cur.SupplierName,
+                SupplierID: cur.SupplierID,
+                OfferRequestedAmount: Number(m.OfferRequestedAmount),
+                OfferedAmount: Number(m.OfferedAmount),
+                OfferedPrice: Number(m.OfferedPrice),
+                UnitPrice: Math.round(Number.EPSILON + 100 * Number(m.OfferedPrice) / Number(m.OfferedAmount)) / 100,
+                Currency: "TRY (placeholder)",
+                OfferDeadline: cur.OfferDeadline,
+                ValidityDate: "TO DO",
+                selected: false
+            };
+            if(exist !== -1) {
+              const supplierExist = acc[exist].Suppliers.findIndex(s => s.SupplierID === supplierData.SupplierID);
+              if(supplierExist !== -1) {
+                acc[exist].Suppliers[supplierExist].OfferRequestedAmount += supplierData.OfferRequestedAmount;
+                acc[exist].Suppliers[supplierExist].OfferedAmount += supplierData.OfferedAmount;
+                acc[exist].Suppliers[supplierExist].OfferedPrice += supplierData.OfferedPrice;
+                acc[exist].Suppliers[supplierExist].UnitPrice = Math.round(Number.EPSILON + 100 * Number(acc[exist].Suppliers[supplierExist].OfferedPrice) / Number(acc[exist].Suppliers[supplierExist].OfferedAmount)) / 100;
+              }
+              else {
+                acc[exist].Suppliers.push(supplierData);
+              }
+            }
+            else {
+              acc.push({
+                  MaterialID: m.MaterialID,
+                  MaterialNo: m.MaterialNo,
+                  MaterialName: m.MaterialName,
+                  Quantity: m.Quantity,
+                  UnitID: m.UnitID,
+                  Suppliers: [supplierData],
+              });
+            }
+          });
+          return acc;
+        }, []).map(m => {
+          m.Suppliers.forEach(s => {
+            if(!m.bestDeadline) {
+              m.bestUnitPrice = s.UnitPrice;
+              m.bestDeadline = s.OfferDeadline;
+            }
+            else {
+              if(s.UnitPrice < m.bestUnitPrice) {
+                m.bestUnitPrice = s.UnitPrice;
+              }
+              if(s.OfferDeadline < m.bestOfferDeadline) {
+                m.bestOfferDeadline = s.OfferDeadline;
+              }
+            }
+          });
+          return m;
+        }));
     });
-  };
+  }
 
-  const getHighlightIndices = (tedarikciler) => {
-    let minFiyat = Math.min(...tedarikciler.map((t) => t.birimFiyat));
-    let enUcuzlar = tedarikciler.filter((t) => t.birimFiyat === minFiyat);
+  useEffect(() => {
+    if(!OfferGroupID) history.goBack();
+    else getOffers();
+  }, []);
 
-    let fiyatIndex = tedarikciler.indexOf(enUcuzlar[0]);
-
-    let today = new Date();
-    let terminIndex = tedarikciler.reduce((closestIndex, tedarikci, index) => {
-      const currentDateDiff = Math.abs(new Date(tedarikci.terminTarihi) - today);
-      const closestDateDiff = Math.abs(
-        new Date(tedarikciler[closestIndex].terminTarihi) - today
-      );
-      return currentDateDiff < closestDateDiff ? index : closestIndex;
-    }, 0);
-
-    return { fiyatIndex, terminIndex };
+  const submit = async () => {
+    const data = {
+        OfferGroupID: OfferGroupID,
+        Materials: offerItems.map(i => ({
+            MaterialID: i.MaterialID,
+            Suppliers: i.Suppliers.reduce((acc, cur) =>
+                cur.selected ? acc.concat([{SupplierID: cur.SupplierID}]) : acc, [])
+        }))
+    };
+    axios.post(baseURL + "/evaluateOffer.php", data);
   };
 
   return (
@@ -117,7 +103,7 @@ const TeklifDegerlendirmeForm = () => {
         <h1>Teklif Değerlendirme Formu {grupNo && `- Grup No: ${grupNo}`}</h1>
         <div className="form-actions">
           <button className="print-button">Yazdır</button>
-          <button className="save-button">Kaydet</button>
+          <button className="save-button" onClick={submit}>Kaydet</button>
           <button className="cancel-button" onClick={() => history.goBack()}>
             Vazgeç
           </button>
@@ -131,8 +117,8 @@ const TeklifDegerlendirmeForm = () => {
               <th style={{ width: "200px" }}>Malzeme Adı</th>
               <th>Stok</th>
               <th>Birim</th>
-              {teklifMalzemeleri[0]?.tedarikciler.map((tedarikci, index) => (
-                <th key={index} colSpan="7">{tedarikci.ad}</th>
+              {offerItems[0]?.Suppliers.map((supplier, index) => (
+                <th key={index} colSpan="7">{supplier.SupplierName}</th>
               ))}
             </tr>
             <tr>
@@ -140,7 +126,7 @@ const TeklifDegerlendirmeForm = () => {
               <th></th>
               <th></th>
               <th></th>
-              {teklifMalzemeleri[0]?.tedarikciler.map((_, index) => (
+              {offerItems[0]?.Suppliers.map((_, index) => (
                 <React.Fragment key={index}>
                   <th>İstenilen Miktar</th>
                   <th>Teklif Miktarı</th>
@@ -154,32 +140,36 @@ const TeklifDegerlendirmeForm = () => {
             </tr>
           </thead>
           <tbody>
-            {teklifMalzemeleri.map((malzeme, index) => {
-              const { fiyatIndex, terminIndex } = getHighlightIndices(malzeme.tedarikciler);
+            {offerItems.map((material, index) => {
               return (
                 <tr key={index}>
-                  <td>{malzeme.no}</td>
-                  <td>{malzeme.adi}</td>
-                  <td>{malzeme.stok}</td>
-                  <td>{malzeme.birim}</td>
-                  {malzeme.tedarikciler.map((tedarikci, i) => (
+                  <td>{material.MaterialNo}</td>
+                  <td>{material.MaterialName}</td>
+                  <td>{material.Quantity}</td>
+                  <td>{material.UnitID}</td>
+                  {material.Suppliers.map((supplier, i) => (
                     <React.Fragment key={i}>
-                      <td>{tedarikci.istenilenMiktar}</td>
-                      <td>{tedarikci.teklifMiktar}</td>
-                      <td style={{ backgroundColor: i === fiyatIndex ? "yellow" : "inherit" }}>
-                        {tedarikci.birimFiyat}
+                      <td>{supplier.OfferRequestedAmount}</td>
+                      <td>{supplier.OfferedAmount}</td>
+                      <td style={{ backgroundColor: supplier.UnitPrice === material.bestUnitPrice ? "yellow" : "inherit" }}>
+                        {supplier.UnitPrice}
                       </td>
-                      <td>{tedarikci.kur}</td>
-                      <td style={{ backgroundColor: i === terminIndex ? "lightgreen" : "inherit" }}>
-                        {tedarikci.terminTarihi}
+                      <td>{supplier.Currency}</td>
+                      <td style={{ backgroundColor: supplier.OfferDeadline === material.bestDeadline ? "lightgreen" : "inherit" }}>
+                        {supplier.OfferDeadline}
                       </td>
-                      <td>{tedarikci.gecerlilikTarihi}</td>
+                      <td>{supplier.ValidityDate}</td>
                       <td>
                         <input
                           type="checkbox"
-                          checked={selectedTedarikci[malzeme.no] === tedarikci.ad}
-                          onChange={() =>
-                            handleCheckboxChange(malzeme.no, tedarikci.ad, tedarikci.birimFiyat)
+                          checked={supplier.selected}
+                          onChange={(e) =>
+                            setOfferItems(prev => {
+                              const idx = prev.findIndex(m => m.MaterialID === material.MaterialID);
+                              const sidx = prev[idx].Suppliers.findIndex(s => s.SupplierID === supplier.SupplierID);
+                              prev[idx].Suppliers[sidx].selected = e.target.checked;
+                              return [...prev];
+                            })
                           }
                         />
                       </td>
@@ -188,11 +178,41 @@ const TeklifDegerlendirmeForm = () => {
                 </tr>
               );
             })}
+            {(() => {
+                const sums = offerItems.reduce((acc, cur) => {
+                  cur.Suppliers.forEach(s => {
+                    if(!s.selected) {
+                      if(!acc[s.SupplierID]) {
+                        acc[s.SupplierID] = 0;
+                        return;
+                      }
+                      else {
+                        return;
+                      }
+                    }
+                    if(acc[s.SupplierID]) {
+                      acc[s.SupplierID] += Number(s.OfferedPrice);
+                    }
+                    else {
+                      acc[s.SupplierID] = Number(s.OfferedPrice);
+                    }
+                  });
+                  return acc;
+                }, []);
+                return (
+                    <tr>
+                      <td colSpan="4">{"Onaylanan Toplam Tutar: " + sums.reduce((a, c) => a + Number(c), 0)}</td>
+                      {sums.map(s => (<>
+                                        <td colSpan="2">{"Toplam Tutar:"}</td>
+                                        <td>{s}</td>
+                                        <td colSpan="4"/>
+                                      </>
+                      ))}
+                    </tr>
+                );
+            })()}
           </tbody>
         </table>
-      </div>
-      <div className="total-price">
-        <h3>Onaylanan Toplam Fiyat: {totalPrice} TL</h3>
       </div>
     </div>
   );

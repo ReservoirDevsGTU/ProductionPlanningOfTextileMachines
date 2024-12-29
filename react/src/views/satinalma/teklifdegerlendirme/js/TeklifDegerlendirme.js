@@ -17,9 +17,9 @@ const TeklifDegerlendirme = () => {
     setExpandedMalzeme(expandedMalzeme === malzemeIndex ? null : malzemeIndex);
   };
 
-  const handleSelect = (grupNo) => {
+  const handleSelect = (offerGroup) => {
     // TeklifDegerlendirmeForm sayfasına yönlendirme yap
-    history.push('./teklif-degerlendirme-form'); //  teklif-degerlendirme-form/${grupNo}
+    history.push({pathname: './teklif-degerlendirme-form', OfferGroupID: offerGroup.OfferGroupID});
   };
 
   return (
@@ -46,7 +46,7 @@ const TeklifDegerlendirme = () => {
       <CustomTable 
         addTableClasses = "main-table"
         fetchAddr="/queryOffers.php"
-        fetchArgs={{subTables: {Materials: {expand: false, subTables: {Requests: {expand: false}}}}}}
+        fetchArgs={{distinct: ["OfferGroupID"], subTables: {Materials: {expand: false, subTables: {Requests: {expand: false}}}}}}
         searchTerm={searchTerm}
         searchFields={["OfferGroupID"]}
         fields={[
@@ -64,10 +64,10 @@ const TeklifDegerlendirme = () => {
                 addTableClasses = "sub-table"
                 data={item.Materials.reduce((acc, cur) => {
                           const exist = acc.findIndex(e => e.MaterialID === cur.MaterialID);
-                          const requests = cur.Requests.map(r => ({...r, RequestedAmount: cur.OfferRequestedAmount, UnitID: cur.UnitID}));
+                          const requests = cur.Requests.map(r => ({...r, RequestedAmount: cur.RequestedAmount, UnitID: cur.UnitID}));
                           if(exist !== -1) {
-                            acc[exist].OfferedAmount = Number(cur.OfferedAmount)
-                                                         + Number(acc[exist].OfferedAmount);
+                            acc[exist].RequestedAmount = Number(cur.RequestedAmount)
+                                                         + Number(acc[exist].RequestedAmount);
                             acc[exist].OfferRequestedAmount = Number(cur.OfferRequestedAmount)
                                                          + Number(acc[exist].OfferRequestedAmount);
                             acc[exist].OfferedPrice = Number(cur.OfferedPrice)
@@ -83,8 +83,8 @@ const TeklifDegerlendirme = () => {
                     {key: "expand", label: ""},
                     {key: "MaterialNo", label: "Malzeme No"},
                     {key: "MaterialName", label: "Malzeme Adi"},
-                    {key: "OfferRequestedAmount", label: "Talep Miktari"},
-                    {key: "OfferedAmount", label: "Teklif Miktari"},
+                    {key: "RequestedAmount", label: "Talep Miktari"},
+                    {key: "OfferRequestedAmount", label: "Teklif Miktari"},
                     {key: "Quantity", label: "Stok"},
                     {key: "UnitID", label: "Birim"}
                 ]}
@@ -132,7 +132,7 @@ const TeklifDegerlendirme = () => {
                 <td>
                   <button
                     className="select-button"
-                    onClick={handleSelect} // Seç butonuna tıklandığında yönlendirme yapılacak ( onClick={handleSelect(teklif.grupNo)} )
+                    onClick={() => handleSelect(item)}
                   >
                     Seç
                   </button>
