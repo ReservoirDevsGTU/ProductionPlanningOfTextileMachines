@@ -10,6 +10,7 @@ import {
   faTasks,
   faChevronDown,
   faChevronUp,
+  faExclamationTriangle
 } from '@fortawesome/free-solid-svg-icons';
 import CustomTable from '../../CustomTable.js';
 import axios from 'axios'; 
@@ -30,6 +31,10 @@ const TeklifListesi = () => {
   const [evaluator, setEvaluator] = useState('');
   const [explanation, setExplanation] = useState('');
   const [cancelOthers, setCancelOthers] = useState(false);  
+
+  const [warningModal, setWarningModal] = useState(false);
+  const [warningMessage, setWarningMessage] = useState('');
+
 
   const [supplierData, setSupplierData] = useState([
     {
@@ -148,13 +153,15 @@ const TeklifListesi = () => {
 
 
   const openEvaluationModal = () => {
-    const selectedOffers = Object.keys(selected).filter(id => selected[id]);
-    
+    const selectedOffers = data.filter(item => selected[item.OfferID]);
+      
     if (selectedOffers.length === 0) {
-      alert('Lütfen değerlendirmeye almak için teklif seçiniz');
+      setWarningMessage('Lütfen değerlendirmeye almak için teklif seçiniz');
+      setWarningModal(true);
       return;
     }
   
+    // Tüm tedarikçileri bul ve unique olanları al
     const suppliers = [...new Set(selectedOffers.map(offer => offer.SupplierName))];
     setSelectedSuppliers(suppliers);
     setEvaluationModal(true);
@@ -276,6 +283,33 @@ const TeklifListesi = () => {
     { key: 'select', label:'Seç'}
   ];
 
+  const checkAndCreateOrder = () => {
+    const selectedOffers = data.filter(item => selected[item.OfferID]);
+    
+    if (selectedOffers.length === 0) {
+      setWarningMessage('Lütfen sipariş oluşturmak için teklif seçiniz');
+      setWarningModal(true);
+      return;
+    }
+  
+    const firstSupplier = selectedOffers[0].SupplierName;
+    const hasDifferentSuppliers = selectedOffers.some(
+      offer => offer.SupplierName !== firstSupplier
+    );
+  
+    if (hasDifferentSuppliers) {
+      setWarningMessage('Sadece aynı tedarikçiden alınan teklifler için sipariş oluşturulabilir!');
+      setWarningModal(true);
+      return;
+    }
+  
+    const selectedOfferIds = selectedOffers.map(offer => offer.OfferID).join(',');
+    
+    history.push(`/satinalma/siparis-form/${selectedOfferIds}`);
+  };
+
+
+
   return (
     <div style={{ padding: '20px' }}>
       <div style={{ marginBottom: '20px' }}>
@@ -292,7 +326,7 @@ const TeklifListesi = () => {
         }}
       >
         <div style={{ display: 'flex', gap: '10px' }}>
-          <CButton color="info" variant='outline' size='lg' onClick={() => history.push('/satinalma/siparis-form')}>
+          <CButton color="info" variant='outline' size='lg' onClick={checkAndCreateOrder}>
             <FontAwesomeIcon icon={faShoppingCart} style={{ marginRight: '8px' }} />
             Sipariş Oluştur
           </CButton>
@@ -537,6 +571,39 @@ const TeklifListesi = () => {
           <CButton color="primary" onClick={sendToEvaluation}>Gönder</CButton>
         </CModalFooter>
       </CModal>
+
+
+
+      <CModal 
+  show={warningModal} 
+  onClose={() => setWarningModal(false)} 
+  size="md" 
+  centered
+>
+  <CModalHeader closeButton>
+    <h5 style={{fontWeight: 'bold', fontSize:'24px'}}>Uyarı</h5>
+  </CModalHeader>
+
+  <CModalBody>
+    <div className="d-flex align-items-center">
+      <div style={{color: '#dc3545', marginRight: '15px'}}>
+        <FontAwesomeIcon icon={faExclamationTriangle} size="2x"/>
+      </div>
+      <div>
+        {warningMessage}!
+      </div>
+    </div>
+  </CModalBody>
+
+  <CModalFooter>
+    <CButton 
+      color="secondary" 
+      onClick={() => setWarningModal(false)}
+    >
+      Kapat
+    </CButton>
+  </CModalFooter>
+</CModal>
 
     </div>
   );

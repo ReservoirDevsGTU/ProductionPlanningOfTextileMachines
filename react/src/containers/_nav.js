@@ -52,12 +52,6 @@ const _nav = [
       },
       {
         _tag: 'CSidebarNavItem',
-        name: 'Teslim ve Giriş İşlemleri',
-        to: '/satinalma/teslim-giris-islemleri',
-        style: { paddingLeft: '10px', fontSize: '0.8rem' },
-      },
-      {
-        _tag: 'CSidebarNavItem',
         name: 'Satın Alma Parametreleri',
         to: '/satinalma/satinalma-parametreleri',
         style: { paddingLeft: '10px', fontSize: '0.8rem' },
