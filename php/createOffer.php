@@ -14,6 +14,7 @@ if($input) {
     $sql3 = "INSERT INTO PurchaseOfferItems(ItemID, OfferID, RequestItemID, MaterialID, OfferRequestedAmount, OfferedAmount, ConformationStatus, ItemStatus, IsDeleted)
              VALUES((SELECT ISNULL(MAX(ItemID)+1,1) FROM PurchaseOfferItems),
                     ?, ?, ?, ?, 0, 0, 0, 0)";
+    sqlsrv_begin_transaction($conn);
     foreach($input["Suppliers"] as $supplier) {
         $stmt = sqlsrv_query($conn, $sql1, array(
             $input["OfferGroupID"],
@@ -31,6 +32,11 @@ if($input) {
                 $supplier["SupplierID"]
             ));
             sqlsrv_free_stmt($stmt);
+            if(!$stmt) {
+                $errors = sqlsrv_errors();
+                sqlsrv_rollback($conn);
+                die(json_encode($errors, true));
+            }
             foreach($input["Materials"] as $material) {
                 $stmt = sqlsrv_query($conn, $sql3, array(
                     $id,
@@ -38,13 +44,21 @@ if($input) {
                     $material["MaterialID"],
                     $material["OfferRequestedAmount"],
                 ));
+                if(!$stmt) {
+                    $errors = sqlsrv_errors();
+                    sqlsrv_rollback($conn);
+                    die(json_encode($errors, true));
+                }
                 sqlsrv_free_stmt($stmt);
             }
         }
         else {
-            die(json_encode(sqlsrv_errors(), true));
+            $errors = sqlsrv_errors();
+            sqlsrv_rollback($conn);
+            die(json_encode($errors, true));
         }
     }
 }
+sqlsrv_commit($conn);
 sqlsrv_close($conn);
 ?>

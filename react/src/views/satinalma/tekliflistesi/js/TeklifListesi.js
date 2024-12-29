@@ -15,6 +15,8 @@ import {
 import CustomTable from '../../CustomTable.js';
 import axios from 'axios'; 
 import baseURL from '../../satinalmatalepleri/js/baseURL.js';
+import Dropzone from 'react-dropzone'
+import * as XLSX from "xlsx";
 
 const TeklifListesi = () => {
   const history = useHistory();
@@ -34,6 +36,8 @@ const TeklifListesi = () => {
 
   const [warningModal, setWarningModal] = useState(false);
   const [warningMessage, setWarningMessage] = useState('');
+        
+  const [sheetModal, setSheetModal] = useState(false);
 
 
   const [supplierData, setSupplierData] = useState([
@@ -342,7 +346,7 @@ const TeklifListesi = () => {
           <CButton color="info" variant='outline' size='lg' disabled={!isSingleSelected}>
             <FontAwesomeIcon icon={faPrint} />
           </CButton>
-          <CButton color="success" variant='outline' size='lg' disabled={!isSingleSelected}>
+          <CButton color="success" variant='outline' size='lg' onClick={()=>setSheetModal(true)}>
             <FontAwesomeIcon icon={faFileExcel} style={{ marginRight: '8px' }} />
             Teklif Aktar
           </CButton>
@@ -376,10 +380,10 @@ const TeklifListesi = () => {
             scopedSlots={{
               'request_id': (item) => (
                 <td>
-                  {item.Materials?.length > 0 ? Object.keys(item.Materials.reduce((acc, cur) => {
+                  {(item.Materials?.length > 0 ? Object.keys(item.Materials.reduce((acc, cur) => {
                       if(typeof cur.RequestID === 'number') acc = {...acc, [cur.RequestID]: 1}
                       return acc;
-                    }, {})).join(', ') : '-'}
+                    }, {})).join(', ') : false) || '-'}
                 </td>),
               'show_materials': (item) => (
                 <td>
@@ -604,6 +608,65 @@ const TeklifListesi = () => {
     </CButton>
   </CModalFooter>
 </CModal>
+
+      <CModal centered show={sheetModal} onClose={()=>setSheetModal(false)}>
+        <CModalHeader closeButton>
+          <h5 style={{fontWeight: 'bold', fontSize:'24px'}}>Teklif Aktar</h5>
+        </CModalHeader>
+        <CModalBody>
+          <Dropzone 
+            accept={{"application/*": [".xlsx"]}} 
+            multiple={false}
+            onDropAccepted={async file=>{
+              const wb = XLSX.read(await file[0].bytes(), {type: "array"});
+              const offerData = XLSX.utils.sheet_to_json(wb.Sheets.Details);
+              const itemData = XLSX.utils.sheet_to_json(wb.Sheets.Items);
+              const supplierData = XLSX.utils.sheet_to_json(wb.Sheets.Suppliers);
+              var data = offerData[0];
+              if(!data.OfferDate) {
+                const d = new Date();
+                data.OfferDate = d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + (d.getDay() + 1)).slice(-2);
+              }
+              if(!data.CreatedBy) {
+                data.CreatedBy = data.RequestedBy;
+              }
+              data.Materials = itemData;
+              data.Suppliers = supplierData;
+              axios.post(baseURL + "/createOffer.php", data);
+            }}
+          >
+            {({getRootProps, getInputProps, isDragActive}) => (
+              <div {...getRootProps()}
+                style={{
+                  display: "block",
+                  border: "2px dashed #ccc",
+                  padding: "20px",
+                  textAlign: "center",
+                  cursor: "pointer",
+                  borderRadius: "4px",
+                  backgroundColor: isDragActive ? "#f1f1f1" : "#ffffff",
+                  transition: "background 0.1s"
+                }}
+                onMouseEnter={(e)=>e.target.style["background"] = "#f1f1f1"}
+                onMouseLeave={(e)=>e.target.style["background"] = "#ffffff"}
+                >
+                  <input {...getInputProps()}/>
+                  {/*
+                     Bunu okuyan front-end'ciye,
+
+                     Tam yazinin ustune sag tiklayinca falan rengi sabit kaliyo,
+                     suna baksana sana zahmet, cozemedim.
+
+                     Saygilar, mehme
+                  */}
+                  <h6 style={{fontSize: '16px'}}>Dosya Surukle veya Tikla</h6>
+              </div>
+            )}
+          </Dropzone>
+        </CModalBody>
+        <CModalFooter>
+        </CModalFooter>
+      </CModal>
 
     </div>
   );
