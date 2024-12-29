@@ -143,7 +143,7 @@ const routes = [
   { path: '/satinalma/teklif-form/:id', name: 'Teklif Form', component: TeklifForm },
 
   // siparis form
-  { path: '/satinalma/siparis-form', name: 'Siparis Form', component: SiparisForm },
+  { path: '/satinalma/siparis-form/:id', name: 'Siparis Form', component: SiparisForm },
 
 
 
