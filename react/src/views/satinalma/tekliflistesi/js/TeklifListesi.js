@@ -312,7 +312,39 @@ const TeklifListesi = () => {
     history.push(`/satinalma/siparis-form/${selectedOfferIds}`);
   };
 
-
+  const printSelectedOffer = async () => {
+    const offerID = Object.keys(selected).find(k => selected[k]);
+    axios.post(baseURL + "/queryOffers.php", {subTables:{Materials: {expand: false}, Details: {expand:true}}, filters: {OfferID: [offerID]}})
+      .then(response => {
+        const data = response.data[0];
+        const printDetails = [{
+          OfferID: data.OfferID,
+          SupplierName: data.SupplierName,
+          OfferDate: data.OfferDate,
+          OfferDeadline: data.OfferDate,
+          OfferGroupID: data.OfferGroupID,
+          RequesterName: data.RequesterName,
+          OfferStatus: data.OfferStatus
+        }];
+        const printItems = data.Materials.map(m => ({
+          MaterialID: m.MaterialID,
+          MaterialNo: m.MaterialNo,
+          MaterialName: m.MaterialName,
+          RequestID: m.RequestID,
+          RequestedAmount: m.RequestedAmount,
+          OfferRequestedAmount: m.OfferRequestedAmount,
+          OfferedAmount: m.OfferedAmount,
+          UnitID: m.UnitID,
+          ItemStatus: m.ItemStatus
+        }));
+        var wb = XLSX.utils.book_new();
+        const detailSheet = XLSX.utils.json_to_sheet(printDetails);
+        const itemSheet = XLSX.utils.json_to_sheet(printItems);
+        XLSX.utils.book_append_sheet(wb, detailSheet, "Details");
+        XLSX.utils.book_append_sheet(wb, itemSheet, "Items");
+        XLSX.writeFileXLSX(wb, "offer.xlsx");
+    });
+  }
 
   return (
     <div style={{ padding: '20px' }}>
@@ -343,7 +375,7 @@ const TeklifListesi = () => {
           <CButton color="info" variant='outline' size='lg' onClick={setPaperPlaneButton}>
             <FontAwesomeIcon icon={faPaperPlane} />
           </CButton>
-          <CButton color="info" variant='outline' size='lg' disabled={!isSingleSelected}>
+          <CButton color="info" variant='outline' size='lg' disabled={!isSingleSelected} onClick={printSelectedOffer}>
             <FontAwesomeIcon icon={faPrint} />
           </CButton>
           <CButton color="success" variant='outline' size='lg' onClick={()=>setSheetModal(true)}>

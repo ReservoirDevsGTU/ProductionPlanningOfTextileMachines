@@ -51,7 +51,7 @@ function genQuery($input, $table, &$selectedColumns, &$selectedJoins, &$selected
         $search = "";
         foreach($input["search"]["fields"] as $f) {
             if(isset($columns[$f])) {
-                $search .= " OR $f LIKE '%$term%'";
+                $search .= " OR $columns[$f] LIKE '%$term%'";
             }
         }
         if(strlen($search) > 0) {
