@@ -165,9 +165,9 @@ const TeklifListesi = () => {
       return;
     }
   
-    // Tüm tedarikçileri bul ve unique olanları al
-    const suppliers = [...new Set(selectedOffers.map(offer => offer.SupplierName))];
-    setSelectedSuppliers(suppliers);
+    // Tüm kullanıcıları bul ve unique olanları al
+    const requester = [...new Set(selectedOffers.map(offer => offer.RequesterName))];
+    setSelectedSuppliers(requester);
     setEvaluationModal(true);
   };
 
@@ -372,7 +372,7 @@ const TeklifListesi = () => {
           </CButton>
         </div>
         <div style={{ display: 'flex', gap: '10px' }}>
-          <CButton color="info" variant='outline' size='lg' onClick={setPaperPlaneButton}>
+          <CButton color="info" variant='outline' size='lg' disabled={!isSingleSelected} onClick={setPaperPlaneButton}>
             <FontAwesomeIcon icon={faPaperPlane} />
           </CButton>
           <CButton color="info" variant='outline' size='lg' disabled={!isSingleSelected} onClick={printSelectedOffer}>

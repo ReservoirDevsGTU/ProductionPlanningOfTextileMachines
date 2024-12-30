@@ -1,13 +1,18 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom"; // history import et
 import "../css/TeklifDegerlendirme.css";
+import {CButton, CInput } from '@coreui/react';
+import {faChevronDown, faChevronUp, faPrint } from '@fortawesome/free-solid-svg-icons';
 import CustomTable from '../../CustomTable.js';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const TeklifDegerlendirme = () => {
   const history = useHistory(); // history kullanımı
   const [expandedRow, setExpandedRow] = useState(null);
   const [expandedMalzeme, setExpandedMalzeme] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [expandedRows, setExpandedRows] = useState({});
+
 
   const toggleRow = (index) => {
     setExpandedRow(expandedRow === index ? null : index);
@@ -30,15 +35,20 @@ const TeklifDegerlendirme = () => {
       </div>
       {/* Yazdırma Butonu */}
       <div className="header">
-        <button className="print-button">
-          <i className="fas fa-print"></i> Yazdır
-        </button>
-        <input
+      <CButton color="info" variant='outline' size='lg'>
+            <FontAwesomeIcon icon={faPrint} />
+          </CButton>
+          <CInput
           type="text"
-          className="search-bar"
           placeholder="Arama Yapın..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          style={{
+            width: '30%',
+            padding: '8px',
+            border: '1px solid #ccc',
+            borderRadius: '5px',
+          }}
         />
       </div>
 
@@ -106,12 +116,15 @@ const TeklifDegerlendirme = () => {
                   ),
                   expand: (item) => (
                     <td>
-                      <button
-                        className="expand-button"
+                      <CButton
+                        size='lg'
+                        variant='outline'
+                        color='secondary'
+                        children={<FontAwesomeIcon style={{color: 'black'}} icon={expandedRows[item.RequestID] ? faChevronUp : faChevronDown} />}
                         onClick={() => toggleMalzemeRow(item.MaterialID)}
-                      >
-                        {expandedMalzeme === item.MaterialID ? "▼" : "▶"}
-                      </button>
+                        >
+                      </CButton>
+
                     </td>
                   )
                 }}
@@ -120,22 +133,23 @@ const TeklifDegerlendirme = () => {
           ),
           expand: (item) => (
                 <td>
-                  <button
-                    className="expand-button"
-                    onClick={() => toggleRow(item.RowID)}
-                  >
-                    {expandedRow === item.RowID ? "▼" : "▶"}
-                  </button>
-                </td>
+
+                  <CButton
+                      size='lg'
+                      variant='outline'
+                      color='secondary'
+                      children={<FontAwesomeIcon style={{color: 'black'}} icon={expandedRows[item.RequestID] ? faChevronUp : faChevronDown} />}
+                      onClick={() => toggleRow(item.RowID)}
+                      >
+                  </CButton>
+                  
+              </td>
           ),
           select: (item) => (
                 <td>
-                  <button
-                    className="select-button"
-                    onClick={() => handleSelect(item)}
-                  >
+                  <CButton shape='square' variant='outline' color='primary'  onClick={() => handleSelect(item)}>
                     Seç
-                  </button>
+                  </CButton>
                 </td>
           ),
           TODO: () => (<td>TO DO</td>)

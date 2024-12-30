@@ -194,7 +194,7 @@ const SiparisForm = () => {
                 >
                   İptal
                 </CButton>
-                <CButton color="success" type="submit">
+                <CButton color="success">
                   Kaydet
                 </CButton>
               </div>
