@@ -66,13 +66,14 @@ const TeklifForm = React.lazy(() => import('./views/satinalma/tekliflistesi/js/T
 // sipariş form
 const SiparisForm = React.lazy(() => import('./views/satinalma/tekliflistesi/js/SiparisForm'));
 
-
-
 // teklif degerlendirme
 const TeklifDegerlendirme = React.lazy(() => import('./views/satinalma/teklifdegerlendirme/js/TeklifDegerlendirme'));
 
 // teklif değerlendirme formu
 const TeklifDegerlendirmeForm = React.lazy(() => import('./views/satinalma/teklifdegerlendirme/js/TeklifDegerlendirmeForm'));
+
+// sipariş listesi
+const SiparisListesi = React.lazy(() => import('./views/satinalma/siparislistesi/js/SiparisListesi'));
 
 
 const routes = [
@@ -145,13 +146,14 @@ const routes = [
   // siparis form
   { path: '/satinalma/siparis-form/:id', name: 'Siparis Form', component: SiparisForm },
 
-
-
   // teklif degerlendirme
   { path: '/satinalma/teklif-degerlendirme', name: 'Teklif Değerlendirme', component: TeklifDegerlendirme },
    
   // teklif değerlendirme formu
   { path: '/satinalma/teklif-degerlendirme-form', name: 'Teklif Değerlendirme Formu', component: TeklifDegerlendirmeForm },
+
+  // siparis listesi
+  { path: '/satinalma/siparis-listesi', name: 'Siparis Listesi', component: SiparisListesi },
 ];
 
 export default routes;

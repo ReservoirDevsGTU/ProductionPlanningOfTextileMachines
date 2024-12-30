@@ -1,0 +1,164 @@
+/* Genel Stil */
+.siparis-listesi-container {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+  }
+  
+  .siparis-listesi-header {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  /* Tablo Stilleri */
+  .siparis-listesi-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .siparis-listesi-table th,
+  .siparis-listesi-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border: 1px solid #ddd;
+  }
+  
+  .siparis-listesi-table th {
+    background-color: #f0f0f0;
+    color: #555;
+    font-weight: 600;
+  }
+  
+  .siparis-listesi-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .siparis-listesi-table tr:hover {
+    background-color: #eaf3ff;
+  }
+  
+  .siparis-listesi-table td {
+    color: #333;
+  }
+  
+  /* Genişleyen Satır */
+  .expanded-row {
+    background-color: #f7faff;
+    padding: 0;
+  }
+  
+  .malzeme-listesi-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  
+  .malzeme-listesi-table th,
+  .malzeme-listesi-table td {
+    padding: 8px;
+    text-align: left;
+    border: 1px solid #ddd;
+  }
+  
+  .malzeme-listesi-table th {
+    background-color: #e9f3ff;
+    color: #333;
+    font-weight: bold;
+  }
+  
+  /* Expand Button */
+  .expand-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: #007bff;
+  }
+  
+  .expand-button:hover {
+    color: #0056b3;
+  }
+  
+  /* Seç Butonu */
+  .siparis-sec-button {
+    padding: 8px 12px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .siparis-sec-button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Talep Tablosu */
+.talep-listesi-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    background-color: #fefefe;
+  }
+  
+  .talep-listesi-table th,
+  .talep-listesi-table td {
+    padding: 8px;
+    text-align: left;
+    border: 1px solid #ddd;
+  }
+  
+  .talep-listesi-table th {
+    background-color: #fffae6;
+    color: #333;
+    font-weight: bold;
+  }
+
+  /* Buton düzeni */
+.button-container {
+    display: flex;
+    margin-bottom: 20px;
+    gap: 10px;
+  }
+  
+  .action-button {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+  }
+  
+  .action-button.olustur {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .action-button.olustur:hover {
+    background-color: #0056b3;
+  }
+  
+  .action-button.giris {
+    background-color: #28a745;
+    color: white;
+  }
+  
+  .action-button.giris:hover {
+    background-color: #1e7e34;
+  }
+  
+  .action-button.yazdir {
+    background-color: #ffc107;
+    color: black;
+  }
+  
+  .action-button.yazdir:hover {
+    background-color: #e0a800;
+  }
