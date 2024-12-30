@@ -49,9 +49,16 @@ const handleGoBackButton = () => {
 const handleModalClose = () => {
   if (showExitWarning) {
     setShowExitWarning(false);
+    setModals({warning: false, info: false});
+  } 
+  else if (modals.info) {
+    setModals({warning: false, info: false});
+    history.push("/satinalma/talepler");
   }
-  setModals({warning: false, info: false});
- };
+  else {
+    setModals({warning: false, info: false});
+  }
+};
 
   const handleButtonClick = (button) => {
     setSelectedButton(button);
