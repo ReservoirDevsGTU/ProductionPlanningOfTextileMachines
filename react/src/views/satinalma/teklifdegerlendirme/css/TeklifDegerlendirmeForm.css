@@ -32,15 +32,12 @@
   
   .form-actions button {
     padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
     cursor: pointer;
     font-size: 16px;
   }
   
   .print-button {
     background-color: #4CAF50;
-    color: white;
   }
   
   .save-button {

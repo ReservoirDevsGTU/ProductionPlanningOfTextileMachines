@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { CInput, CButton, CCollapse, CModal, CCardBody, CModalHeader, CModalBody, CModalFooter } from '@coreui/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import CustomModal from '../../CustomModal.js';
 import {
   faFileExcel,
   faPaperPlane,
@@ -33,6 +34,20 @@ const TeklifListesi = () => {
   const [evaluator, setEvaluator] = useState('');
   const [explanation, setExplanation] = useState('');
   const [cancelOthers, setCancelOthers] = useState(false);  
+
+  const [modals, setModals] = useState({
+    warning: false,
+    info: false
+  });
+  
+  const [modalMessages, setModalMessages] = useState({
+    warning: '',
+    info: ''
+  });
+
+
+
+  
 
   const [warningModal, setWarningModal] = useState(false);
   const [warningMessage, setWarningMessage] = useState('');
@@ -160,8 +175,8 @@ const TeklifListesi = () => {
     const selectedOffers = data.filter(item => selected[item.OfferID]);
       
     if (selectedOffers.length === 0) {
-      setWarningMessage('Lütfen değerlendirmeye almak için teklif seçiniz');
-      setWarningModal(true);
+      setModalMessages({...modalMessages, warning: 'Lütfen değerlendirmeye almak için teklif seçiniz!'});
+      setModals({...modals, warning: true});
       return;
     }
   
@@ -291,8 +306,8 @@ const TeklifListesi = () => {
     const selectedOffers = data.filter(item => selected[item.OfferID]);
     
     if (selectedOffers.length === 0) {
-      setWarningMessage('Lütfen sipariş oluşturmak için teklif seçiniz');
-      setWarningModal(true);
+      setModalMessages({...modalMessages, warning: 'Lütfen sipariş oluşturmak için teklif seçiniz!'});
+      setModals({...modals, warning: true});
       return;
     }
   
@@ -545,6 +560,13 @@ const TeklifListesi = () => {
       </CModal>
 
 
+      <CustomModal 
+ show={modals.warning || modals.info}
+ onClose={() => setModals({warning: false, info: false})}
+ message={modals.warning ? modalMessages.warning : modalMessages.info}
+ type={modals.warning ? 'warning' : 'info'}
+/>
+
 
       <CModal show={evaluationModal} onClose={() => setEvaluationModal(false)} size="md" centered>
         <CModalHeader closeButton>
@@ -610,36 +632,6 @@ const TeklifListesi = () => {
 
 
 
-      <CModal 
-  show={warningModal} 
-  onClose={() => setWarningModal(false)} 
-  size="md" 
-  centered
->
-  <CModalHeader closeButton>
-    <h5 style={{fontWeight: 'bold', fontSize:'24px'}}>Uyarı</h5>
-  </CModalHeader>
-
-  <CModalBody>
-    <div className="d-flex align-items-center">
-      <div style={{color: '#dc3545', marginRight: '15px'}}>
-        <FontAwesomeIcon icon={faExclamationTriangle} size="2x"/>
-      </div>
-      <div>
-        {warningMessage}!
-      </div>
-    </div>
-  </CModalBody>
-
-  <CModalFooter>
-    <CButton 
-      color="secondary" 
-      onClick={() => setWarningModal(false)}
-    >
-      Kapat
-    </CButton>
-  </CModalFooter>
-</CModal>
 
       <CModal centered show={sheetModal} onClose={()=>setSheetModal(false)}>
         <CModalHeader closeButton>

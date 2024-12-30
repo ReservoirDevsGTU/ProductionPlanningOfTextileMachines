@@ -2,7 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useHistory, useParams } from "react-router-dom";
 import "../css/TeklifDegerlendirmeForm.css";
 import axios from 'axios'; 
+import {CButton} from '@coreui/react';
 import baseURL from '../../satinalmatalepleri/js/baseURL.js';
+import { faPrint } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const TeklifDegerlendirmeForm = (props) => {
   const history = useHistory();
@@ -102,11 +105,13 @@ const TeklifDegerlendirmeForm = (props) => {
       <div className="form-header">
         <h1>Teklif Değerlendirme Formu {grupNo && `- Grup No: ${grupNo}`}</h1>
         <div className="form-actions">
-          <button className="print-button">Yazdır</button>
-          <button className="save-button" onClick={submit}>Kaydet</button>
-          <button className="cancel-button" onClick={() => history.goBack()}>
+        <CButton color="info" variant='outline' size='lg'>
+            <FontAwesomeIcon icon={faPrint} />
+          </CButton>
+          <CButton color="info" variant="outline" size="lg" onClick={submit}>Kaydet</CButton>
+          <CButton color="danger" variant="outline" size="lg" onClick={() => history.goBack()}>
             Vazgeç
-          </button>
+          </CButton>
         </div>
       </div>
       <div style={{ overflowX: "auto", maxWidth: "100%" }}>

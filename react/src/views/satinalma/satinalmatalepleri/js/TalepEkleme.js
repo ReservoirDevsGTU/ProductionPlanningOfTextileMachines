@@ -8,6 +8,8 @@ import baseURL from "./baseURL";
 import CustomTable from "../../CustomTable.js";
 import { faTimes, faArrowLeft, faSave} from '@fortawesome/free-solid-svg-icons';
 import { faFileExcel, faPaperPlane } from "@fortawesome/free-regular-svg-icons";
+import CustomModal from '../../CustomModal.js';
+
 
 const TalepEkleme = ({ editID }) => {
   const [selectedMaterials, setSelectedMaterials] = useState([]);
@@ -18,15 +20,38 @@ const TalepEkleme = ({ editID }) => {
   const [templateTable, setTemplateTable] = useState([]);
   const history = useHistory();
 
+   const [isDirty, setIsDirty] = useState(false);
+   const [modals, setModals] = useState({ warning: false, info: false });
+   const [modalMessages, setModalMessages] = useState({ warning: '', info: '' });
+   const [showExitWarning, setShowExitWarning] = useState(false);
+
   const [requestDetails, setRequestDetails] = useState({
     date: "",
     requester: "",
     description: "",
   });
-
-  const handleGoBack = () => {
+  
+  const handleGoBack = async () => {
+    await new Promise(resolve => setTimeout(resolve, 1500));
     history.push("/satinalma/talepler");
   };
+
+const handleGoBackButton = () => {
+ if (isDirty) {
+   setModalMessages({...modalMessages, warning: 'Yaptığınız değişiklikler kaybolacak. Çıkmak istediğinize emin misiniz?'});
+   setModals({...modals, warning: true});
+   setShowExitWarning(true);
+ } else {
+   history.push("/satinalma/talepler");
+ }
+};
+
+const handleModalClose = () => {
+  if (showExitWarning) {
+    setShowExitWarning(false);
+  }
+  setModals({warning: false, info: false});
+ };
 
   const handleButtonClick = (button) => {
     setSelectedButton(button);
@@ -36,12 +61,14 @@ const TalepEkleme = ({ editID }) => {
   const handleMaterialSelect = (material) => {
     setSelectedMaterials((prev) => {
       if (prev.find((item) => item.MaterialID === material.MaterialID)) return prev;
+      setIsDirty(true);
       return [...prev, { ...material, RequestedAmount: 1 }];
     });
   };
 
   const handleRemoveMaterial = (id) => {
     setSelectedMaterials(selectedMaterials.filter((material) => material.MaterialID !== id));
+    setIsDirty(true);
   };
 
   const handleQuantityChange = (id, quantity) => {
@@ -50,11 +77,13 @@ const TalepEkleme = ({ editID }) => {
         material.MaterialID === id ? { ...material, RequestedAmount: quantity } : material
       )
     );
+    setIsDirty(true);
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setRequestDetails((prev) => ({ ...prev, [name]: value }));
+    setIsDirty(true);
   };
 
   const getSubmitData = () => ({
@@ -72,27 +101,33 @@ const TalepEkleme = ({ editID }) => {
 
   const handleSubmit = () => {
     if (!requestDetails.date || !requestDetails.requester) {
-      alert("Lütfen tüm gerekli alanları doldurun!");
+      setModalMessages({...modalMessages, warning: 'Lütfen tüm gerekli alanları doldurun!'});
+      setModals({...modals, warning: true});
       return;
     }
     if (editID) {
       axios.post(baseURL + "/deleteRequest.php", new URLSearchParams({ request_id: editID }));
     }
     axios.post(baseURL + "/addRequest.php", { ...getSubmitData(), IsDraft: true });
+    setModalMessages({...modalMessages, info: 'Talebiniz başarıyla kaydedildi.'});
+    setModals({...modals, info: true});
     handleGoBack();
   };
 
   const handleOnayaGonder = () => {
     if (!requestDetails.date || !requestDetails.requester) {
-      alert("Lütfen tüm gerekli alanları doldurun!");
+      setModalMessages({...modalMessages, warning: 'Lütfen tüm gerekli alanları doldurun!'});
+      setModals({...modals, warning: true});
       return;
     }
     if (editID) {
       axios.post(baseURL + "/deleteRequest.php", new URLSearchParams({ request_id: editID }));
     }
     axios.post(baseURL + "/addRequest.php", { ...getSubmitData(), IsDraft: false });
+    setModalMessages({...modalMessages, info: 'Talebiniz onaya gönderildi.'});
+    setModals({...modals, info: true});
     handleGoBack();
-    alert("Talebiniz onaya gönderildi.");
+
   };
 
   useEffect(() => {
@@ -170,7 +205,7 @@ const TalepEkleme = ({ editID }) => {
         }}
       >
         <CButton
-          onClick={handleGoBack}
+          onClick={handleGoBackButton}
           color="dark"
           variant="outline"
           size="md"
@@ -412,6 +447,18 @@ const TalepEkleme = ({ editID }) => {
           ),
         }}
       />
+
+<CustomModal 
+  show={modals.warning || modals.info}
+  onClose={handleModalClose}
+  message={modals.warning ? modalMessages.warning : modalMessages.info}
+  type={modals.warning ? 'warning' : 'info'}
+  showExitWarning={showExitWarning}
+  onExit={() => {
+    handleModalClose();
+    history.push("/satinalma/talepler");
+  }}
+/>
 
       {templateModal && (
         <div

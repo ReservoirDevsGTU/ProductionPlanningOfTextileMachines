@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 import "../css/SiparisListesi.css";
+import { CInput ,CButton } from "@coreui/react";
+import {  faLongArrowAltDown, faPrint, faShoppingCart } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 
 const SiparisListesi = () => {
   // Sipariş ve malzeme listesi
@@ -113,6 +117,7 @@ const SiparisListesi = () => {
   // Satırların genişleme durumları
   const [expandedRows, setExpandedRows] = useState({});
   const [expandedMaterials, setExpandedMaterials] = useState({});
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Sipariş satırını açma/kapama
   const toggleRow = (index) => {
@@ -145,21 +150,51 @@ const SiparisListesi = () => {
   };
 
   return (
-    <div className="siparis-listesi-container">
-      <h1 className="siparis-listesi-header">Sipariş Listesi</h1>
-
-      {/* Butonlar */}
-      <div className="button-container">
-        <button className="action-button olustur" onClick={handleSiparisOlustur}>
-          Sipariş Oluştur
-        </button>
-        <button className="action-button giris" onClick={handleSiparistenGiris}>
-          Siparişten Giriş
-        </button>
-        <button className="action-button yazdir" onClick={handleYazdir}>
-          <i className="print-icon">🖨️</i> Yazdır
-        </button>
+    <div style={{ padding: '20px' }}>
+      <div style={{ marginBottom: '20px' }}>
+        <h1>Sipariş Listesi</h1>
+        <hr style={{ border: '1px solid #333' }} />
       </div>
+
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '20px',
+        }}
+      >
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <CButton color="info" variant='outline' size='lg' onClick={handleSiparisOlustur}>
+            <FontAwesomeIcon icon={faShoppingCart} style={{ marginRight: '8px' }} />
+            Sipariş Oluştur
+          </CButton>
+          <CButton color="info" variant='outline' size='lg' onClick={handleSiparistenGiris}>
+            <FontAwesomeIcon icon={faLongArrowAltDown} style={{ marginRight: '8px' }} />
+            Siparişten Giriş
+          </CButton>
+          <CButton color="info" variant='outline' size='lg' onClick={handleYazdir} >
+            <FontAwesomeIcon icon={faPrint} style={{ marginRight: '8px' }} />
+            Yazdır
+          </CButton>
+
+
+        </div>
+
+        <CInput
+          type="text"
+          placeholder="Arama Yapın..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{
+            width: '30%',
+            padding: '8px',
+            border: '1px solid #ccc',
+            borderRadius: '5px',
+          }}
+        />
+      </div>
+
 
       <table className="siparis-listesi-table">
         <thead>
@@ -193,7 +228,9 @@ const SiparisListesi = () => {
                 <td>{siparis.talepNo}</td>
                 <td>{siparis.durum}</td>
                 <td>
-                  <button className="siparis-sec-button">Seç</button>
+                <CButton shape='square' variant='outline' color='primary' >
+                    Seç
+                  </CButton>
                 </td>
               </tr>
               {expandedRows[index] && (
