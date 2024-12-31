@@ -5,6 +5,7 @@ import baseURL from "../../satinalmatalepleri/js/baseURL.js";
 import axios from "axios";
 import { CButton, CNav, CNavItem, CNavLink, CTabContent, CTabPane, CTabs } from '@coreui/react';
 import CustomTable from '../../CustomTable.js';
+import SearchBox from '../../SearchBox.js';
 
 
 const TeklifIsteme = (props) => {
@@ -185,6 +186,8 @@ const TeklifIsteme = (props) => {
           <div style={{ display: "flex", gap: "20px", marginBottom: "20px" }}>
             <div style={{ flex: 1 }}>
               <label style={{ display: "block", marginBottom: "8px" }}>Teklif İsteyen</label>
+          <SearchBox fetchAddr="/queryUsers.php" label="UserName" value="UserID" onSelect={v => setRequester(v)}/>
+      {/*
               <select
                 value={requester}
                 onChange={(e) => setRequester(e.target.value)}
@@ -202,6 +205,7 @@ const TeklifIsteme = (props) => {
                   </option>
                 ))}
               </select>
+          */}
             </div>
             <div style={{ flex: 1 }}>
               <label style={{ display: "block", marginBottom: "8px" }}>Teklif Grup No</label>

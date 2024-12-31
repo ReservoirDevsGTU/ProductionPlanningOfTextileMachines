@@ -94,7 +94,7 @@ const SatinAlmaTalepleri = () => {
               { label: '', key: 'show_materials' },
               { label: 'Duzenle', key: 'edit_buttons' },
               { label: 'Talep No', key: 'RequestID' },
-              { label: 'TaleEden', key: 'UserName' },
+              { label: 'Talep Eden', key: 'UserName' },
               { label: 'Aciklama', key: 'RequestDescription' },
               { label: 'Durum', key: 'request_status' },
               { label: 'Ilerleme', key: 'progress' },
@@ -142,6 +142,7 @@ const SatinAlmaTalepleri = () => {
                   <CButton
                     size='lg'
                     color='info'
+                    disabled={item.RequestStatus != 0}
                     onClick={() => handleEditClick(item)}
                     children={<FontAwesomeIcon style={{color:'white'}} icon={faEdit} />}
                     style={{
@@ -156,6 +157,7 @@ const SatinAlmaTalepleri = () => {
                   <CButton
                     size='lg'
                     color='danger'
+                    disabled={item.RequestStatus != 0}
                     onClick={() => handleDeleteClick(item)}
                     style={{
                       color: '#fff',

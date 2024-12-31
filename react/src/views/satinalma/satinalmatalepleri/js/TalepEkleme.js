@@ -9,11 +9,11 @@ import CustomTable from "../../CustomTable.js";
 import { faTimes, faArrowLeft, faSave} from '@fortawesome/free-solid-svg-icons';
 import { faFileExcel, faPaperPlane } from "@fortawesome/free-regular-svg-icons";
 import CustomModal from '../../CustomModal.js';
+import SearchBox from '../../SearchBox.js';
 
 
 const TalepEkleme = ({ editID }) => {
   const [selectedMaterials, setSelectedMaterials] = useState([]);
-  const [users, setUsers] = useState([]);
   const [selectedButton, setSelectedButton] = useState("secili");
   const [searchTerm, setSearchTerm] = useState("");
   const [templateModal, setTemplateModal] = useState(false);
@@ -144,11 +144,6 @@ const handleModalClose = () => {
         })
         .catch((error) => console.error("Error fetching request details:", error));
     }
-
-    axios
-      .post(baseURL + "/queryUsers.php")
-      .then((response) => setUsers(response.data))
-      .catch((error) => console.error("Error fetching users:", error));
   }, [editID]);
 
   const processFile = (file) => {
@@ -279,6 +274,8 @@ const handleModalClose = () => {
           <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>
             Talep Eden
           </label>
+          <SearchBox fetchAddr="/queryUsers.php" value="UserID" label="UserName" onSelect={v=>setRequestDetails(prev => ({...prev, requester: v}))}/>
+          {/*
           <CSelect
             name="requester"
             value={requestDetails.requester}
@@ -299,6 +296,7 @@ const handleModalClose = () => {
               </option>
             ))}
           </CSelect>
+          */}
         </div>
       </div>
 
