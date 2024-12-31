@@ -98,8 +98,6 @@ const handleModalClose = () => {
     RequestedBy: requestDetails.requester,
     CreatedBy: requestDetails.requester,
     RequestDescription: requestDetails.description,
-    ManufacturingUnitID: 1,
-    IsDraft: true,
     Materials: selectedMaterials.map((m) => ({
       MaterialID: m.MaterialID,
       RequestedAmount: m.RequestedAmount,
@@ -112,10 +110,7 @@ const handleModalClose = () => {
       setModals({...modals, warning: true});
       return;
     }
-    if (editID) {
-      axios.post(baseURL + "/deleteRequest.php", new URLSearchParams({ request_id: editID }));
-    }
-    axios.post(baseURL + "/addRequest.php", { ...getSubmitData(), IsDraft: true });
+    axios.post(baseURL + (!editID ? "/addRequest.php" : "/editRequest.php"), { ...getSubmitData(), RequestStatus: 0, RequestID: editID});
     setModalMessages({...modalMessages, info: 'Talebiniz başarıyla kaydedildi.'});
     setModals({...modals, info: true});
     handleGoBack();
@@ -127,10 +122,7 @@ const handleModalClose = () => {
       setModals({...modals, warning: true});
       return;
     }
-    if (editID) {
-      axios.post(baseURL + "/deleteRequest.php", new URLSearchParams({ request_id: editID }));
-    }
-    axios.post(baseURL + "/addRequest.php", { ...getSubmitData(), IsDraft: false });
+    axios.post(baseURL + (!editID ? "/addRequest.php" : "/editRequest.php"), { ...getSubmitData(), RequestStatus: 1, RequestID: editID});
     setModalMessages({...modalMessages, info: 'Talebiniz onaya gönderildi.'});
     setModals({...modals, info: true});
     handleGoBack();

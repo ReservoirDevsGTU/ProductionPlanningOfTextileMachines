@@ -35,7 +35,7 @@ const SatinAlmaTalepleri = () => {
   };
 
   const confirmDelete = () => {
-    axios.post(baseURL + '/deleteRequest.php', new URLSearchParams({ request_id: selectedItem.RequestID }));
+    axios.post(baseURL + '/deleteRequest.php', {RequestID: selectedItem.RequestID});
     setShowModal(false);
   };
 
@@ -96,10 +96,19 @@ const SatinAlmaTalepleri = () => {
               { label: 'Talep No', key: 'RequestID' },
               { label: 'TaleEden', key: 'UserName' },
               { label: 'Aciklama', key: 'RequestDescription' },
-              { label: 'Durum', key: 'RequestStatus' },
+              { label: 'Durum', key: 'request_status' },
               { label: 'Ilerleme', key: 'progress' },
             ]}
             scopedSlots={{
+              'request_status': (item) => (
+                <td>{["Taslak",
+                      "Onay Bekliyor",
+                      "Onaylandi",
+                      "Reddedildi",
+                      "Kismi Onaylandi"
+                     ][item.RequestStatus]}
+                </td>
+              ),
               'show_materials': (item) => (
                 <td>
                   <CButton

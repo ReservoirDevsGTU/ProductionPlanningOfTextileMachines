@@ -1,48 +1,29 @@
 <?php
-/*
- * Marks a purchase request and all related details as deleted.
- * Usage: Call this script by passing a 'request_id' as a GET parameter.
- * Parameters:
- *   request_id => The ID of the purchase request to be marked as deleted.
- *   conn => The connection object to the database.
- * Process:
- *   Marks the related entries in PurchaseRequests, PurchaseRequestInfos, and PurchaseRequestDetails as deleted by setting IsDeleted = 1.
- * Return:
- *   JSON response indicating success or error.
- */
-
-header('Content-Type: application/json');
-# Allow cross-origin requests
-//header('Access-Control-Allow-Origin: *'); 
-
+include 'headers.php';
 include 'connect.php';
 
-# Check if 'request_id' is provided in the GET parameters
-if (isset($_POST['request_id'])) {
-    # Convert 'request_id' to an integer for safety
-    $requestId = intval($_POST['request_id']);
+$input = json_decode(file_get_contents("php://input"), true);
+
+if(isset($input["RequestID"])) {
     sqlsrv_begin_transaction($conn);
 
-    // Mark the PurchaseRequests record as deleted by setting IsDeleted = 1
-    $sql = "UPDATE PurchaseRequests SET IsDeleted = 1 WHERE RequestID = ?";
-    $params = array($requestId);
-    sqlsrv_query($conn, $sql, $params); // No error handling here
+    $id = $input["RequestID"];
 
-    // Mark the related record in PurchaseRequestItems as deleted
-    $sql = "UPDATE PurchaseRequestItems SET IsDeleted = 1 WHERE RequestID = ?";
-    sqlsrv_query($conn, $sql, $params); // No error handling here
+    $sql = "IF (SELECT RequestStatus FROM PurchaseRequests WHERE RequestID = $id) != 0
+            THROW 50000, 'Invalid status.', $id;
+            UPDATE PurchaseRequests SET IsDeleted = 1 WHERE RequestID = $id;
+            UPDATE PurchaseRequestItems SET IsDeleted = 1 WHERE RequestID = $id;
+            UPDATE PurchaseRequestDetails SET IsDeleted = 1 WHERE RequestID = $id;";
 
-    // Mark the related record in PurchaseRequestDetails as deleted
-    $sql = "UPDATE PurchaseRequestDetails SET IsDeleted = 1 WHERE RequestID = ?";
-    sqlsrv_query($conn, $sql, $params); // No error handling here
+    $stmt = sqlsrv_query($conn, $sql);
 
-    sqlsrv_commit($conn);
-
-    echo json_encode(array("status" => "success", "message" => "Request ID $requestId has been marked as deleted in all related tables."));
-    
-} else {
-    // If 'request_id' is not provided, return an error message in JSON format
-    echo json_encode(array("status" => "error", "message" => "Request ID not provided."));
+    if($stmt) {
+        sqlsrv_commit($conn);
+    }
+    else {
+        echo json_encode(sqlsrv_errors(), true);
+        sqlsrv_rollback($conn);
+    }
 }
 
 sqlsrv_close($conn);
