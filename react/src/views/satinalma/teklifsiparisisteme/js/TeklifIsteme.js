@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
-import baseURL from "../../satinalmatalepleri/js/baseURL.js";
+import baseURL from "../../baseURL.js";
 import axios from "axios";
 import { CButton, CNav, CNavItem, CNavLink, CTabContent, CTabPane, CTabs } from '@coreui/react';
 import CustomTable from '../../CustomTable.js';

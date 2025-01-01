@@ -124,6 +124,8 @@ function getTableData($conn, $input, $table) {
 
     $sql = $head . " " . $selectedColumns . " " . $from . " " . $selectedJoins . " WHERE " . $selectedFilters . " " . $tail;
 
+    //echo $sql;
+
     $stmt = sqlsrv_query($conn, $sql);
     
     $data = [];

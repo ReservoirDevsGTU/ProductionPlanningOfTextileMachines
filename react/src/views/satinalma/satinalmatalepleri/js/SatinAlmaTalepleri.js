@@ -5,7 +5,7 @@ import { useHistory } from 'react-router-dom';
 import { CInput, CProgress, CCollapse, CCardBody, CButton } from '@coreui/react';
 import TalepEkleme from './TalepEkleme';
 import axios from 'axios';
-import baseURL from "./baseURL.js";
+import baseURL from "../../baseURL.js";
 import CustomTable from '../../CustomTable.js';
 import '@coreui/coreui/dist/css/coreui.min.css';
 

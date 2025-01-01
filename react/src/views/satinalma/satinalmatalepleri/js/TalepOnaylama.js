@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useHistory, useParams } from "react-router-dom";
 import axios from "axios";
 import { CInput } from "@coreui/react";
-import baseURL from "./baseURL.js";
+import baseURL from "../../baseURL.js";
 
 const TalepOnayla = () => {
   const { id } = useParams();

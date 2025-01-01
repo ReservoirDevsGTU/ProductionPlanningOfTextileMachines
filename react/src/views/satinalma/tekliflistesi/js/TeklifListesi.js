@@ -15,9 +15,10 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import CustomTable from '../../CustomTable.js';
 import axios from 'axios'; 
-import baseURL from '../../satinalmatalepleri/js/baseURL.js';
+import baseURL from '../../baseURL.js';
 import Dropzone from 'react-dropzone'
 import * as XLSX from "xlsx";
+import searchTables from "../../util.js";
 
 const TeklifListesi = () => {
   const history = useHistory();
@@ -388,34 +389,6 @@ const TeklifListesi = () => {
     });
   }
 
-  function searchTables(wb, columnFilters) {
-    var result = [];
-    Object.values(wb.Sheets).forEach(s => {
-      var grid = XLSX.utils.sheet_to_json(s, {header: 1});
-	  for(var i = 0; i < grid.length; i++) {
-        for(var j = 0; j < grid[i].length; j++) {
-          if(grid[i][j]) {
-            var length = 0;
-			while(grid[i][j + length]) length++;
-			var tableArray = [];
-			var k = 0;
-			while(true) {
-              const row = grid[i + k]?.slice(j, j + length);
-			  if(!row?.find(Boolean)) break;
-			  for(var l = 0; l < length; l++) grid[i + k][j + l] = undefined;
-			  tableArray[tableArray.length] = row;
-			  k++;
-            }
-			if(columnFilters.find(cf => cf.reduce((acc, cur) => acc && tableArray[0].find(c => c === cur), true))) {
-			  result[result.length] = XLSX.utils.sheet_to_json(XLSX.utils.aoa_to_sheet(tableArray));
-            }
-          }
-        }
-      }
-    });
-    return result;
-  }
-
   return (
     <div style={{ padding: '20px' }}>
       <div style={{ marginBottom: '20px' }}>
@@ -481,7 +454,7 @@ const TeklifListesi = () => {
             fields={fields}
             scopedSlots={{
               'offer_status': (item) => (
-                <td>{["Teklif Istegi",
+                <td>{["Yeni Teklif",
                       "Teklif Gonderildi",
                       "Teklif Alindi",
                       "Degerlendiriliyor",
@@ -509,7 +482,23 @@ const TeklifListesi = () => {
                   </CButton>
                 </td>
               ),
-              'details': (item) => (
+              checkbox: (item) => (
+                <td>
+                  <input
+                    type="checkbox"
+                    checked={!!selected[item.OfferID]}
+                    onChange={(e) => handleRowSelect(item.OfferID, e.target.checked)}
+                  />
+                </td>
+              ),
+              select : (item) => (
+                <td>
+                  <CButton disabled={[0, 1, 2].find(s=>s === item.OfferStatus) === undefined} shape='square' variant='outline' color='primary' onClick={() => history.push(`/satinalma/teklif-form/${item.OfferID}`)}>
+                    Seç
+                  </CButton>
+                </td>
+              ),
+              details: (item) => (
                 <CCollapse show={expandedRows[item.RowID]}>
                   <CCardBody>
                     <CustomTable
@@ -548,22 +537,6 @@ const TeklifListesi = () => {
                     />
                   </CCardBody>
                 </CCollapse>
-              ),
-              checkbox: (item) => (
-                <td>
-                  <input
-                    type="checkbox"
-                    checked={!!selected[item.OfferID]}
-                    onChange={(e) => handleRowSelect(item.OfferID, e.target.checked)}
-                  />
-                </td>
-              ),
-              'select' : (item) => (
-                <td>
-                  <CButton shape='square' variant='outline' color='primary' onClick={() => history.push(`/satinalma/teklif-form/${item.OfferID}`)}>
-                    Seç
-                  </CButton>
-                </td>
               ),
             }}
           />

@@ -1,4 +1,4 @@
 php/connect.php
 php/update.php
 react/node_modules
-react/src/views/satinalma/satinalmatalepleri/js/baseURL.js
+react/src/views/satinalma/baseURL.js

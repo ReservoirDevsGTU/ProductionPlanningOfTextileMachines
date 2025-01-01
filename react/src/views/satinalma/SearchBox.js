@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from 'axios';
-import baseURL from './satinalmatalepleri/js/baseURL.js';
+import baseURL from './baseURL.js';
 
-const SearchBox = ({fetchAddr, label, value, onSelect}) => {
+const SearchBox = ({fetchAddr, label, value, initialValue, onSelect}) => {
   const [options, setOptions] = useState([]);
   const [query, setQuery] = useState("");
   const [previousCancel, setCancel] = useState(false);
@@ -10,6 +10,15 @@ const SearchBox = ({fetchAddr, label, value, onSelect}) => {
   const [selectionValid, setSelectionValid] = useState(false);
 
   const inputRef = useRef(null);
+
+  useEffect(async () => {
+    if(initialValue) {
+      axios.post(baseURL + fetchAddr, {filters: {[value]: [initialValue]}})
+      .then(r => {
+        setQuery(r.data[0]?.[label]);
+      });
+    }
+  }, [initialValue]);
 
   useEffect(async () => {
     if(previousCancel) {
@@ -46,7 +55,7 @@ const SearchBox = ({fetchAddr, label, value, onSelect}) => {
   }, []);
 
   const handleSelect = (o) => {
-    onSelect(value ? o[value] : o);
+    onSelect(value ? o?.[value] : o);
     setSelectionValid(o);
   };
 

@@ -4,7 +4,7 @@ import { CInput, CSelect, CButton } from "@coreui/react";
 import { useHistory } from "react-router-dom";
 import axios from "axios";
 import * as XLSX from "xlsx";
-import baseURL from "./baseURL";
+import baseURL from "../../baseURL";
 import CustomTable from "../../CustomTable.js";
 import { faTimes, faArrowLeft, faSave} from '@fortawesome/free-solid-svg-icons';
 import { faFileExcel, faPaperPlane } from "@fortawesome/free-regular-svg-icons";
@@ -28,6 +28,7 @@ const TalepEkleme = ({ editID }) => {
   const [requestDetails, setRequestDetails] = useState({
     date: "",
     requester: "",
+    initialRequester: null,
     description: "",
   });
   
@@ -138,6 +139,7 @@ const handleModalClose = () => {
           setRequestDetails({
             date: data.RequestDeadline,
             requester: data.RequestedBy,
+            initialRequester: data.RequestedBy,
             description: data.RequestDescription,
           });
           setSelectedMaterials(data.Materials || []);
@@ -274,7 +276,7 @@ const handleModalClose = () => {
           <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>
             Talep Eden
           </label>
-          <SearchBox fetchAddr="/queryUsers.php" value="UserID" label="UserName" onSelect={v=>setRequestDetails(prev => ({...prev, requester: v}))}/>
+          <SearchBox fetchAddr="/queryUsers.php" value="UserID" initialValue={requestDetails.initialRequester} label="UserName" onSelect={v=>setRequestDetails(prev => ({...prev, requester: v}))}/>
           {/*
           <CSelect
             name="requester"

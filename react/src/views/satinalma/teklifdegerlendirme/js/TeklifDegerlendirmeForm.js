@@ -3,7 +3,7 @@ import { useHistory, useParams } from "react-router-dom";
 import "../css/TeklifDegerlendirmeForm.css";
 import axios from 'axios'; 
 import {CButton} from '@coreui/react';
-import baseURL from '../../satinalmatalepleri/js/baseURL.js';
+import baseURL from '../../baseURL.js';
 import { faPrint } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 

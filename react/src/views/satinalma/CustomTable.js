@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { CDataTable, CPagination } from '@coreui/react';
 import axios from 'axios';
-import baseURL from './satinalmatalepleri/js/baseURL.js';
+import baseURL from './baseURL.js';
 
 const CustomTable = ({addTableClasses, data, fields, fetchAddr, fetchArgs, onFetch, scopedSlots, update, searchTerm, searchFields}) => {
   const [displayData, setDisplayData] = useState(["dummy"]);
