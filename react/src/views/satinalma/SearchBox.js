@@ -24,9 +24,11 @@ const SearchBox = ({fetchAddr, label, value, onSelect}) => {
         data: {offset: 0, fetch: 10, search: {term: query, fields: [label]}}
     })
       .then(r => {
-        if(query === r.data[0][label]) {
-          handleSelect(r.data[0][value]);
-        }
+        r.data.forEach(row => {
+          if(query === row[label]) {
+            handleSelect(row);
+          }
+        });
         setOptions(r.data);
       })
       .catch(e => {
@@ -43,9 +45,9 @@ const SearchBox = ({fetchAddr, label, value, onSelect}) => {
       return () => document.removeEventListener("clicl", toggle);
   }, []);
 
-  const handleSelect = (val) => {
-    onSelect(val);
-    setSelectionValid(val);
+  const handleSelect = (o) => {
+    onSelect(value ? o[value] : o);
+    setSelectionValid(o);
   };
 
   return (
@@ -67,7 +69,7 @@ const SearchBox = ({fetchAddr, label, value, onSelect}) => {
           {showList && options.map(o => (<tr
                               onMouseEnter={(e)=>e.target.style["background"] = "#f0f0f0"}
                               onMouseLeave={(e)=>e.target.style["background"] = "white"}
-                              onClick={() => {handleSelect(o[value]); setQuery(o[label])}}>
+                              onClick={() => {handleSelect(o); setQuery(o[label])}}>
                               <td>
                                 {o[label]}
                               </td>

@@ -332,31 +332,58 @@ const TeklifListesi = () => {
     axios.post(baseURL + "/queryOffers.php", {subTables:{Materials: {expand: false}, Details: {expand:true}}, filters: {OfferID: [offerID]}})
       .then(response => {
         const data = response.data[0];
-        const printDetails = [{
-          OfferID: data.OfferID,
-          SupplierName: data.SupplierName,
-          OfferDate: data.OfferDate,
-          OfferDeadline: data.OfferDate,
-          OfferGroupID: data.OfferGroupID,
-          RequesterName: data.RequesterName,
-          OfferStatus: data.OfferStatus
-        }];
-        const printItems = data.Materials.map(m => ({
-          MaterialID: m.MaterialID,
-          MaterialNo: m.MaterialNo,
-          MaterialName: m.MaterialName,
-          RequestID: m.RequestID,
-          RequestedAmount: m.RequestedAmount,
-          OfferRequestedAmount: m.OfferRequestedAmount,
-          OfferedAmount: m.OfferedAmount,
-          UnitID: m.UnitID,
-          ItemStatus: m.ItemStatus
-        }));
+        const printDetails = [
+            ["OfferID",
+			 "OfferDescription",
+			 "SupplierID",
+			 "SupplierName",
+			 "OfferDate",
+			 "OfferDeadline",
+			 "OfferGroupID",
+			 "RequestedBy",
+			 "RequesterName",
+			 "CreatedBy",
+			 "CreatorName",
+			 "OfferStatus"],
+            [data.OfferID,
+			 data.OfferDescription,
+			 data.SupplierID,
+			 data.SupplierName,
+			 data.OfferDate,
+			 data.OfferDeadline,
+			 data.OfferGroupID,
+			 data.RequestedBy,
+			 data.RequesterName,
+			 data.CreatedBy,
+			 data.CreatorName,
+			 data.OfferStatus
+            ]];
+        const printItems = [
+            ["MaterialID",
+			 "MaterialNo",
+			 "MaterialName",
+			 "RequestID",
+			 "RequestItemID",
+			 "RequestedAmount",
+			 "OfferRequestedAmount",
+			 "OfferedAmount",
+			 "UnitID",
+			 "ItemStatus"]]
+              .concat(data.Materials.map(m => ([
+             m.MaterialID,
+             m.MaterialNo,
+             m.MaterialName,
+             m.RequestID,
+             m.RequestItemID,
+             m.RequestedAmount,
+             m.OfferRequestedAmount,
+             m.OfferedAmount,
+             m.UnitID,
+             m.ItemStatus]
+              )));
         var wb = XLSX.utils.book_new();
-        const detailSheet = XLSX.utils.json_to_sheet(printDetails);
-        const itemSheet = XLSX.utils.json_to_sheet(printItems);
-        XLSX.utils.book_append_sheet(wb, detailSheet, "Details");
-        XLSX.utils.book_append_sheet(wb, itemSheet, "Items");
+        const sheet = XLSX.utils.json_to_sheet(printDetails.concat('').concat(printItems), {skipHeader: true});
+        XLSX.utils.book_append_sheet(wb, sheet);
         XLSX.writeFileXLSX(wb, "offer.xlsx");
     });
   }
@@ -707,7 +734,7 @@ const TeklifListesi = () => {
                 data.CreatedBy = data.RequestedBy;
               }
               data.Materials = itemData;
-              data.Suppliers = supplierData;
+              data.Suppliers = supplierData.map(r => ({SupplierID: r.SupplierID}));
               axios.post(baseURL + "/createOffer.php", data);
             }}
           >
