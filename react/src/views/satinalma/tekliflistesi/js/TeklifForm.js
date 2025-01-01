@@ -16,12 +16,19 @@ import {
   CNavItem,
   CNavLink,
   CTabContent,
-  CTabPane
+  CTabPane,
+  CModal,
+  CModalHeader,
+  CModalBody,
+  CModalFooter,
 } from '@coreui/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileExcel } from '@fortawesome/free-solid-svg-icons';
 import SearchBox from '../../SearchBox.js';
 import baseURL from '../../baseURL.js';
+import * as XLSX from 'xlsx';
+import Dropzone from 'react-dropzone';
+import searchTables from '../../util.js';
 
 const TeklifForm = () => {
   const OfferID = useParams().id;
@@ -38,6 +45,7 @@ const TeklifForm = () => {
     OfferStatus: '',
     OfferDescription: ''
   });
+  const [sheetModal, setSheetModal] = useState(false);
 
   if(!OfferID) history.goBack();
 
@@ -80,6 +88,7 @@ const TeklifForm = () => {
   };
 
   const handleInputChange = (e) => {
+    console.log(formData);
     setFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value
@@ -98,7 +107,7 @@ const TeklifForm = () => {
     <div style={{ padding: '20px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <h3>Teklif Formu</h3>
-        <CButton color="success" size='lg' variant="outline">
+        <CButton color="success" size='lg' variant="outline" onClick={()=>setSheetModal(true)}>
           <FontAwesomeIcon icon={faFileExcel} style={{ marginRight: '8px' }} />
           Teklif Aktar
         </CButton>
@@ -255,7 +264,7 @@ const TeklifForm = () => {
                           <CInput
                             type="number"
                             value={item.OfferedAmount}
-                            disabled={formData.OfferStatus !== 2}
+                            disabled={formData.OfferStatus != 2}
                             onChange={e => handleMaterialChange(index, 'OfferedAmount', e.target.value)}
                           />
                         </td>
@@ -264,14 +273,14 @@ const TeklifForm = () => {
                           <CInput
                             type="number"
                             value={item.UnitPrice}
-                            disabled={formData.OfferStatus !== 2}
+                            disabled={formData.OfferStatus != 2}
                             onChange={e => handleMaterialChange(index, 'UnitPrice', e.target.value)}
                           />
                         </td>
                         <td style={{ padding: '12px' }}>
                           <CSelect
                             value={item.Currency}
-                            disabled={formData.OfferStatus !== 2}
+                            disabled={formData.OfferStatus != 2}
                             onChange={e => handleMaterialChange(index, 'Currency', e.target.value)}
                           >
                             <option value="TL">TL</option>
@@ -288,6 +297,82 @@ const TeklifForm = () => {
           </CTabPane>
         </CTabContent>
       </CTabs>
+      <CModal centered show={sheetModal} onClose={()=>setSheetModal(false)}>
+        <CModalHeader closeButton>
+          <h5 style={{fontWeight: 'bold', fontSize:'24px'}}>Teklif Aktar</h5>
+        </CModalHeader>
+        <CModalBody>
+          <Dropzone 
+            accept={{"application/*": [".xlsx"]}} 
+            multiple={false}
+            onDropAccepted={async file=>{
+              const wb = XLSX.read(await file[0].bytes(), {type: "array"});
+              const tables = searchTables(wb, [["OfferDescription", "OfferDeadline", "OfferGroupID"], 
+                                               ["MaterialID"],
+                                               ["SupplierID"]]);
+              const offerData = tables.find(t => t.find(r => r.OfferGroupID));
+              const itemData = tables.find(t => t.find(r => r.MaterialID));
+              const supplierData = tables.find(t => t.find(r => r.SupplierID));
+              if(!(offerData && itemData && supplierData)) {
+                console.error('Invalid sheet.');
+                return;
+              }
+              var data = offerData[0];
+              setFormData(prev => ({
+                ...prev,
+                OfferGroupID: data?.OfferGroupID || prev.OfferGroupID,
+                OfferDeadline: data?.OfferDeadline || prev.OfferDeadline,
+                OfferDate: data?.OfferDate || prev.OfferDeadline,
+                OfferDescription: data?.OfferDescription || prev.OfferDescription,
+                OfferStatus: [1, 2].find(s => s === data?.OfferStatus) || prev.OfferStatus,
+                SupplierID: supplierData?.[0].SupplierID || prev.SupplierID,
+                initialSupplier: supplierData?.[0].SupplierID || prev.SupplierID,
+              }));
+              setMaterialData(prev => prev.map(m => {
+                const totalPrice = itemData.reduce((acc, cur) => cur.MaterialID === m.MaterialID ? acc + Number(cur.OfferedPrice) : acc, 0);
+                const totalAmount = itemData.reduce((acc, cur) => cur.MaterialID === m.MaterialID ? acc + Number(cur.OfferedAmount) : acc, 0);
+                return {
+                  ...m,
+                  OfferedPrice: totalPrice || m.OfferedPrice,
+                  OfferedAmount: totalAmount || m.OfferedAmount,
+                  UnitPrice: totalPrice && totalAmount ? Math.round(Number.EPSILON + 100 * totalPrice / totalAmount) / 100 : m.UnitPrice
+                };
+              }));
+              setSheetModal(false);
+            }}
+          >
+            {({getRootProps, getInputProps, isDragActive}) => (
+              <div {...getRootProps()}
+                style={{
+                  display: "block",
+                  border: "2px dashed #ccc",
+                  padding: "20px",
+                  textAlign: "center",
+                  cursor: "pointer",
+                  borderRadius: "4px",
+                  backgroundColor: isDragActive ? "#f1f1f1" : "#ffffff",
+                  transition: "background 0.1s"
+                }}
+                onMouseEnter={(e)=>e.target.style["background"] = "#f1f1f1"}
+                onMouseLeave={(e)=>e.target.style["background"] = "#ffffff"}
+                >
+                  <input {...getInputProps()}/>
+                  {/*
+                     Bunu okuyan front-end'ciye,
+
+                     Tam yazinin ustune sag tiklayinca falan rengi sabit kaliyo,
+                     suna baksana sana zahmet, cozemedim.
+
+                     Saygilar, mehme
+                  */}
+                  <h6 style={{fontSize: '16px'}}>Dosya Surukle veya Tikla</h6>
+              </div>
+            )}
+          </Dropzone>
+        </CModalBody>
+        <CModalFooter>
+        </CModalFooter>
+      </CModal>
     </div>
   );
 };

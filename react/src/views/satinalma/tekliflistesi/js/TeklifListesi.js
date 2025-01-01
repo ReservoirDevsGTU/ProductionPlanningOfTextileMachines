@@ -510,7 +510,7 @@ const TeklifListesi = () => {
                         { label: 'Birim', key: 'UnitID' },
                         { label: 'Birim Fiyatı', key: 'unit_price' },
                         { label: 'Kur', key: 'exchange_rate' },
-                        { label: 'Durum', key: 'ItemStatus' },
+                        { label: 'Durum', key: 'item_status' },
 
                       ]}
                       data={item.Materials?.reduce((acc, cur) => {
@@ -529,6 +529,12 @@ const TeklifListesi = () => {
                           return acc;
                         }, [])}
                       scopedSlots={{
+                        'item_status': (item) => (
+                            <td>{["Onay Bekliyor",
+                                  "Onaylandi",
+                                  "Reddedildi"][item.ItemStatus]
+                                }</td>
+                        ),
                         'unit_price': (item) => (<td>{item.OfferedPrice ?
                               Math.round(Number.EPSILON + 100 * item.OfferedPrice / item.OfferedAmount) / 100
                               : '?'}</td>),
