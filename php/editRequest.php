@@ -5,6 +5,14 @@ include 'connect.php';
 $input = json_decode(file_get_contents("php://input"), true);
 
 if($input
+   and isset(
+    $input["RequestID"],
+    $input["RequestStatus"],
+    $input["RequestedBy"],
+    $input["RequestDeadline"],
+    $input["RequestDescription"],
+    $input["Materials"])
+   and count($input["Materials"]) > 0
    and ($input["RequestStatus"] == 0 or $input["RequestStatus"] == 1)
   ) {
     $id = $input["RequestID"];

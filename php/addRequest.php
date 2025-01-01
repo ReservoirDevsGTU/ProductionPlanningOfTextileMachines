@@ -24,6 +24,7 @@ if($input
 
             INSERT INTO PurchaseRequestDetails(RequestInfoID, RequestID, RequestedBy, RequestDeadline, RequestDescription, RequestDetailStatus, IsDeleted)
             VALUES((SELECT ISNULL(MAX(RequestInfoID)+1,1) FROM PurchaseRequestDetails), (SELECT val FROM @id), ?, ?, ?, 0, 0);
+
             INSERT INTO PurchaseRequestItems(ItemID, RequestID, MaterialID, RequestedAmount, ItemStatus, IsDeleted) VALUES";
 
     $i = 1;
@@ -35,8 +36,9 @@ if($input
         $i = $i + 1;
     }
 
-    sqlsrv_begin_transaction($conn);
     $sql = substr($sql, 0, strlen($sql) - 1);
+
+    sqlsrv_begin_transaction($conn);
 
     $stmt = sqlsrv_query($conn, $sql, array(
         $input["CreatedBy"],

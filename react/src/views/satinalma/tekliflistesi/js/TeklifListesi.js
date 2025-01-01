@@ -298,7 +298,7 @@ const TeklifListesi = () => {
     { key: 'OfferID', label: 'Teklif No' },
     { key: 'request_id', label: 'Talep No' },
     { key: 'RequesterName', label: 'Teklif İsteyen' },
-    { key: 'OfferStatus', label: 'Durum' },
+    { key: 'offer_status', label: 'Durum' },
     { key: 'select', label:'Seç'}
   ];
 
@@ -359,6 +359,34 @@ const TeklifListesi = () => {
         XLSX.utils.book_append_sheet(wb, itemSheet, "Items");
         XLSX.writeFileXLSX(wb, "offer.xlsx");
     });
+  }
+
+  function searchTables(wb, columnFilters) {
+    var result = [];
+    Object.values(wb.Sheets).forEach(s => {
+      var grid = XLSX.utils.sheet_to_json(s, {header: 1});
+	  for(var i = 0; i < grid.length; i++) {
+        for(var j = 0; j < grid[i].length; j++) {
+          if(grid[i][j]) {
+            var length = 0;
+			while(grid[i][j + length]) length++;
+			var tableArray = [];
+			var k = 0;
+			while(true) {
+              const row = grid[i + k]?.slice(j, j + length);
+			  if(!row?.find(Boolean)) break;
+			  for(var l = 0; l < length; l++) grid[i + k][j + l] = undefined;
+			  tableArray[tableArray.length] = row;
+			  k++;
+            }
+			if(columnFilters.find(cf => cf.reduce((acc, cur) => acc && tableArray[0].find(c => c === cur), true))) {
+			  result[result.length] = XLSX.utils.sheet_to_json(XLSX.utils.aoa_to_sheet(tableArray));
+            }
+          }
+        }
+      }
+    });
+    return result;
   }
 
   return (
@@ -425,6 +453,16 @@ const TeklifListesi = () => {
             onFetch={processData}
             fields={fields}
             scopedSlots={{
+              'offer_status': (item) => (
+                <td>{["Teklif Istegi",
+                      "Teklif Gonderildi",
+                      "Teklif Alindi",
+                      "Degerlendiriliyor",
+                      "Onaylandi",
+                      "Reddedildi",
+                      "Kismi Onaylandi"][item.OfferStatus]
+                }</td>
+              ),
               'request_id': (item) => (
                 <td>
                   {(item.Materials?.length > 0 ? Object.keys(item.Materials.reduce((acc, cur) => {
@@ -643,13 +681,27 @@ const TeklifListesi = () => {
             multiple={false}
             onDropAccepted={async file=>{
               const wb = XLSX.read(await file[0].bytes(), {type: "array"});
-              const offerData = XLSX.utils.sheet_to_json(wb.Sheets.Details);
-              const itemData = XLSX.utils.sheet_to_json(wb.Sheets.Items);
-              const supplierData = XLSX.utils.sheet_to_json(wb.Sheets.Suppliers);
+              const tables = searchTables(wb, [["OfferDescription", "OfferDeadline", "OfferGroupID"], 
+                                               ["MaterialID", "OfferRequestedAmount"],
+                                               ["SupplierID"]]);
+              console.log(tables);
+              const offerData = tables.find(t => t.find(r => r.OfferGroupID));
+              const itemData = tables.find(t => t.find(r => r.MaterialID));
+              const supplierData = tables.find(t => t.find(r => r.SupplierID));
+              if(!(offerData && itemData && supplierData)) {
+                console.error('Invalid sheet.');
+                return;
+              }
               var data = offerData[0];
               if(!data.OfferDate) {
                 const d = new Date();
                 data.OfferDate = d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + (d.getDay() + 1)).slice(-2);
+              }
+              if(!data.OfferStatus) {
+                data.OfferStatus = 0;
+              }
+              if(!data.RequestedBy) {
+                data.RequestedBy = 1;
               }
               if(!data.CreatedBy) {
                 data.CreatedBy = data.RequestedBy;

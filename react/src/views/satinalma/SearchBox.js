@@ -24,6 +24,9 @@ const SearchBox = ({fetchAddr, label, value, onSelect}) => {
         data: {offset: 0, fetch: 10, search: {term: query, fields: [label]}}
     })
       .then(r => {
+        if(query === r.data[0][label]) {
+          handleSelect(r.data[0][value]);
+        }
         setOptions(r.data);
       })
       .catch(e => {

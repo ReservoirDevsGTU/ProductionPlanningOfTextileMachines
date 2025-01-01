@@ -83,6 +83,7 @@ const TeklifIsteme = (props) => {
     const requestData = {
       OfferGroupID: quoteGroupNo,
       CreatedBy: requester,
+      OfferStatus: 0,
       RequestedBy: requester,
       OfferDescription: description,
       OfferDate: quoteDate,
@@ -122,7 +123,6 @@ const TeklifIsteme = (props) => {
         return acc;
       }, [])
     };
-    console.log("Saved Request Data:", requestData);
     axios.post(baseURL + "/createOffer.php", requestData);
     alert("Teklif bilgileri kaydedildi!");
   };
