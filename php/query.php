@@ -22,28 +22,30 @@ function genQuery($input, $table, &$selectedColumns, &$selectedJoins, &$selected
     }
 
     foreach(array_keys($columns) as $colName) {
-        if(!isset($table["alias"]) and isset($table["parentPrimary"]) and $colName == $table["parentPrimary"]) {
-            continue;
-        }
         $selectedColumns .= ", " . $columns[$colName] . " " . $colName;
     }
     
     if(isset($input["filters"])) {
-        foreach(array_keys($input["filters"]) as $colName) {
-            if(isset($columns[$colName])) {
-                $values = "";
-                foreach($input["filters"][$colName] as $value) {
-                    if(gettype($value) == "string") {
-                        $values .= ", '" . $value . "'";
+        $allFilters = "";
+        foreach($input["filters"] as $filter) {
+            $filterGroup = "";
+            foreach(array_keys($filter) as $colName) {
+                if(isset($columns[$colName])) {
+                    $values = "";
+                    foreach($filter[$colName] as $value) {
+                        if(gettype($value) == "string") {
+                            $values .= ", '" . $value . "'";
+                        }
+                        else {
+                            $values .= ", " . $value;
+                        }
                     }
-                    else {
-                        $values .= ", " . $value;
-                    }
+                    $filterGroup .= " AND " . $columns[$colName] . " IN (" . substr($values, 2) . ")";
                 }
-                $values = substr($values, 2);
-                $selectedFilters .= " AND " . $columns[$colName] . " IN (" . $values . ")";
             }
+            $allFilters .= " OR (" . substr($filterGroup, 4) . ")";
         }
+        $selectedFilters .= " AND (" . substr($allFilters, 3) . ")";
     }
 
     if(isset($input["search"]) and strlen($input["search"]["term"]) > 0) {
@@ -64,14 +66,23 @@ function genQuery($input, $table, &$selectedColumns, &$selectedJoins, &$selected
         foreach(array_keys($input["subTables"]) as $subTableName) {
             if(isset($subTables[$subTableName])) {
                 $subTable = $subTables[$subTableName];
-                $subTable["parentPrimary"] = $primary;
+                $subTable["alias"] = $subTableName;
                 if($input["subTables"][$subTableName]["expand"]) {
+                    $joinConditions = "";
+                    foreach($subTable["subTableJoinOn"] as $colName) {
+                        $joinConditions .= " AND " . $columns[$colName] . " = " .
+                                           $subTable["columns"][$colName];
+                        $subTable["columns"] = array_filter($subTable["columns"],
+                            function($key) use($colName) {
+                                return $key != $colName;
+                            },
+                            ARRAY_FILTER_USE_KEY);
+                    }
                     $selectedJoins .= " JOIN  " . $subTable["name"] .
-                                       " ON " . $subTable["subTableJoinOn"] . " = " . $columns[$primary];
+                                       " ON " . substr($joinConditions, 4);
                     genQuery($input["subTables"][$subTableName], $subTable, $selectedColumns, $selectedJoins, $selectedFilters, $subTablesNoExpand, $postProcessList);
                 }
                 else {
-                    $subTable["alias"] = $subTableName;
                     $subTablesNoExpand[] = $subTable;
                 }
             }
@@ -91,23 +102,6 @@ function getTableData($conn, $input, $table) {
 
     $subTablesNoExpand = [];
     $postProcessList = [];
-
-    if(isset($input["distinct"])) {
-        $from = "FROM (SELECT MIN(" . $table["primary"] . ") AS " . $table["primary"];
-        $distinctGroups = "";
-        $tableFullName = strstr($table["name"], " ", true);
-        $tableAlias = substr(strstr($table["name"], " "), 1);
-        foreach($input["distinct"] as $colName) {
-            $distinctGroups .= ", " . $colName;
-        }
-        $from .= $distinctGroups;
-        $from .= " FROM " . $tableFullName;
-        $from .= " WHERE " . str_replace($tableAlias, $tableFullName, $table["filters"]);
-        $from .= " GROUP BY" . substr($distinctGroups, 1) . ") distinctRows";
-        $selectedJoins .= " JOIN " . $table["name"] .
-                          " ON " . $table["columns"][$table["primary"]] . " =" .
-                          " distinctRows." . $table["primary"];
-    }
 
     genQuery($input, $table, $selectedColumns, $selectedJoins, $selectedFilters, $subTablesNoExpand, $postProcessList);
     
@@ -141,24 +135,34 @@ function getTableData($conn, $input, $table) {
 
     if($subTablesNoExpand) {
         foreach($subTablesNoExpand as $subTable) {
-            $parentPrimary = $subTable["parentPrimary"];
+            $joinOn = $subTable["subTableJoinOn"];
 
-            $ids = [];
+            $subFilters = [];
 
             foreach($data as $row) {
-                if($row[$parentPrimary] !== null)
-                    $ids[] = $row[$parentPrimary];
+                $result = array();
+                foreach($joinOn as $colName) {
+                    if($row[$colName] != null) {
+                        $result[$colName] = array($row[$colName]);
+                    }
+                }
+                if($result) $subFilters[] = $result;
             }
 
+            //print_r($subFilters);
+
             $subInput = $input["subTables"][$subTable["alias"]];
-            $subInput["filters"][$parentPrimary] = $ids;
-            $subInput["columns"][] = $parentPrimary;
+            $subInput["filters"] = $subFilters;
 
             $subData = getTableData($conn, $subInput, $subTable);
 
             for($i = 0; $i < count($data); $i++) {
-                $data[$i][$subTable["alias"]] = array_values(array_filter($subData, function($r) use ($parentPrimary, $data, $i) {
-                    return $r[$parentPrimary] == $data[$i][$parentPrimary];
+                $data[$i][$subTable["alias"]] = array_values(array_filter($subData, function($r) use ($joinOn, $data, $i) {
+                    $result = true;
+                    foreach($joinOn as $colName) {
+                        $result = $result && $r[$colName] == $data[$i][$colName];
+                    }
+                    return $result;
                 }));
             }
         }
@@ -180,6 +184,11 @@ function query($table) {
     
     if($_SERVER['REQUEST_METHOD'] != 'POST') return;
 
-    echo json_encode(getTableData($conn, $input, $table));
+    header('Content-Encoding: gzip'); 
+    echo gzencode(json_encode(getTableData($conn, $input, $table)));
+}
+
+function dateToText($date) {
+    return $date->format("Y-m-d");
 }
 ?>

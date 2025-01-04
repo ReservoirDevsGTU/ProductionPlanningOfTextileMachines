@@ -2,7 +2,7 @@
 include 'query.php';
 
 $requestItemTable = array("primary" => "RequestItemID",
-                          "subTableJoinOn" => "pri.RequestID",
+                          "subTableJoinOn" => array("RequestID"),
                           "columns" => array("RequestItemID" => "pri.ItemID",
                                              "RequestID" => "pri.RequestID",
                                              "MaterialID" => "pri.MaterialID",
@@ -27,10 +27,6 @@ $requestItemTable = array("primary" => "RequestItemID",
                           "filters" => "pri.IsDeleted = 0
                                         AND ms.IsDeleted = 0",
 );
-
-function dateToText($date) {
-    return $date->format("Y-m-d");
-}
 
 $requestTable = array("primary" => "RequestID",
                       "columns" => array("RequestID" => "pr.RequestID",

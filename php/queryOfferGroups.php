@@ -2,7 +2,7 @@
 include "query.php";
 
 $requestTable = array("primary" => "RequestID",
-                      "subTableJoinOn" => array("OfferID"),
+                      "subTableJoinOn" => array("RequestID"),
                       "columns" => array("RequestID" => "pr.RequestID",
                                          "CreationDate" => "pr.CreationDate",
                                          "RequestDeadline" => "prd.RequestDeadline",
@@ -22,13 +22,14 @@ $requestTable = array("primary" => "RequestID",
                       "postProcess" => array("CreationDate" => "dateToText",
                                              "RequestDeadline" => "dateToText",
                                             ),
-                      "subTables" => [],
 );
 
 $offerItemTable = array("primary" => "OfferItemID",
-                        "subTableJoinOn" => array("OfferID"),
+                        "subTableJoinOn" => array("OfferGroupID", "OfferStatus"),
                         "columns" => array("OfferItemID" => "poi.ItemID",
                                            "OfferID" => "poi.OfferID",
+                                           "OfferStatus" => "po.OfferStatus",
+                                           "OfferGroupID" => "po.OfferGroupID",
                                            "ConformationStatus" => "poi.ConformationStatus",
                                            "RequestItemID" => "poi.RequestItemID",
                                            "RequestID" => "pri.RequestID",
@@ -53,6 +54,8 @@ $offerItemTable = array("primary" => "OfferItemID",
                                     ON m.MaterialID = poi.MaterialID
                                     JOIN MaterialSpecs ms
                                     ON ms.MaterialID = poi.MaterialID
+                                    JOIN PurchaseOffers po
+                                    ON po.OfferID = poi.OfferID
                                     LEFT JOIN PurchaseRequestItems pri
                                     ON pri.ItemID = poi.RequestItemID",
                         "filters" => "poi.IsDeleted = 0
@@ -60,35 +63,19 @@ $offerItemTable = array("primary" => "OfferItemID",
                         "subTables" => array("Requests" => $requestTable)
 );
 
-$offerTable = array("primary" => "OfferID",
-                    "columns" => array("OfferID" => "po.OfferID",
-                                       "OfferGroupID" => "po.OfferGroupID",
-                                       "CreatedBy" => "po.CreatedBy",
-                                       "CreatorName" => "u.UserName",
-                                       "CreationDate" => "po.CreationDate",
-                                       "OfferStatus" => "po.OfferStatus",
-                                       "OfferDate" => "pod.OfferDate",
-                                       "OfferDeadline" => "pod.OfferDeadline",
-                                       "RequestedBy" => "u1.UserID",
-                                       "RequesterName" => "u1.UserName",
-                                       "OfferDescription" => "pod.OfferDescription",
-                                       "SupplierID" => "pod.SupplierID",
-                                       "SupplierName" => "s.SupplierName",
-                                       "DetailStatus" => "pod.DetailStatus",
-                                       "DetailID" => "pod.DetailID",
-                                      ),
-                    "name" => "PurchaseOffers po",
-                    "joins" => "JOIN Users u ON u.UserID = po.CreatedBy
-                                JOIN PurchaseOfferDetails pod ON pod.OfferID = po.OfferID
-                                JOIN Users u1 ON u1.UserID = pod.RequestedBy
-                                JOIN Suppliers s ON s.SupplierID = pod.SupplierID",
-                    "filters" => "po.IsDeleted = 0",
-                    "subTables" => array("Materials" => $offerItemTable),
-                    "postProcess" => array("CreationDate" => "dateToText",
-                                           "OfferDate" => "dateToText",
-                                           "OfferDeadline" => "dateToText"
-                                          ),
-);
+$offerGroupTable = array("primary" => "OfferGroupID",
+                         "columns" => array("OfferGroupID" => "pog.OfferGroupID",
+                                            "OfferStatus" => "pog.OfferStatus"
+                                           ),
+                         "name" => "(SELECT DISTINCT
+                                     po.OfferGroupID,
+                                     po.OfferStatus
+                                     FROM PurchaseOffers po
+                                     WHERE po.IsDeleted = 0) pog",
+                         "joins" => "",
+                         "filters" => "1 = 1",
+                         "subTables" => array("Materials" => $offerItemTable)
+                        );
 
-query($offerTable);
+query($offerGroupTable);
 ?>

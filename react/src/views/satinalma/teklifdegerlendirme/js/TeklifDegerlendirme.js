@@ -55,8 +55,8 @@ const TeklifDegerlendirme = () => {
       {/* Ana Tablo */}
       <CustomTable 
         addTableClasses = "main-table"
-        fetchAddr="/queryOffers.php"
-        fetchArgs={{distinct: ["OfferGroupID"], subTables: {Materials: {expand: false, subTables: {Requests: {expand: false}}}}}}
+        fetchAddr="/queryOfferGroups.php"
+        fetchArgs={{subTables: {Materials: {expand: false, subTables: {Requests: {expand: false}}}}}}
         searchTerm={searchTerm}
         searchFields={["OfferGroupID"]}
         fields={[

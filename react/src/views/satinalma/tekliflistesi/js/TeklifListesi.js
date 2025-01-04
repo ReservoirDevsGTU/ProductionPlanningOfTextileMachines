@@ -190,6 +190,7 @@ const TeklifListesi = () => {
   const sendToEvaluation = () => {
     axios.post(baseURL + "/sendToEvaluation.php", {
         OfferID: Object.keys(selected).filter(id => selected[id]),
+        OfferDescription: explanation,
         cancelOthers: cancelOthers
     });
   }
@@ -330,7 +331,7 @@ const TeklifListesi = () => {
 
   const printSelectedOffer = async () => {
     const offerID = Object.keys(selected).find(k => selected[k]);
-    axios.post(baseURL + "/queryOffers.php", {subTables:{Materials: {expand: false}, Details: {expand:true}}, filters: {OfferID: [offerID]}})
+    axios.post(baseURL + "/queryOffers.php", {subTables:{Materials: {expand: false}}, filters: {OfferID: [offerID]}})
       .then(response => {
         const data = response.data[0];
         const printDetails = [
@@ -447,7 +448,7 @@ const TeklifListesi = () => {
         {filteredData.length > 0 ? (
           <CustomTable
             fetchAddr="/queryOffers.php"
-            fetchArgs={{subTables:{Materials: {expand: false}, Details: {expand:true}}}}
+            fetchArgs={{subTables:{Materials: {expand: false}}}}
             searchTerm={searchTerm}
             searchFields={["SupplierName", "OfferGroupID", "OfferID"]}
             onFetch={processData}
