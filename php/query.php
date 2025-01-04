@@ -40,12 +40,12 @@ function genQuery($input, $table, &$selectedColumns, &$selectedJoins, &$selected
                             $values .= ", " . $value;
                         }
                     }
-                    $filterGroup .= " AND " . $columns[$colName] . " IN (" . substr($values, 2) . ")";
+                    if($values) $filterGroup .= " AND " . $columns[$colName] . " IN (" . substr($values, 2) . ")";
                 }
             }
-            $allFilters .= " OR (" . substr($filterGroup, 4) . ")";
+            if($filterGroup) $allFilters .= " OR (" . substr($filterGroup, 4) . ")";
         }
-        $selectedFilters .= " AND (" . substr($allFilters, 3) . ")";
+        if($allFilters) $selectedFilters .= " AND (" . substr($allFilters, 3) . ")";
     }
 
     if(isset($input["search"]) and strlen($input["search"]["term"]) > 0) {
