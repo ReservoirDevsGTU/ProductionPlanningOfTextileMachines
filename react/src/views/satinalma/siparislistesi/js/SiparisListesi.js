@@ -3,9 +3,11 @@ import "../css/SiparisListesi.css";
 import { CInput ,CButton } from "@coreui/react";
 import {  faLongArrowAltDown, faPrint, faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
-
+import { useHistory } from "react-router-dom"; // useHistory import edildi
 const SiparisListesi = () => {
+
+  const history = useHistory(); // useHistory hook'u kullanılıyor
+  
   // Sipariş ve malzeme listesi
   const siparisListesi = [
     {
@@ -142,7 +144,10 @@ const SiparisListesi = () => {
   };
 
   const handleSiparistenGiris = () => {
-    alert("Siparişten giriş işlemi başlatıldı!");
+     //alert("Siparişten giriş işlemi başlatıldı!");
+     // Yönlendirme işlemi
+     history.push("/satinalma/giris-formu");
+    
   };
 
   const handleYazdir = () => {

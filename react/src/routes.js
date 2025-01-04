@@ -75,6 +75,9 @@ const TeklifDegerlendirmeForm = React.lazy(() => import('./views/satinalma/tekli
 // sipariş listesi
 const SiparisListesi = React.lazy(() => import('./views/satinalma/siparislistesi/js/SiparisListesi'));
 
+// giris form
+const GirisFormu = React.lazy(() => import('./views/satinalma/siparislistesi/js/GirisFormu'));
+
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },
@@ -154,6 +157,9 @@ const routes = [
 
   // siparis listesi
   { path: '/satinalma/siparis-listesi', name: 'Siparis Listesi', component: SiparisListesi },
+
+  // giris formu
+  { path: '/satinalma/giris-formu', name: 'Giris Formu', component: GirisFormu },
 ];
 
 export default routes;
