@@ -16,11 +16,15 @@ import {
   CNavItem,
   CNavLink,
   CTabContent,
-  CTabPane
+  CTabPane,
+  CModal,
+  CModalHeader,
+  CModalBody,
+  CModalFooter,
 } from '@coreui/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import CustomTable from '../../CustomTable.js';
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faTrash, faChevronDown, faChevronUp  } from "@fortawesome/free-solid-svg-icons";
 
 
 const SiparisForm = () => {
@@ -30,11 +34,11 @@ const SiparisForm = () => {
   const [materialData, setMaterialData] = useState([]);
   const [formData, setFormData] = useState({
     siparisNumarasi: '',
-    tedarikci: '',
+    tedarikci: 'XXX Tedarikçi',
     siparisTarihi: '',
     sevkTarihi: '',
     terminTarihi: '',
-    mailgonder: '',
+    mailgonder: 'true',
     firmaSorumlusu: '',
     not: ''
   });
@@ -42,14 +46,67 @@ const SiparisForm = () => {
   const [selectedMaterials, setSelectedMaterials] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedMaterialToDelete, setSelectedMaterialToDelete] = useState(null);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [expandedSuppliers, setExpandedSuppliers] = useState({});
 
 
+  const [supplierData, setSupplierData] = useState([
+    {
+      name: 'XXX Tedarikçi',
+      emails: [
+        { address: 'info@xxx.com', selected: true },
+        { address: 'sales.person1@xxx.com', selected: true },
+        { address: 'sales.person2@xxx.com', selected: true },
+      ],
+    },
+    {
+      name: 'XXY Tedarikçi',
+      emails: [
+        { address: 'contact@xxy.com', selected: true },
+        { address: 'sales@xxy.com', selected: true },
+      ],
+    }
+  ]);
+
+
+
+  const toggleSupplier = (index) => {
+    setExpandedSuppliers((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
+  };
+
+  const toggleEmailSelection = (supplierIndex, emailIndex) => {
+    setSupplierData((prevData) =>
+      prevData.map((supplier, sIndex) =>
+        sIndex === supplierIndex
+          ? {
+              ...supplier,
+              emails: supplier.emails.map((email, eIndex) =>
+                eIndex === emailIndex
+                  ? { ...email, selected: !email.selected }
+                  : email
+              ),
+            }
+          : supplier
+      )
+    );
+  };
+
+  const handleSubmit = () => {
+    if (formData.mailgonder) {
+      setShowEmailModal(true);
+    }
+    // Form kaydetme işlemleri
+  };
 
 
   const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
 
@@ -194,7 +251,7 @@ const SiparisForm = () => {
                 >
                   İptal
                 </CButton>
-                <CButton color="success">
+                <CButton color="success" onClick={handleSubmit}>
                   Kaydet
                 </CButton>
               </div>
@@ -443,6 +500,56 @@ const SiparisForm = () => {
     </div>
   </div>
 )}
+
+
+<CModal show={showEmailModal} onClose={() => setShowEmailModal(false)} size="md" centered>
+        <CModalHeader closeButton>
+          <h5 style={{fontWeight: 'bold', fontSize:'24px'}}>Sipariş Gönderme Formu</h5>
+        </CModalHeader>
+
+        <CModalBody style={{maxHeight: '500px', overflowY: 'auto'}}>
+          {supplierData.map((supplier, supplierIndex) => (
+            <div key={supplierIndex} style={{ marginBottom: '15px' }}>
+              <CButton
+                color="light"
+                className="w-100 d-flex justify-content-between align-items-center"
+                onClick={() => toggleSupplier(supplierIndex)}
+              >
+                <span style={{ fontSize: "16px" }}>
+                  {supplier.name}
+                </span>
+                <FontAwesomeIcon
+                  style={{color: 'black'}}
+                  icon={expandedSuppliers[supplierIndex] ? faChevronUp : faChevronDown}
+                />
+              </CButton>
+
+              {expandedSuppliers[supplierIndex] && (
+                <div style={{ padding: '10px', backgroundColor: '#f8f9fa', borderRadius: '5px' }}>
+                  {supplier.emails.map((email, emailIndex) => (
+                    <div key={emailIndex} className="d-flex align-items-center mb-2">
+                      <input
+                        type="checkbox"
+                        checked={email.selected}
+                        onChange={() => toggleEmailSelection(supplierIndex, emailIndex)}
+                        style={{ marginRight: '10px' }}
+                      />
+                      {email.address}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </CModalBody>
+
+        <CModalFooter>
+          <CButton color="danger" onClick={() => setShowEmailModal(false)}>
+            Vazgeç
+          </CButton>
+          <CButton color="info">Gönder</CButton>
+        </CModalFooter>
+      </CModal>
 
 
     </div>
