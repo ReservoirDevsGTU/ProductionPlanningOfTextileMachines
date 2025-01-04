@@ -20,7 +20,7 @@ const TeklifDegerlendirmeForm = (props) => {
 
   const getOffers = async () => {
     axios.post(baseURL + "/queryOffers.php", {
-        filters: {OfferGroupID: [OfferGroupID]},
+        filters: [{OfferGroupID: [OfferGroupID], OfferStatus: [3]}],
         subTables: {Materials: {expand: false}}
     }).then(response => {
       const data = response.data;

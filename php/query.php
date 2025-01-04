@@ -184,8 +184,8 @@ function query($table) {
     
     if($_SERVER['REQUEST_METHOD'] != 'POST') return;
 
-    header('Content-Encoding: gzip'); 
-    echo gzencode(json_encode(getTableData($conn, $input, $table)));
+    ob_start("ob_gzhandler");
+    echo json_encode(getTableData($conn, $input, $table));
 }
 
 function dateToText($date) {

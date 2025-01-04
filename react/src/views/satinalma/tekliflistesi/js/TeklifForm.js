@@ -50,7 +50,7 @@ const TeklifForm = () => {
   if(!OfferID) history.goBack();
 
   useEffect(() => {
-    axios.post(baseURL + "/queryOffers.php", {filters: {OfferID: [OfferID]}, subTables: {Materials: {expand: false}}})
+    axios.post(baseURL + "/queryOffers.php", {filters: [{OfferID: [OfferID]}], subTables: {Materials: {expand: false}}})
       .then(r => {
         const data = r.data[0];
         data.OfferStatus = data.OfferStatus === 0 ? 1 : data.OfferStatus;

@@ -13,7 +13,7 @@ const SearchBox = ({fetchAddr, label, value, initialValue, onSelect}) => {
 
   useEffect(async () => {
     if(initialValue) {
-      axios.post(baseURL + fetchAddr, {filters: {[value]: [initialValue]}})
+      axios.post(baseURL + fetchAddr, {filters: [{[value]: [initialValue]}]})
       .then(r => {
         setQuery(r.data[0]?.[label]);
       });
