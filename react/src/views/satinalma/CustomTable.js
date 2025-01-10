@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { CDataTable, CPagination } from '@coreui/react';
+import { CDataTable, CPagination, CSelect } from '@coreui/react';
 import axios from 'axios';
 import baseURL from './baseURL.js';
 
@@ -53,8 +53,13 @@ const CustomTable = ({addTableClasses, data, fields, fetchAddr, fetchArgs, onFet
     }
   };
 
-  useEffect(() => changePage(), [page, data, searchTerm]);
-  useEffect(() => setPage(1), [searchTerm]);
+  const handlePageChange = e => {
+    const val = e.target.value;
+    setPageLength(val);
+  };
+
+  useEffect(() => changePage(), [page, data, searchTerm, pageLength]);
+  useEffect(() => setPage(1), [searchTerm, pageLength]);
   useEffect(() => {if(update) changePage()}, [update]);
 
   return (<>
@@ -71,11 +76,20 @@ const CustomTable = ({addTableClasses, data, fields, fetchAddr, fetchArgs, onFet
         size="sm"
         loading={loading}
       />
+      <div style={{display: "flex"}}>
       <CPagination
         pages={Math.ceil(Number(maxRows) / pageLength)}
         activePage={page}
         onActivePageChange={p => setPage(p)}
       />
+      <CSelect
+        style={{width: "5%", gap: "25px"}}
+        value={pageLength}
+        onChange={e => setPageLength(e.target.value)}
+      >
+        {[5, 10, 20].map(v => (<option value={v}>{v}</option>))}
+      </CSelect>
+      </div>
     </>);
 };
 
