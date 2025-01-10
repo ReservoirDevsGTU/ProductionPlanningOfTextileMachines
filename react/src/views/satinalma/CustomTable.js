@@ -63,19 +63,35 @@ const CustomTable = ({addTableClasses, data, fields, fetchAddr, fetchArgs, onFet
   useEffect(() => {if(update) changePage()}, [update]);
 
   return (<>
-      <CDataTable
-        addTableClasses={addTableClasses}
-        fields={fields}
-        items={displayData}
-        itemsPerPage={pageLength}
-        pagination={false}
-        scopedSlots={scopedSlots}
-        stripped
-        hover
-        bordered
-        size="sm"
-        loading={loading}
-      />
+      <div>
+        <CDataTable
+          addTableClasses={addTableClasses}
+          fields={fields}
+          items={displayData}
+          itemsPerPage={pageLength}
+          pagination={false}
+          scopedSlots={scopedSlots}
+          stripped
+          hover
+          bordered
+          size="sm"
+          loading={loading}
+        />
+        <style>
+          {`
+            .table tbody {
+              display: block;
+              max-height: 400px;
+              overflow-y: auto;
+            }
+            .table thead, .table tbody tr {
+              display: table;
+              width: 100%;
+              table-layout: fixed;
+            }
+          `}
+        </style>
+      </div>
       <div style={{display: "flex"}}>
       <CPagination
         pages={Math.ceil(Number(maxRows) / pageLength)}
