@@ -137,7 +137,7 @@ const TeklifSiparisListe = () => {
         <CustomTable
           fetchAddr="/queryRequests.php"
           onFetch={processData}
-          fetchArgs={{subTables: {Materials: { expand: true }}}}
+          fetchArgs={{filters: [{RequestStatus: [2]}], subTables: {Materials: { expand: true }}}}
           searchTerm={searchTerm}
           searchFields={["UserName", "MaterialNo", "MaterialName"]}
           fields={fields}

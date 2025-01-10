@@ -23,26 +23,27 @@ const TalepOnayla = () => {
 
   useEffect(() => {
     if (id) {
-      axios.get(`${baseURL}/getRequestByID.php?id=${id}`)
+      axios.post(`${baseURL}/queryRequests.php`, {filters: [{RequestID: [id]}], subTables: {Materials: {expand: false}}})
         .then((response) => {
-          const data = response.data;
+          const data = response.data[0];
           setRequestDetails({
             date: data.RequestDeadline,
             requester: data.RequestedBy,
             description: data.RequestDescription,
           });
+          setSelectedMaterials(data.Materials);
         })
         .catch((error) => console.error("Error fetching request details:", error));
+    }
+  }, [id]);
 
-      axios.get(`${baseURL}/getRequestsMaterials.php?id=${id}`)
-        .then((response) => setSelectedMaterials(response.data || []))
-        .catch((error) => console.error("Error fetching request materials:", error));
-
-      axios.post(`${baseURL}/queryUsers.php`)
+  useEffect(() => {
+    if(requestDetails.requester) {
+      axios.post(`${baseURL}/queryUsers.php`, {filters: [{UserID: [requestDetails.requester]}]})
         .then((response) => setUsers(response.data))
         .catch((error) => console.error("Error fetching users:", error));
     }
-  }, [id]);
+  }, [requestDetails.requester]);
 
   const filteredMaterials = selectedMaterials.filter((material) =>
     material.MaterialName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -52,7 +53,7 @@ const TalepOnayla = () => {
   const handleApprove = () => {
     axios.post(`${baseURL}/approveRequest.php`, {
         RequestID: id,
-        Approve: true,
+        RequestStatus: 2,
       })
       .then(() => {
         alert("Talep onaylandı");
@@ -67,7 +68,7 @@ const TalepOnayla = () => {
   const handleReject = () => {
     axios.post(`${baseURL}/approveRequest.php`, {
         RequestID: id,
-        Approve: false,
+        RequestStatus: 3,
       })
       .then(() => {
         alert("Talep reddedildi");
@@ -163,8 +164,8 @@ const TalepOnayla = () => {
             }}
           >
             {users.map((user) => (
-              <option key={user.id} value={user.name}>
-                {user.name}
+              <option key={user.UserID} value={user.UserName}>
+                {user.UserName}
               </option>
             ))}
           </select>
@@ -229,7 +230,7 @@ const TalepOnayla = () => {
                   color: "white",
                 }}
               >
-                {material.OrderedAmount}
+                {material.RequestedAmount}
               </td>
               <td style={{ border: "1px solid #ccc", padding: "10px" }}>{material.Quantity}</td>
               <td style={{ border: "1px solid #ccc", padding: "10px" }}>{material.UnitID}</td>

@@ -15,6 +15,7 @@ const TeklifDegerlendirmeForm = (props) => {
   const [selectedTedarikci, setSelectedTedarikci] = useState({});
   const [totalPrice, setTotalPrice] = useState(0);
   const [offerItems, setOfferItems] = useState([]);
+  const [allSuppliers, setAllSuppliers] = useState([]);
 
   const OfferGroupID = props.location.OfferGroupID;
 
@@ -24,6 +25,12 @@ const TeklifDegerlendirmeForm = (props) => {
         subTables: {Materials: {expand: false}}
     }).then(response => {
       const data = response.data;
+      setAllSuppliers(data.reduce((acc, cur) => {
+        if(!acc.find(s => cur.SupplierID == s.SupplierID)) {
+          acc.push({SupplierName: cur.SupplierName, SupplierID: cur.SupplierID});
+        }
+        return acc;
+      }, []));
       setOfferItems(data.reduce((acc, cur) => {
           cur.Materials.forEach(m => {
             const exist = acc.findIndex(e => e.MaterialID === m.MaterialID);
@@ -63,11 +70,12 @@ const TeklifDegerlendirmeForm = (props) => {
             }
           });
           return acc;
-        }, []).map(m => {
+        }, []).map(mt => {
+          var m = {...mt};
           m.Suppliers.forEach(s => {
-            if(!m.bestDeadline) {
+            if(!m.bestOfferDeadline) {
               m.bestUnitPrice = s.UnitPrice;
-              m.bestDeadline = s.OfferDeadline;
+              m.bestOfferDeadline = s.OfferDeadline;
             }
             else {
               if(s.UnitPrice < m.bestUnitPrice) {
@@ -122,7 +130,7 @@ const TeklifDegerlendirmeForm = (props) => {
               <th style={{ width: "200px" }}>Malzeme Adı</th>
               <th>Stok</th>
               <th>Birim</th>
-              {offerItems[0]?.Suppliers.map((supplier, index) => (
+              {allSuppliers.map((supplier, index) => (
                 <th key={index} colSpan="7">{supplier.SupplierName}</th>
               ))}
             </tr>
@@ -131,7 +139,7 @@ const TeklifDegerlendirmeForm = (props) => {
               <th></th>
               <th></th>
               <th></th>
-              {offerItems[0]?.Suppliers.map((_, index) => (
+              {allSuppliers.map((_, index) => (
                 <React.Fragment key={index}>
                   <th>İstenilen Miktar</th>
                   <th>Teklif Miktarı</th>
@@ -152,15 +160,16 @@ const TeklifDegerlendirmeForm = (props) => {
                   <td>{material.MaterialName}</td>
                   <td>{material.Quantity}</td>
                   <td>{material.UnitID}</td>
-                  {material.Suppliers.map((supplier, i) => (
-                    <React.Fragment key={i}>
+                  {allSuppliers.map(s => {
+                    const supplier = material.Suppliers.find(i => i.SupplierID == s.SupplierID);
+                    return !supplier ? (<td colSpan="7"></td>) : (<>
                       <td>{supplier.OfferRequestedAmount}</td>
                       <td>{supplier.OfferedAmount}</td>
                       <td style={{ backgroundColor: supplier.UnitPrice === material.bestUnitPrice ? "yellow" : "inherit" }}>
                         {supplier.UnitPrice}
                       </td>
                       <td>{supplier.Currency}</td>
-                      <td style={{ backgroundColor: supplier.OfferDeadline === material.bestDeadline ? "lightgreen" : "inherit" }}>
+                      <td style={{ backgroundColor: supplier.OfferDeadline === material.bestOfferDeadline ? "lightgreen" : "inherit" }}>
                         {supplier.OfferDeadline}
                       </td>
                       <td>{supplier.ValidityDate}</td>
@@ -178,32 +187,22 @@ const TeklifDegerlendirmeForm = (props) => {
                           }
                         />
                       </td>
-                    </React.Fragment>
-                  ))}
+                  </>)})}
                 </tr>
               );
             })}
             {(() => {
-                const sums = offerItems.reduce((acc, cur) => {
-                  cur.Suppliers.forEach(s => {
-                    if(!s.selected) {
-                      if(!acc[s.SupplierID]) {
-                        acc[s.SupplierID] = 0;
-                        return;
+                const sums = allSuppliers.map(s => {
+                  var sum = 0;
+                  offerItems.forEach(m => {
+                    m.Suppliers.forEach(ms => {
+                      if(ms.SupplierID == s.SupplierID && ms.selected) {
+                        sum += Number(ms.OfferedPrice);
                       }
-                      else {
-                        return;
-                      }
-                    }
-                    if(acc[s.SupplierID]) {
-                      acc[s.SupplierID] += Number(s.OfferedPrice);
-                    }
-                    else {
-                      acc[s.SupplierID] = Number(s.OfferedPrice);
-                    }
+                    });
                   });
-                  return acc;
-                }, []);
+                  return sum;
+                });
                 return (
                     <tr>
                       <td colSpan="4">{"Onaylanan Toplam Tutar: " + sums.reduce((a, c) => a + Number(c), 0)}</td>

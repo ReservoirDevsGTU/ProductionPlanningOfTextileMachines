@@ -133,7 +133,7 @@ const handleModalClose = () => {
   useEffect(() => {
     if (editID) {
       axios
-        .post(baseURL + "/queryRequests.php", { subTables: {Materials: {expand: false}}, filters: { RequestID: [editID] } })
+        .post(baseURL + "/queryRequests.php", { subTables: {Materials: {expand: false}}, filters: [{ RequestID: [editID] }] })
         .then((response) => {
           const data = response.data[0];
           setRequestDetails({

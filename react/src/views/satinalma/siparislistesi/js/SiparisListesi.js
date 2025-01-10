@@ -98,6 +98,8 @@ const SiparisListesi = () => {
         addTableClasses="siparis-listesi-table"
         fetchAddr="/queryOrders.php"
         fetchArgs={{subTables: {Materials: {expand: false, subTables: {Requests: {expand: false}}}}}}
+        searchTerm={searchTerm}
+        searchFields={["SupplierName", "OrderID"]}
         fields={[
 		  {label:'', key: 'expand'},
 		  {label:'Tedarikçi', key: 'SupplierName'},
@@ -131,7 +133,7 @@ const SiparisListesi = () => {
               }, {})).join(', ') : false) || '-'}
             </td>),
           order_status: (item) => (
-            <td>{item.OrderStatus}</td>
+            <td>{["Siparis Verildi", "Kismen Teslim Edildi", "Teslim Edildi"][item.OrderStatus]}</td>
           ),
           select: (item) => (
             <td>
