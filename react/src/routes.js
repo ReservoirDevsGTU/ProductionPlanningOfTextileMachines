@@ -1,4 +1,5 @@
 import React from 'react';
+import SatinAlmaParametreleri from './views/satinalma/satinalmaparametreleri/SatinAlmaParametreleri';
 
 const Toaster = React.lazy(() => import('./views/notifications/toaster/Toaster'));
 const Tables = React.lazy(() => import('./views/base/tables/Tables'));
@@ -160,6 +161,10 @@ const routes = [
 
   // giris formu
   { path: '/satinalma/giris-formu', name: 'Giris Formu', component: GirisFormu },
+  
+  
+  // Satin alma parametreleri
+  { path: '/satinalma/satinalma-parametreleri', name: 'Satin Alma Parametreleri', component : SatinAlmaParametreleri},
 ];
 
 export default routes;
