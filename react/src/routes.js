@@ -1,5 +1,4 @@
 import React from 'react';
-import SatinAlmaParametreleri from './views/satinalma/satinalmaparametreleri/SatinAlmaParametreleri';
 
 const Toaster = React.lazy(() => import('./views/notifications/toaster/Toaster'));
 const Tables = React.lazy(() => import('./views/base/tables/Tables'));
@@ -78,6 +77,9 @@ const SiparisListesi = React.lazy(() => import('./views/satinalma/siparislistesi
 
 // giris form
 const GirisFormu = React.lazy(() => import('./views/satinalma/siparislistesi/js/GirisFormu'));
+
+// satin alma parametreleri
+const SatinAlmaParametreleri = React.lazy(() => import('./views/satinalma/satinalmaparametreleri/js/SatinAlmaParametreleri'));
 
 
 const routes = [

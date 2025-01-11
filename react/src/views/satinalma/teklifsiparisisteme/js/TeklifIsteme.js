@@ -45,15 +45,16 @@ const TeklifIsteme = (props) => {
   useEffect(() => {
     setSelectedMaterials(editItems ? editItems.reduce((acc, cur) => {
       let exist = acc.find(i => i.MaterialID === cur.MaterialID);
-      if(exist) {
+      if (exist) {
         exist.OfferRequestedAmount = Number(cur.RequestedAmount) + Number(exist.OfferRequestedAmount);
         exist.RequestedAmount = Number(cur.RequestedAmount) + Number(exist.RequestedAmount);
       }
-      else acc = acc.concat([{...cur, final: true, OfferRequestedAmount: cur.RequestedAmount}]);
+      else acc = acc.concat([{ ...cur, final: true, OfferRequestedAmount: cur.RequestedAmount }]);
       return acc;
-    }, []) : []);}, [editItems]);
+    }, []) : []);
+  }, [editItems]);
 
-  useEffect(()=>console.log(setSelectedMaterials(prev => prev.sort((a, b) => a.MaterialID - b.MaterialID))), [selectedMaterials]);
+  useEffect(() => console.log(setSelectedMaterials(prev => prev.sort((a, b) => a.MaterialID - b.MaterialID))), [selectedMaterials]);
 
   useEffect(() => {
     const today = new Date().toISOString().split("T")[0];
@@ -61,7 +62,7 @@ const TeklifIsteme = (props) => {
   }, []);
 
   const handleSelectAllSuppliers = () => {
-    if(!selectAllChecked) {
+    if (!selectAllChecked) {
       setSelectedSuppliers((prev) =>
         supplierPage.reduce((acc, cur) => acc.find(s => s.SupplierID === cur.SupplierID) ? acc : [...acc, cur], prev));
     }
@@ -69,8 +70,8 @@ const TeklifIsteme = (props) => {
   };
 
   const handleAddSelectedSuppliers = () => {
-    setSelectedSuppliers((prev) => 
-      prev.map(s => ({...s, final: true})));
+    setSelectedSuppliers((prev) =>
+      prev.map(s => ({ ...s, final: true })));
   };
 
   const handleRemoveSupplier = (supplierId) => {
@@ -88,10 +89,10 @@ const TeklifIsteme = (props) => {
       OfferDescription: description,
       OfferDate: quoteDate,
       OfferDeadline: deadlineDate,
-      Suppliers: selectedSuppliers.map(s => ({SupplierID: s.SupplierID})),
+      Suppliers: selectedSuppliers.map(s => ({ SupplierID: s.SupplierID })),
       Materials: selectedMaterials.reduce((acc, cur) => {
-        if(!cur.final) return acc;
-        if(cur.RequestItemID === 0) {
+        if (!cur.final) return acc;
+        if (cur.RequestItemID === 0) {
           acc = acc.concat([{
             MaterialID: cur.MaterialID,
             RequestItemID: null,
@@ -101,18 +102,18 @@ const TeklifIsteme = (props) => {
         else {
           const items = editItems.filter(i => i.MaterialID === cur.MaterialID);
           var remain = Number(cur.OfferRequestedAmount);
-          if(items) {
+          if (items) {
             const totalRequest = items.reduce((acc, cur) => acc + Number(cur.RequestedAmount), 0);
             items.forEach(i => {
               acc = acc.concat([{
                 MaterialID: i.MaterialID,
                 RequestItemID: i.RequestItemID,
                 OfferRequestedAmount: remain >= totalRequest ? i.RequestedAmount : remain * Number(i.RequestedAmount) / totalRequest
-                }]);
+              }]);
             });
             remain = Math.max(0, remain - totalRequest);
           }
-          if(remain > 0) {
+          if (remain > 0) {
             acc = acc.concat([{
               MaterialID: cur.MaterialID,
               RequestItemID: null,
@@ -151,43 +152,43 @@ const TeklifIsteme = (props) => {
         </CNav>
         <CTabContent fade>
           <CTabPane data-tab="details">
-          <div style={{padding: "20px", borderRadius: "8px" }}>
-          <div style={{ display: "flex", gap: "20px", marginBottom: "20px" }}>
-            <div style={{ flex: 1 }}>
-              <label style={{ display: "block", marginBottom: "8px" }}>Teklif Tarihi</label>
-              <input
-                type="date"
-                value={quoteDate}
-                onChange={(e) => setQuoteDate(e.target.value)}
-                style={{
-                  padding: "10px",
-                  width: "100%",
-                  border: "1px solid #ccc",
-                  borderRadius: "4px",
-                }}
-              />
-            </div>
-            <div style={{ flex: 1 }}>
-              <label style={{ display: "block", marginBottom: "8px" }}>Termin Tarihi</label>
-              <input
-                type="date"
-                value={deadlineDate}
-                onChange={(e) => setDeadlineDate(e.target.value)}
-                style={{
-                  padding: "10px",
-                  width: "100%",
-                  border: "1px solid #ccc",
-                  borderRadius: "4px",
-                }}
-              />
-            </div>
-          </div>
+            <div style={{ padding: "20px", borderRadius: "8px" }}>
+              <div style={{ display: "flex", gap: "20px", marginBottom: "20px" }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: "block", marginBottom: "8px" }}>Teklif Tarihi</label>
+                  <input
+                    type="date"
+                    value={quoteDate}
+                    onChange={(e) => setQuoteDate(e.target.value)}
+                    style={{
+                      padding: "10px",
+                      width: "100%",
+                      border: "1px solid #ccc",
+                      borderRadius: "4px",
+                    }}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: "block", marginBottom: "8px" }}>Termin Tarihi</label>
+                  <input
+                    type="date"
+                    value={deadlineDate}
+                    onChange={(e) => setDeadlineDate(e.target.value)}
+                    style={{
+                      padding: "10px",
+                      width: "100%",
+                      border: "1px solid #ccc",
+                      borderRadius: "4px",
+                    }}
+                  />
+                </div>
+              </div>
 
-          <div style={{ display: "flex", gap: "20px", marginBottom: "20px" }}>
-            <div style={{ flex: 1 }}>
-              <label style={{ display: "block", marginBottom: "8px" }}>Teklif İsteyen</label>
-          <SearchBox fetchAddr="/queryUsers.php" label="UserName" value="UserID" onSelect={v => setRequester(v)}/>
-      {/*
+              <div style={{ display: "flex", gap: "20px", marginBottom: "20px" }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: "block", marginBottom: "8px" }}>Teklif İsteyen</label>
+                  <SearchBox fetchAddr="/queryUsers.php" label="UserName" value="UserID" onSelect={v => setRequester(v)} />
+                  {/*
               <select
                 value={requester}
                 onChange={(e) => setRequester(e.target.value)}
@@ -206,405 +207,407 @@ const TeklifIsteme = (props) => {
                 ))}
               </select>
           */}
-            </div>
-            <div style={{ flex: 1 }}>
-              <label style={{ display: "block", marginBottom: "8px" }}>Teklif Grup No</label>
-              <input
-                type="text"
-                value={quoteGroupNo}
-                onChange={(e) => setQuoteGroupNo(e.target.value)}
-                style={{
-                  padding: "10px",
-                  width: "100%",
-                  border: "1px solid #ccc",
-                  borderRadius: "4px",
-                }}
-              />
-            </div>
-          </div>
-
-          <div style={{ marginBottom: "20px" }}>
-            <label style={{ display: "block", marginBottom: "8px" }}>Açıklama</label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              style={{
-                padding: "10px",
-                width: "100%",
-                border: "1px solid #ccc",
-                borderRadius: "4px",
-                resize: "none",
-                height: "80px",
-              }}
-            />
-          </div>
-
-          {/* Tedarikçiler */}
-          <div style={{padding: "20px", borderRadius: "8px"}}>
-            
-          <h3 style={{marginBottom: '20px'}}>Tedarikçiler</h3>
-
-          <CTabs activeTab="selected">
-            <CNav variant="tabs">
-              <CNavItem>
-                <CNavLink data-tab="selected">Seçili Tedarikçiler</CNavLink>
-              </CNavItem>
-              <CNavItem>
-                <CNavLink data-tab="all">Tüm Tedarikçiler</CNavLink>
-              </CNavItem>
-            </CNav>
-
-            <CTabContent>
-              {/* Seçili Tedarikçiler */}
-              <CTabPane data-tab="selected">
-                <CustomTable style={{ marginTop:"20px", width: "100%", borderCollapse: "collapse" }}
-                  data={selectedSuppliers.filter(s=>s?.final !== undefined)}
-                  fields={[
-                    {label: "Tedarikçi Kodu", key: "SupplierID"},
-                    {label: "Tedarikçi Adı", key: "SupplierName"},
-                    {label: "Telefon", key: "SupplierTelNo"},
-                    {label: "E-Posta", key: "SupplierEmail"},
-                    {label: "Adres", key: "SupplierAddress"},
-                    {label: "Kaldır", key: "delete"},
-                  ]}
-                  scopedSlots={{
-                    delete: (supplier) => (
-                        <td>
-                          <button
-                            onClick={() => setSelectedSuppliers((prev) => prev.filter(s => s.SupplierID !== supplier.SupplierID))}
-                            style={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              color: "#dc3545",
-                              cursor: "pointer",
-                            }}
-                          >
-                            <FontAwesomeIcon icon={faTrash} />
-                          </button>
-                        </td>
-                    )
-                  }}/>
-              </CTabPane>
-
-              {/* Tüm Tedarikçiler */}
-              <CTabPane data-tab="all">
-              <div>
-                <CustomTable style={{ marginTop: "20px", width: "100%", borderCollapse: "collapse" }}
-                  fetchAddr="/querySuppliers.php"
-                  onFetch={(data) => setSupplierPage(data)}
-                  fields={[
-                    {label: (
-                        <input
-                          type="checkbox"
-                          checked={selectAllChecked}
-                          onChange={handleSelectAllSuppliers}
-                        />
-                    ), key: "select"},
-                    {label: "Tedarikçi Kodu", key: "SupplierID"},
-                    {label: "Tedarikçi Adı", key: "SupplierName"},
-                    {label: "Telefon", key: "SupplierTelNo"},
-                    {label: "E-Posta", key: "SupplierEmail"},
-                    {label: "Adres", key: "SupplierAddress"},
-                  ]}
-                  scopedSlots= {{
-                    select: (supplier) => (
-                        <td>
-                          <input
-                            type="checkbox"
-                            disabled={selectedSuppliers.find(s => s.SupplierID === supplier.SupplierID)?.final !== undefined}
-                            checked={selectedSuppliers.find(s => s.SupplierID === supplier.SupplierID) !== undefined}
-                            onChange={(e) =>
-                            setSelectedSuppliers((prev) =>
-                              e.target.checked ? prev.concat([supplier])
-                              : prev.filter(s => s.SupplierID !== supplier.SupplierID))}
-                          />
-                        </td>
-                    ),
-                  }}/>
-
-                {/* Buton Sağ Alt Köşede ve Hafif Sola Kaydırılmış */}
-                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "20px" }}>
-                  <CButton
-                    color="info"
-                    variant="outline"
-                    onClick={handleAddSelectedSuppliers}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: "block", marginBottom: "8px" }}>Teklif Grup No</label>
+                  <input
+                    type="text"
+                    value={quoteGroupNo}
+                    onChange={(e) => setQuoteGroupNo(e.target.value)}
                     style={{
-                      padding: "10px 20px",
-                      cursor: "pointer",
-                      marginRight: "120px", // Butonu hafif sola kaydırır
+                      padding: "10px",
+                      width: "100%",
+                      border: "1px solid #ccc",
+                      borderRadius: "4px",
                     }}
-                  >
-                    Listeye Ekle
-                  </CButton>
+                  />
                 </div>
               </div>
-            </CTabPane>
 
-            </CTabContent>
-          </CTabs>
-          </div>
-             
-        </div>
-        </CTabPane>
-        </CTabContent>
-                    
-        <CTabContent>
-          <CTabPane data-tab="materials">        
-          <div>
-                    {/* Malzemeler */}
-                    <h3 style={{marginTop:"20px", marginBottom:"20px"}}>Malzemeler</h3>
-
-        <CTabs activeTab="selected">
-          <CNav variant="tabs">
-            <CNavItem>
-              <CNavLink data-tab="selected">Seçili Malzemeler</CNavLink>
-            </CNavItem>
-            <CNavItem>
-              <CNavLink data-tab="all">Tüm Malzemeler</CNavLink>
-            </CNavItem>
-          </CNav>
-
-          <CTabContent>
-            {/* Seçili Malzemeler */}
-            <CTabPane data-tab="selected">
-
-        <CustomTable style={{ marginTop:"20px", width: "100%", borderCollapse: "collapse" }}
-          data={selectedMaterials.filter(m=>m.final)}
-          fields={[
-            {label: "Sil", key: "delete"},
-            {label: "Malzeme No", key: "MaterialNo"},
-            {label: "Malzeme Adi", key: "MaterialName"},
-            {label: "Teklif Miktari", key: "offerRequestedAmount"},
-            {label: "Talep Miktari", key: "RequestedAmount"},
-            {label: "Birim", key: "UnitID"},
-          ]}
-          scopedSlots={{
-            delete: (material) => (
-                      <td>
-                        <button
-                          onClick={() => {
-                            setShowModal(true);
-                            setSelectedMaterialToDelete(material);
-                          }}
-                          style={{
-                            backgroundColor: "transparent",
-                            border: "none",
-                            color: "#dc3545",
-                            cursor: "pointer",
-                          }}
-                        >
-                          <FontAwesomeIcon icon={faTrash} />
-                        </button>
-                      </td>
-            ),
-            offerRequestedAmount: (material) => (
-                      <td>
-                        <input
-                          type="number"
-                          value={material.OfferRequestedAmount}
-                          onChange={(e) =>
-                            setSelectedMaterials((prev) =>
-                              prev.map((m) =>
-                                m.MaterialID === material.MaterialID
-                                  ? { ...m, OfferRequestedAmount: Number(e.target.value), RequestedAmount: m.RequestItemID === 0 ? Number(e.target.value) : m.RequestedAmount}
-                                  : m
-                              )
-                            )
-                          }
-                          style={{
-                            padding: "5px",
-                            border: "1px solid #ccc",
-                            borderRadius: "4px",
-                            width: "100px",
-                          }}
-                        />
-                      </td>
-            ),
-          }}
-        />
-            </CTabPane>
-
-            {/* Tüm Malzemeler */}
-            <CTabPane data-tab="all">
-            <div>
-        <CustomTable style={{ width: "100%", borderCollapse: "collapse" }}
-          fetchAddr="/queryMaterials.php"
-          fetchArgs={{columns: ["MaterialID"]}}
-          fields={[
-            {label: "", key: "select"},
-            {label: "Malzeme No", key: "MaterialNo"},
-            {label: "Malzeme Adi", key: "MaterialName"},
-            {label: "Miktar", key: "offerRequestedAmount"},
-            {label: "Toplam Stok", key: "Quantity"},
-            {label: "Birim", key: "UnitID"},
-          ]}
-          scopedSlots={{
-            select: (material) => (
-                      <td>
-                        <input
-                          type="checkbox"
-                          disabled={selectedMaterials.find(m => m.MaterialID === material.MaterialID)?.final !== undefined}
-                          checked={selectedMaterials.find(m => m.MaterialID === material.MaterialID) !== undefined}
-                          onChange={(e) =>
-                            setSelectedMaterials((prev) =>
-                              e.target.checked ? prev.concat([{...material, OfferRequestedAmount: 1, RequestItemID: 0}])
-                              : prev.filter(m => m.MaterialID !== material.MaterialID))
-                          }
-                        />
-                      </td>
-            ),
-            offerRequestedAmount: (material) => (
-                      <td>
-                        <input
-                          type="number"
-                          disabled={selectedMaterials.find(m => m.MaterialID === material.MaterialID)?.final !== undefined}
-                          value={selectedMaterials.find(m => m.MaterialID === material.MaterialID)?.OfferRequestedAmount || ""}
-                          onChange={(e) =>
-                            setSelectedMaterials((prev) =>
-                              prev.map((m) =>
-                                m.MaterialID === material.MaterialID
-                                  ? { ...m, OfferRequestedAmount: Number(e.target.value)}
-                                  : m
-                              )
-                            )
-                          }
-                          style={{
-                            padding: "5px",
-                            border: "1px solid #ccc",
-                            borderRadius: "4px",
-                            width: "100px",
-                          }}
-                        />
-                      </td>
-            ),
-          }}
-        />
-
-              <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "20px" }}>
-                <CButton
-                  color="info"
-                  variant="outline"
-                  onClick={() => setSelectedMaterials((prev) => prev.map(m=>({...m, RequestedAmount: m.OfferRequestedAmount, final: true})))}
+              <div style={{ marginBottom: "20px" }}>
+                <label style={{ display: "block", marginBottom: "8px" }}>Açıklama</label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
                   style={{
-                    padding: "10px 20px",
-                    cursor: "pointer",
-                    marginRight: "100px",
+                    padding: "10px",
+                    width: "100%",
+                    border: "1px solid #ccc",
+                    borderRadius: "4px",
+                    resize: "none",
+                    height: "80px",
                   }}
-                >
-                  Listeye Ekle
-                </CButton>
+                />
               </div>
+
+              {/* Tedarikçiler */}
+              <div style={{ padding: "20px", borderRadius: "8px" }}>
+
+                <h3 style={{ marginBottom: '20px' }}>Tedarikçiler</h3>
+
+                <CTabs activeTab="selected">
+                  <CNav variant="tabs">
+                    <CNavItem>
+                      <CNavLink data-tab="selected">Seçili Tedarikçiler</CNavLink>
+                    </CNavItem>
+                    <CNavItem>
+                      <CNavLink data-tab="all">Tüm Tedarikçiler</CNavLink>
+                    </CNavItem>
+                  </CNav>
+
+                  <CTabContent>
+                    {/* Seçili Tedarikçiler */}
+                    <CTabPane data-tab="selected">
+                      <CustomTable style={{ marginTop: "20px", width: "100%", borderCollapse: "collapse" }}
+                        data={selectedSuppliers.filter(s => s?.final !== undefined)}
+                        fields={[
+                          { label: "Tedarikçi Kodu", key: "SupplierID" },
+                          { label: "Tedarikçi Adı", key: "SupplierName" },
+                          { label: "Telefon", key: "SupplierTelNo" },
+                          { label: "E-Posta", key: "SupplierEmail" },
+                          { label: "Adres", key: "SupplierAddress" },
+                          { label: "Kaldır", key: "delete" },
+                        ]}
+                        scopedSlots={{
+                          delete: (supplier) => (
+                            <td>
+                              <button
+                                onClick={() => setSelectedSuppliers((prev) => prev.filter(s => s.SupplierID !== supplier.SupplierID))}
+                                style={{
+                                  backgroundColor: "transparent",
+                                  border: "none",
+                                  color: "#dc3545",
+                                  cursor: "pointer",
+                                }}
+                              >
+                                <FontAwesomeIcon icon={faTrash} />
+                              </button>
+                            </td>
+                          )
+                        }} />
+                    </CTabPane>
+
+                    {/* Tüm Tedarikçiler */}
+                    <CTabPane data-tab="all">
+                      <div>
+                        <CustomTable style={{ marginTop: "20px", width: "100%", borderCollapse: "collapse" }}
+                          fetchAddr="/querySuppliers.php"
+                          onFetch={(data) => setSupplierPage(data)}
+                          fields={[
+                            {
+                              label: (
+                                <input
+                                  type="checkbox"
+                                  checked={selectAllChecked}
+                                  onChange={handleSelectAllSuppliers}
+                                />
+                              ), key: "select"
+                            },
+                            { label: "Tedarikçi Kodu", key: "SupplierID" },
+                            { label: "Tedarikçi Adı", key: "SupplierName" },
+                            { label: "Telefon", key: "SupplierTelNo" },
+                            { label: "E-Posta", key: "SupplierEmail" },
+                            { label: "Adres", key: "SupplierAddress" },
+                          ]}
+                          scopedSlots={{
+                            select: (supplier) => (
+                              <td>
+                                <input
+                                  type="checkbox"
+                                  disabled={selectedSuppliers.find(s => s.SupplierID === supplier.SupplierID)?.final !== undefined}
+                                  checked={selectedSuppliers.find(s => s.SupplierID === supplier.SupplierID) !== undefined}
+                                  onChange={(e) =>
+                                    setSelectedSuppliers((prev) =>
+                                      e.target.checked ? prev.concat([supplier])
+                                        : prev.filter(s => s.SupplierID !== supplier.SupplierID))}
+                                />
+                              </td>
+                            ),
+                          }} />
+
+                        {/* Buton Sağ Alt Köşede ve Hafif Sola Kaydırılmış */}
+                        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "20px" }}>
+                          <CButton
+                            color="info"
+                            variant="outline"
+                            onClick={handleAddSelectedSuppliers}
+                            style={{
+                              padding: "10px 20px",
+                              cursor: "pointer",
+                              marginRight: "120px", // Butonu hafif sola kaydırır
+                            }}
+                          >
+                            Listeye Ekle
+                          </CButton>
+                        </div>
+                      </div>
+                    </CTabPane>
+
+                  </CTabContent>
+                </CTabs>
+              </div>
+
             </div>
           </CTabPane>
-          </CTabContent>
-        </CTabs>
-
-        </div>
-        </CTabPane>
         </CTabContent>
-  
+
+        <CTabContent>
+          <CTabPane data-tab="materials">
+            <div>
+              {/* Malzemeler */}
+              <h3 style={{ marginTop: "20px", marginBottom: "20px" }}>Malzemeler</h3>
+
+              <CTabs activeTab="selected">
+                <CNav variant="tabs">
+                  <CNavItem>
+                    <CNavLink data-tab="selected">Seçili Malzemeler</CNavLink>
+                  </CNavItem>
+                  <CNavItem>
+                    <CNavLink data-tab="all">Tüm Malzemeler</CNavLink>
+                  </CNavItem>
+                </CNav>
+
+                <CTabContent>
+                  {/* Seçili Malzemeler */}
+                  <CTabPane data-tab="selected">
+
+                    <CustomTable style={{ marginTop: "20px", width: "100%", borderCollapse: "collapse" }}
+                      data={selectedMaterials.filter(m => m.final)}
+                      fields={[
+                        { label: "Sil", key: "delete" },
+                        { label: "Malzeme No", key: "MaterialNo" },
+                        { label: "Malzeme Adi", key: "MaterialName" },
+                        { label: "Teklif Miktari", key: "offerRequestedAmount" },
+                        { label: "Talep Miktari", key: "RequestedAmount" },
+                        { label: "Birim", key: "UnitID" },
+                      ]}
+                      scopedSlots={{
+                        delete: (material) => (
+                          <td>
+                            <button
+                              onClick={() => {
+                                setShowModal(true);
+                                setSelectedMaterialToDelete(material);
+                              }}
+                              style={{
+                                backgroundColor: "transparent",
+                                border: "none",
+                                color: "#dc3545",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <FontAwesomeIcon icon={faTrash} />
+                            </button>
+                          </td>
+                        ),
+                        offerRequestedAmount: (material) => (
+                          <td>
+                            <input
+                              type="number"
+                              value={material.OfferRequestedAmount}
+                              onChange={(e) =>
+                                setSelectedMaterials((prev) =>
+                                  prev.map((m) =>
+                                    m.MaterialID === material.MaterialID
+                                      ? { ...m, OfferRequestedAmount: Number(e.target.value), RequestedAmount: m.RequestItemID === 0 ? Number(e.target.value) : m.RequestedAmount }
+                                      : m
+                                  )
+                                )
+                              }
+                              style={{
+                                padding: "5px",
+                                border: "1px solid #ccc",
+                                borderRadius: "4px",
+                                width: "100px",
+                              }}
+                            />
+                          </td>
+                        ),
+                      }}
+                    />
+                  </CTabPane>
+
+                  {/* Tüm Malzemeler */}
+                  <CTabPane data-tab="all">
+                    <div>
+                      <CustomTable style={{ width: "100%", borderCollapse: "collapse" }}
+                        fetchAddr="/queryMaterials.php"
+                        fetchArgs={{ columns: ["MaterialID"] }}
+                        fields={[
+                          { label: "", key: "select" },
+                          { label: "Malzeme No", key: "MaterialNo" },
+                          { label: "Malzeme Adi", key: "MaterialName" },
+                          { label: "Miktar", key: "offerRequestedAmount" },
+                          { label: "Toplam Stok", key: "Quantity" },
+                          { label: "Birim", key: "UnitID" },
+                        ]}
+                        scopedSlots={{
+                          select: (material) => (
+                            <td>
+                              <input
+                                type="checkbox"
+                                disabled={selectedMaterials.find(m => m.MaterialID === material.MaterialID)?.final !== undefined}
+                                checked={selectedMaterials.find(m => m.MaterialID === material.MaterialID) !== undefined}
+                                onChange={(e) =>
+                                  setSelectedMaterials((prev) =>
+                                    e.target.checked ? prev.concat([{ ...material, OfferRequestedAmount: 1, RequestItemID: 0 }])
+                                      : prev.filter(m => m.MaterialID !== material.MaterialID))
+                                }
+                              />
+                            </td>
+                          ),
+                          offerRequestedAmount: (material) => (
+                            <td>
+                              <input
+                                type="number"
+                                disabled={selectedMaterials.find(m => m.MaterialID === material.MaterialID)?.final !== undefined}
+                                value={selectedMaterials.find(m => m.MaterialID === material.MaterialID)?.OfferRequestedAmount || ""}
+                                onChange={(e) =>
+                                  setSelectedMaterials((prev) =>
+                                    prev.map((m) =>
+                                      m.MaterialID === material.MaterialID
+                                        ? { ...m, OfferRequestedAmount: Number(e.target.value) }
+                                        : m
+                                    )
+                                  )
+                                }
+                                style={{
+                                  padding: "5px",
+                                  border: "1px solid #ccc",
+                                  borderRadius: "4px",
+                                  width: "100px",
+                                }}
+                              />
+                            </td>
+                          ),
+                        }}
+                      />
+
+                      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "20px" }}>
+                        <CButton
+                          color="info"
+                          variant="outline"
+                          onClick={() => setSelectedMaterials((prev) => prev.map(m => ({ ...m, RequestedAmount: m.OfferRequestedAmount, final: true })))}
+                          style={{
+                            padding: "10px 20px",
+                            cursor: "pointer",
+                            marginRight: "100px",
+                          }}
+                        >
+                          Listeye Ekle
+                        </CButton>
+                      </div>
+                    </div>
+                  </CTabPane>
+                </CTabContent>
+              </CTabs>
+
+            </div>
+          </CTabPane>
+        </CTabContent>
+
       </CTabs>
 
-        
+
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
-      <CButton
-        color="success"
-        variant="outline"
-        onClick={handleSaveButton}
-        style={{
-          padding: "10px 20px",
-          cursor: "pointer",
-          marginTop: "20px",
-          marginRight: "20px",
-        }}
-      >
-        Kaydet
-      </CButton>
-
-      <CButton
-      color="danger"
-      variant="outline"
-      style={{
-        padding: "10px 20px",
-        cursor: "pointer",
-        marginTop: "20px",
-      }}
-      >
-        İptal
-      </CButton>
-      </div>
-
-      {/* Modal */}
-{showModal && (
-  <div
-    style={{
-      position: "fixed",
-      top: 0,
-      left: 0,
-      width: "100%",
-      height: "100%",
-      backgroundColor: "rgba(0, 0, 0, 0.5)",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      zIndex: 1000,
-    }}
-  >
-    <div
-      style={{
-        backgroundColor: "white",
-        padding: "20px",
-        borderRadius: "8px",
-        boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
-        textAlign: "center",
-        width: "400px",
-      }}
-    >
-      <h2 style={{ marginBottom: "20px" }}>Silme Onayı</h2>
-      <div
-        style={{
-          backgroundColor: "#f8d7da",
-          padding: "15px",
-          borderRadius: "5px",
-          marginBottom: "20px",
-        }}
-      >
-        <p>
-          '{selectedMaterialToDelete?.MaterialName}' malzemesini silmek
-          istediğinizden emin misiniz?
-        </p>
-      </div>
-      <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
-        <button
-          onClick={() => setShowModal(false)}
+        <CButton
+          color="success"
+          variant="outline"
+          onClick={handleSaveButton}
           style={{
             padding: "10px 20px",
-            backgroundColor: "#6c757d",
-            color: "white",
-            border: "none",
-            borderRadius: "5px",
             cursor: "pointer",
+            marginTop: "20px",
+            marginRight: "20px",
+          }}
+        >
+          Kaydet
+        </CButton>
+
+        <CButton
+          color="danger"
+          variant="outline"
+          style={{
+            padding: "10px 20px",
+            cursor: "pointer",
+            marginTop: "20px",
           }}
         >
           İptal
-        </button>
-        <button
-          onClick={handleRemoveMaterial}
+        </CButton>
+      </div>
+
+      {/* Modal */}
+      {showModal && (
+        <div
           style={{
-            padding: "10px 20px",
-            backgroundColor: "#dc3545",
-            color: "white",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
           }}
         >
-          Sil
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+          <div
+            style={{
+              backgroundColor: "white",
+              padding: "20px",
+              borderRadius: "8px",
+              boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+              textAlign: "center",
+              width: "400px",
+            }}
+          >
+            <h2 style={{ marginBottom: "20px" }}>Silme Onayı</h2>
+            <div
+              style={{
+                backgroundColor: "#f8d7da",
+                padding: "15px",
+                borderRadius: "5px",
+                marginBottom: "20px",
+              }}
+            >
+              <p>
+                '{selectedMaterialToDelete?.MaterialName}' malzemesini silmek
+                istediğinizden emin misiniz?
+              </p>
+            </div>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+              <button
+                onClick={() => setShowModal(false)}
+                style={{
+                  padding: "10px 20px",
+                  backgroundColor: "#6c757d",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "5px",
+                  cursor: "pointer",
+                }}
+              >
+                İptal
+              </button>
+              <button
+                onClick={handleRemoveMaterial}
+                style={{
+                  padding: "10px 20px",
+                  backgroundColor: "#dc3545",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "5px",
+                  cursor: "pointer",
+                }}
+              >
+                Sil
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
 
 
