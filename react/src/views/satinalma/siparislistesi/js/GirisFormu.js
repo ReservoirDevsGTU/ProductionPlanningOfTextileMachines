@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useHistory, useParams } from "react-router-dom";
 import axios from 'axios';
+import baseURL from "../../baseURL.js";
 import {
   CButton,
   CInput,
@@ -13,7 +14,7 @@ import {
 
 const GirisFormu = () => {
   const history = useHistory();
-  const { orderId } = useParams();
+  const { id } = useParams();
   const [activeTab, setActiveTab] = useState("siparisBilgileri");
   
   // Ana state'ler
@@ -31,46 +32,75 @@ const GirisFormu = () => {
     notlar: ""
   });
 
+  console.log("URL'den alınan OrderID:", id);
+
+
   // Veri çekme - Sipariş detayları
   useEffect(() => {
     const fetchOrderData = async () => {
       try {
-        const response = await axios.post("/queryOrders.php", {
-          subTables: { Materials: { expand: false }},
-          filters: { OrderID: [orderId] }
+        console.log("Veri çekme başladı, OrderID:", id);
+        
+        const response = await axios.post(baseURL + "/queryOrders.php", {  // baseURL eklendi
+          filters: [ { 
+            OrderID: [id]
+          } ],
+          subTables: {
+            Materials: {
+              expand: false,
+            }
+          }
         });
+  
+      console.log("API Yanıtı:", response.data);
 
-        if (response.data && response.data[0]) {
-          setOrderData(response.data[0]);
-          const combinedMaterials = combineMaterials(response.data[0].Materials);
+      if (response.data && response.data.length > 0) {
+        const order = response.data[0];
+        console.log("Sipariş Verisi:", order);
+        console.log("Materials Verisi:", order.Materials);
+        
+        setOrderData(order);
+        
+        if (order.Materials && order.Materials.length > 0) {
+          console.log("Materials Array'i mevcut ve dolu");
+          const combinedMaterials = combineMaterials(order.Materials);
+          console.log("Birleştirilmiş Materials:", combinedMaterials);
           setMaterials(combinedMaterials);
+        } else {
+          console.log("Materials Array'i yok veya boş");
         }
-        setLoading(false);
-      } catch (error) {
-        console.error("Veri çekme hatası:", error);
-        setLoading(false);
+      } else {
+        console.log("API yanıtı boş veya yanlış formatta");
       }
-    };
-
-    if (orderId) {
-      fetchOrderData();
+      setLoading(false);
+    } catch (error) {
+      console.error("Veri çekme hatası:", error);
+      setLoading(false);
     }
-  }, [orderId]);
+  };
+
+  if (id) {
+    fetchOrderData();
+  }
+}, [id]);
 
   // Aynı MaterialID'ye sahip malzemeleri birleştir
   const combineMaterials = (materialsList) => {
-    return materialsList.reduce((acc, current) => {
+    console.log("Birleştirme Öncesi Gelen Liste:", materialsList);
+    
+    const combined = materialsList.reduce((acc, current) => {
       const existingMaterial = acc.find(m => m.MaterialID === current.MaterialID);
       
       if (existingMaterial) {
-        // Varolan malzemeyi güncelle
         existingMaterial.OrderedAmount += Number(current.OrderedAmount);
         existingMaterial.originalItems.push({
           OrderItemID: current.OrderItemID,
-          OrderedAmount: current.OrderedAmount
+          OrderedAmount: current.OrderedAmount,
+          MaterialID: current.MaterialID,
+          MaterialName: current.MaterialName,
+          UnitPrice: current.UnitPrice
         });
       } else {
-        // Yeni malzeme ekle
         acc.push({
           ...current,
           OrderedAmount: Number(current.OrderedAmount),
@@ -78,12 +108,18 @@ const GirisFormu = () => {
           UnitPrice: current.UnitPrice || 0,
           originalItems: [{
             OrderItemID: current.OrderItemID,
-            OrderedAmount: current.OrderedAmount
+            OrderedAmount: current.OrderedAmount,
+            MaterialID: current.MaterialID,
+            MaterialName: current.MaterialName,
+            UnitPrice: current.UnitPrice
           }]
         });
       }
       return acc;
     }, []);
+  
+    console.log("Birleştirme Sonrası Liste:", combined);
+    return combined;
   };
 
   // Malzeme input değişikliklerini handle et
@@ -108,37 +144,47 @@ const GirisFormu = () => {
   // Kaydet - Form submit
   const handleSubmit = async () => {
     try {
+      console.log("Gönderim Öncesi Malzeme Durumu:", materials);
+  
       // Malzemeleri orijinal kayıtlarına böl
       const splitMaterials = materials.flatMap(material => {
         const totalOrdered = material.OrderedAmount;
+        console.log(`${material.MaterialName} için Orijinal Kayıtlar:`, material.originalItems);
+        
         return material.originalItems.map(item => {
           const ratio = item.OrderedAmount / totalOrdered;
+          const providedForThis = material.ProvidedAmount * ratio;
+          
+          console.log(`${material.MaterialName} - ${item.OrderItemID} için hesaplama:`, {
+            OrderedAmount: item.OrderedAmount,
+            TotalOrdered: totalOrdered,
+            Ratio: ratio,
+            ProvidedAmount: providedForThis,
+            OriginalUnitPrice: item.UnitPrice,
+            NewUnitPrice: material.UnitPrice
+          });
+  
           return {
             OrderItemID: item.OrderItemID,
-            ProvidedAmount: material.ProvidedAmount * ratio,
+            ProvidedAmount: providedForThis,
             UnitPrice: material.UnitPrice
           };
         });
       });
-
-      // Submit data hazırla
+  
       const submitData = {
-        OrderID: orderData.OrderID,
-        SupplierID: orderData.SupplierID,
-        DeliveryNote: formData.irsaliyeNo,
-        DeliveryDate: formData.teslimTarihi,
-        DeliveredBy: formData.teslimEden,
-        ReceivedBy: formData.teslimAlan,
-        WarehouseID: formData.teslimAmbar,
-        Notes: formData.notlar,
-        Materials: splitMaterials
-      };
+      OrderID: orderData.OrderID,
+      SupplierID: orderData.SupplierID,
+      Materials: splitMaterials
+    };
 
-      await axios.post("/submitOrderEntry.php", submitData);
-      history.push("/satinalma/siparis-listesi");
-    } catch (error) {
-      console.error("Gönderme hatası:", error);
-    }
+    console.log("Backend'e Gönderilecek Veri:", submitData);
+    
+    await axios.post(baseURL + "/submitOrderEntry.php", submitData);  // baseURL eklendi
+    history.push("/satinalma/siparis-listesi");
+  } catch (error) {
+    console.error("Gönderme hatası:", error);
+  }
   };
 
 /*  if (loading) {
