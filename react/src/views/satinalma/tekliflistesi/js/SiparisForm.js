@@ -49,11 +49,13 @@ const SiparisForm = () => {
         setSelectedMaterials(data.Materials.reduce((acc, cur) => {
           const exist = acc.find(m => m.MaterialID == cur.MaterialID);
           const amount = Number(cur.OfferedAmount) || Number(cur.RequestedAmount) || 0;
+          const references = {OfferItemID: cur.OfferItemID, OfferedAmount: cur.OfferedAmount, RequestItemID: cur.RequestItemID, RequestedAmount: cur.RequestedAmount};
           if(!exist) {
-            acc.push({...cur, OrderedAmount: amount, UnitPrice: 1, final: true});
+            acc.push({...cur, OrderedAmount: amount, UnitPrice: 1, references: [references], final: true});
           }
           else {
             exist.OrderedAmount += amount;
+            exist.references.push(references);
           }
           return acc;
         }, []));
@@ -110,7 +112,28 @@ const SiparisForm = () => {
     }
     const data = {
       ...formData,
-      Materials: selectedMaterials.filter(m => m.final)
+      Materials: selectedMaterials.filter(m => m.final).reduce((acc, cur) => {
+        if(cur.references) {
+          const sum = cur.OrderedAmount;
+          var remain = sum;
+          const totalRequest = cur.references.reduce((acc, cur) => acc + (Number(cur.OfferedAmount) || Number(cur.RequestedAmount) || 0), 0);
+          cur.references.forEach(r => {
+            const request = Number(r.OfferedAmount) || Number(r.RequestedAmount);
+            if(request) {
+              const amt = Math.min(request, sum * request / totalRequest);
+              acc.push({...cur, ...r, OrderedAmount: amt});
+              remain -= amt;
+            }
+          });
+          if(remain) {
+            acc.push({...cur, OrderedAmount: remain, OfferItemID: null, RequestItemID: null});
+          }
+        }
+        else {
+          acc.push(cur);
+        }
+        return acc;
+      }, [])
     };
     axios.post(baseURL + "/createOrder.php", data);
   };

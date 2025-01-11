@@ -2,7 +2,7 @@
 include "query.php";
 
 $requestTable = array("primary" => "RequestID",
-                      "subTableJoinOn" => array("OfferItemID"),
+                      "subTableJoinOn" => array("RequestID"),
                       "columns" => array("RequestID" => "pr.RequestID",
                                          "CreationDate" => "pr.CreationDate",
                                          "RequestDeadline" => "prd.RequestDeadline",
@@ -10,16 +10,10 @@ $requestTable = array("primary" => "RequestID",
                                          "RequestedBy" => "prd.RequestedBy",
                                          "ManufacturingUnitID" => "prd.ManufacturingUnitID",
                                          "UserName" => "u.UserName",
-                                         "RequestStatus" => "pr.RequestStatus",
-                                         "OfferItemID" => "poi.RequestItemID",
-                                         "RequestedAmount" => "pri.RequestedAmount"
+                                         "RequestStatus" => "pr.RequestStatus"
                                         ),
-                      "name" => "(SELECT ItemID OfferItemID, RequestItemID FROM PurchaseOfferItems) poi",
-                      "joins" => "JOIN PurchaseRequestItems pri
-                                  ON pri.ItemID = poi.RequestItemID
-                                  JOIN PurchaseRequests pr
-                                  ON pr.RequestID = pri.RequestID
-                                  JOIN PurchaseRequestDetails prd
+                      "name" => "PurchaseRequests pr",
+                      "joins" => "JOIN PurchaseRequestDetails prd
                                   ON pr.RequestID = prd.RequestID
                                   JOIN Users u
                                   ON prd.RequestedBy = u.UserID",
@@ -45,7 +39,9 @@ $orderItemTable = array("primary" => "OrderItemID",
                                            "Quantity" => "mi.Quantity",
                                            "UnitID" => "ms.UnitID",
                                            "MaterialNo" => "ms.MaterialNo",
-                                           "SuckerNo" => "ms.SuckerNo"
+                                           "SuckerNo" => "ms.SuckerNo",
+                                           "RequestID" => "pri.RequestID",
+                                           "RequestedAmount" => "pri.RequestedAmount",
                                           ),
                         "name" => "PurchaseOrderItems poi",
                         "joins" => "JOIN (SELECT MaterialID, MAX(LastUpdated) AS LastUpdated FROM MaterialInventory GROUP BY MaterialID) mi_max
@@ -54,6 +50,9 @@ $orderItemTable = array("primary" => "OrderItemID",
                                     ON mi.LastUpdated = mi_max.LastUpdated AND mi.MaterialID = poi.MaterialID
                                     JOIN Materials m
                                     ON m.MaterialID = poi.MaterialID
+                                    LEFT JOIN PurchaseRequestItems pri
+                                    ON (poi.RequestItemID IS NOT NULL AND pri.ItemID = poi.RequestItemID)
+                                    OR (poi.OfferItemID IS NOT NULL AND EXISTS (SELECT 1 FROM PurchaseOfferItems poi1 WHERE poi1.ItemID = poi.OfferItemID AND poi1.RequestItemID = pri.ItemID))
                                     JOIN MaterialSpecs ms
                                     ON ms.MaterialID = poi.MaterialID",
                         "filters" => "poi.IsDeleted = 0

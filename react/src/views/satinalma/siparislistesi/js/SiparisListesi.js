@@ -146,11 +146,17 @@ const SiparisListesi = () => {
             <CustomTable
               addTableClasses="malzeme-listesi-table"
               data={item.Materials.reduce((acc, cur) => {
-                const exist = acc.find(m => m.MaterialID = cur.MaterialID);
+                const exist = acc.find(m => m.MaterialID == cur.MaterialID);
+                if(cur.Requests.length > 0) {
+                  cur.Requests[0].RequestedAmount = cur.RequestedAmount;
+                  cur.Requests[0].UnitID = cur.UnitID;
+                }
                 if(exist) {
                   exist.OrderedAmount -= -cur.OrderedAmount;
                   exist.ProvidedAmount -= -cur.ProvidedAmount;
-                  exist.Requests = exist.Requests.concat(cur.Requests);
+                  if(cur.Requests) {
+                    exist.Requests = exist.Requests.concat(cur.Requests);
+                  }
                 }
                 else {
                   acc.push({...cur});
