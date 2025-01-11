@@ -77,7 +77,7 @@ $orderTable = array("primary" => "OrderID",
                                        "DetailID" => "pod.DetailID",
                                       ),
                     "name" => "PurchaseOrders po",
-                    "joins" => "JOIN Users u ON u.UserID = po.CreatedBy
+                    "joins" => "LEFT JOIN Users u ON u.UserID = po.CreatedBy
                                 JOIN PurchaseOrderDetails pod ON pod.OrderID = po.OrderID
                                 JOIN Suppliers s ON s.SupplierID = pod.SupplierID",
                     "filters" => "po.IsDeleted = 0",

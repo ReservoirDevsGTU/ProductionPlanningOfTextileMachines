@@ -11,7 +11,7 @@ $userTable = array("primary" => "UserID",
                                       ),
                    "name" => "Users u",
                    "joins" => "",
-                   "filters" => "u.UserStatus != 0",
+                   "filters" => "1 = 1",
                    "subTables" => [],
 );
 

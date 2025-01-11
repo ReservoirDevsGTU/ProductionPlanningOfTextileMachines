@@ -24,6 +24,8 @@ import {
 } from '@coreui/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import CustomTable from '../../CustomTable.js';
+import SearchBox from '../../SearchBox.js';
+import baseURL from '../../baseURL.js';
 import { faTrash, faChevronDown, faChevronUp  } from "@fortawesome/free-solid-svg-icons";
 
 
@@ -32,16 +34,7 @@ const SiparisForm = () => {
   const history = useHistory();
   const [activeTab, setActiveTab] = useState('siparisBilgileri');
   const [materialData, setMaterialData] = useState([]);
-  const [formData, setFormData] = useState({
-    siparisNumarasi: '',
-    tedarikci: 'XXX Tedarikçi',
-    siparisTarihi: '',
-    sevkTarihi: '',
-    terminTarihi: '',
-    mailgonder: 'true',
-    firmaSorumlusu: '',
-    not: ''
-  });
+  const [formData, setFormData] = useState({});
 
   const [selectedMaterials, setSelectedMaterials] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -49,6 +42,23 @@ const SiparisForm = () => {
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [expandedSuppliers, setExpandedSuppliers] = useState({});
 
+  useEffect(() => {
+    axios.post(baseURL + "/queryOffers.php", {subTables: {Materials: {expand: false}}, filters: [{OfferID: [id]}]})
+      .then(response => {
+        const data = response.data[0];
+        setSelectedMaterials(data.Materials.reduce((acc, cur) => {
+          const exist = acc.find(m => m.MaterialID == cur.MaterialID);
+          const amount = Number(cur.OfferedAmount) || Number(cur.RequestedAmount) || 0;
+          if(!exist) {
+            acc.push({...cur, OrderedAmount: amount, UnitPrice: 1, final: true});
+          }
+          else {
+            exist.OrderedAmount += amount;
+          }
+          return acc;
+        }, []));
+      });
+  }, [id]);
 
   const [supplierData, setSupplierData] = useState([
     {
@@ -98,7 +108,11 @@ const SiparisForm = () => {
     if (formData.mailgonder) {
       setShowEmailModal(true);
     }
-    // Form kaydetme işlemleri
+    const data = {
+      ...formData,
+      Materials: selectedMaterials.filter(m => m.final)
+    };
+    axios.post(baseURL + "/createOrder.php", data);
   };
 
 
@@ -165,8 +179,8 @@ const SiparisForm = () => {
                     <CLabel>Sipariş Tarihi</CLabel>
                     <CInput
                       type="date"
-                      name="siparisTarihi"
-                      value={formData.siparisTarihi}
+                      name="OrderDate"
+                      value={formData.OrderDate}
                       onChange={handleInputChange}
                     />
                   </CFormGroup>
@@ -174,8 +188,8 @@ const SiparisForm = () => {
                     <CLabel>Termin Tarihi</CLabel>
                     <CInput
                       type="date"
-                      name="terminTarihi"
-                      value={formData.terminTarihi}
+                      name="OrderDeadline"
+                      value={formData.OrderDeadline}
                       onChange={handleInputChange}
                     />
                   </CFormGroup>
@@ -183,22 +197,15 @@ const SiparisForm = () => {
                 </div>
                 <div>
                   <CFormGroup>
-                    <CLabel>Tedarikçi Firma</CLabel>
-                    <CSelect
-                      name="tedarikci"
-                      value={formData.tedarikci}
-                      onChange={handleInputChange}
-                    >
-                      <option value="">Seçiniz...</option>
-                      <option value="XXY Tedarikçi">XXY Tedarikçi</option>
-                    </CSelect>
+                    <CLabel>Tedarikci Firma</CLabel>
+                    <SearchBox fetchAddr="/querySuppliers.php" value="SupplierID" initialValue={formData.initialSupplier} label="SupplierName" onSelect={v=>setFormData(p=>({...p, SupplierID: v}))}/>
                   </CFormGroup>
                   <CFormGroup>
                     <CLabel>Sevk Tarihi</CLabel>
                     <CInput
                       type="date"
-                      name="sevkTarihi"
-                      value={formData.sevkTarihi}
+                      name="ShippingDate"
+                      value={formData.ShippingDate}
                       onChange={handleInputChange}
                     />
                   </CFormGroup>
@@ -233,9 +240,9 @@ const SiparisForm = () => {
                   <CFormGroup>
                     <CLabel>Notlar</CLabel>
                     <CTextarea
-                      name="not"
+                      name="OrderNotes"
                       rows="4"
-                      value={formData.not}
+                      value={formData.OrderNotes}
                       onChange={handleInputChange}
                       placeholder="Not giriniz..."
                       style={{ resize: 'none' }}
@@ -283,14 +290,13 @@ const SiparisForm = () => {
             {label: "Sil", key: "delete"},
             {label: "Malzeme No", key: "MaterialNo"},
             {label: "Malzeme Adi", key: "MaterialName"},
-            {label: "Sipariş Miktarı", key: "offeredAmount"},
+            {label: "Sipariş Miktarı", key: "orderedAmount"},
             {label: "Birim", key: "UnitID"},
             {label: "Birim Fiyatı", key: "UnitPrice"},
-            {label: "Kur", key: "RequestedAmount"},
-
-
+            {label: "Kur", key: "currency"},
           ]}
           scopedSlots={{
+            currency: () => (<td>TRY (placeholder)</td>),
             delete: (material) => (
                       <td>
                         <button
@@ -309,16 +315,16 @@ const SiparisForm = () => {
                         </button>
                       </td>
             ),
-            offeredAmount: (material) => (
+            orderedAmount: (material) => (
                       <td>
                         <input
                           type="number"
-                          value={material.OfferedAmount}
+                          value={material.OrderedAmount}
                           onChange={(e) =>
                             setSelectedMaterials((prev) =>
                               prev.map((m) =>
                                 m.MaterialID === material.MaterialID
-                                  ? { ...m, OfferedAmount: Number(e.target.value), RequestedAmount: m.RequestItemID === 0 ? Number(e.target.value) : m.RequestedAmount}
+                                  ? { ...m, OrderedAmount: Number(e.target.value)}
                                   : m
                               )
                             )
@@ -337,7 +343,15 @@ const SiparisForm = () => {
                   <input
                     type="number"
                     value={material.UnitPrice}
-                    // burası birim fiyatı diye güncellenecek backendden gelecekle OnChange diye
+                          onChange={(e) =>
+                            setSelectedMaterials((prev) =>
+                              prev.map((m) =>
+                                m.MaterialID === material.MaterialID
+                                  ? { ...m, UnitPrice: Number(e.target.value)}
+                                  : m
+                              )
+                            )
+                          }
                     style={{
                       padding: "5px",
                       border: "1px solid #ccc",

@@ -228,10 +228,9 @@ CREATE TABLE PurchaseOrderItems (
     ItemStatus INT,
     IsDeleted INT,
     FOREIGN KEY (OrderID) REFERENCES PurchaseOrders(OrderID),
-    FOREIGN KEY (ItemID) REFERENCES PurchaseOfferItems(ItemID),
     FOREIGN KEY (MaterialID) REFERENCES Materials(MaterialID),
     FOREIGN KEY (RequestItemID) REFERENCES PurchaseRequestItems(ItemID),
-    FOREIGN KEY (OfferItemID) REFERENCES PurchaseOfferItems(ItemID),
+    FOREIGN KEY (OfferItemID) REFERENCES PurchaseOfferItems(ItemID)
 );
 
 CREATE TABLE DeliveryDetails (

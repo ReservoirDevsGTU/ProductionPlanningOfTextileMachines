@@ -18,21 +18,20 @@ if($input
 
     $sql = "DECLARE @id TABLE(val INT);
 
-            INSERT INTO PurchaseRequests(RequestID, CreatedBy, CreationDate, RequestStatus, IsDeleted)
+            INSERT INTO PurchaseRequests(CreatedBy, CreationDate, RequestStatus, IsDeleted)
             OUTPUT INSERTED.RequestID INTO @id
-            VALUES((SELECT ISNULL(MAX(RequestID)+1,1) FROM PurchaseRequests), ?, GETDATE(), ?, 0);
+            VALUES(?, GETDATE(), ?, 0);
 
-            INSERT INTO PurchaseRequestDetails(RequestInfoID, RequestID, RequestedBy, RequestDeadline, RequestDescription, RequestDetailStatus, IsDeleted)
-            VALUES((SELECT ISNULL(MAX(RequestInfoID)+1,1) FROM PurchaseRequestDetails), (SELECT val FROM @id), ?, ?, ?, 0, 0);
+            INSERT INTO PurchaseRequestDetails(RequestID, RequestedBy, RequestDeadline, RequestDescription, RequestDetailStatus, IsDeleted)
+            VALUES((SELECT val FROM @id), ?, ?, ?, 0, 0);
 
-            INSERT INTO PurchaseRequestItems(ItemID, RequestID, MaterialID, RequestedAmount, ItemStatus, IsDeleted) VALUES";
+            INSERT INTO PurchaseRequestItems(RequestID, MaterialID, RequestedAmount, ItemStatus, IsDeleted) VALUES";
 
     $i = 1;
     foreach($input["Materials"] as $m) {
         $mid = $m["MaterialID"];
         $amt = $m["RequestedAmount"];
-        $sql .= "((SELECT ISNULL(MAX(ItemID)+$i,$i) FROM PurchaseRequestItems), (SELECT val FROM @id),
-                  $mid, $amt, 0, 0),";
+        $sql .= "((SELECT val FROM @id), $mid, $amt, 0, 0),";
         $i = $i + 1;
     }
 

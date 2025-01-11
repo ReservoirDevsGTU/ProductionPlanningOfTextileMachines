@@ -25,11 +25,12 @@ $requestTable = array("primary" => "RequestID",
 );
 
 $offerItemTable = array("primary" => "OfferItemID",
-                        "subTableJoinOn" => array("OfferGroupID", "OfferStatus"),
+                        "subTableJoinOn" => array("OfferGroupID", "EvaluatedBy", "OfferStatus"),
                         "columns" => array("OfferItemID" => "poi.ItemID",
                                            "OfferID" => "poi.OfferID",
                                            "OfferStatus" => "po.OfferStatus",
                                            "OfferGroupID" => "po.OfferGroupID",
+                                           "EvaluatedBy" => "pod.EvaluatedBy",
                                            "RequestItemID" => "poi.RequestItemID",
                                            "RequestID" => "pri.RequestID",
                                            "RequestedAmount" => "pri.RequestedAmount",
@@ -49,6 +50,8 @@ $offerItemTable = array("primary" => "OfferItemID",
                                     ON mi_max.MaterialID = poi.MaterialID
                                     JOIN MaterialInventory mi
                                     ON mi.LastUpdated = mi_max.LastUpdated AND mi.MaterialID = poi.MaterialID
+                                    JOIN PurchaseOfferDetails pod
+                                    ON pod.OfferID = poi.OfferID
                                     JOIN Materials m
                                     ON m.MaterialID = poi.MaterialID
                                     JOIN MaterialSpecs ms
@@ -64,12 +67,20 @@ $offerItemTable = array("primary" => "OfferItemID",
 
 $offerGroupTable = array("primary" => "OfferGroupID",
                          "columns" => array("OfferGroupID" => "pog.OfferGroupID",
+                                            "EvaluatedBy" => "pog.EvaluatedBy",
+                                            "EvaluatorName" => "pog.EvaluatorName",
                                             "OfferStatus" => "pog.OfferStatus"
                                            ),
                          "name" => "(SELECT DISTINCT
                                      po.OfferGroupID,
+                                     pod.EvaluatedBy,
+                                     u.UserName EvaluatorName,
                                      po.OfferStatus
                                      FROM PurchaseOffers po
+                                     JOIN PurchaseOfferDetails pod
+                                     ON pod.OfferID = po.OfferID
+                                     JOIN Users u
+                                     ON pod.EvaluatedBy = u.UserID
                                      WHERE po.IsDeleted = 0) pog",
                          "joins" => "",
                          "filters" => "1 = 1",
