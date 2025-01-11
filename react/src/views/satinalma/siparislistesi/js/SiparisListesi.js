@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "../css/SiparisListesi.css";
 import { CInput ,CButton } from "@coreui/react";
-import {  faLongArrowAltDown, faPrint, faShoppingCart } from "@fortawesome/free-solid-svg-icons";
+import {  faChevronDown, faChevronUp, faLongArrowAltDown, faPrint, faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useHistory } from "react-router-dom"; // useHistory import edildi
 import CustomTable from '../../CustomTable.js';
@@ -9,6 +9,43 @@ import CustomTable from '../../CustomTable.js';
 const SiparisListesi = () => {
 
   const history = useHistory(); // useHistory hook'u kullanılıyor
+
+
+  // checkbox işlevleri
+
+  const [allSelected, setAllSelected] = useState(false);  
+  const [selected, setSelected] = useState({});
+  const [data, setData] = useState([]);
+
+  const handleSelectedAll = (isChecked) => {
+    const newSelected = {};
+    data.forEach(item => {
+      newSelected[item.OrderID] = isChecked;
+    });
+    setSelected(newSelected);
+    setAllSelected(isChecked);
+  };
+  
+  const handleRowSelect = (itemId, isChecked) => {
+    const newSelected = {
+      ...selected,
+      [itemId]: isChecked
+    };
+    setSelected(newSelected);
+    
+    const allItemsSelected = data.every(item => newSelected[item.OrderID]);
+    setAllSelected(allItemsSelected);
+  };
+
+  const processData = (newData) => {
+    setData(newData);
+    // Tüm satırların seçili olup olmadığını kontrol et
+    if (Object.keys(selected).length > 0) {
+      setAllSelected(!newData.find(item => !selected[item.OrderID]));
+    }
+  };
+  const isSingleSelected = Object.values(selected).filter(Boolean).length === 1;
+
 
   // Satırların genişleme durumları
   const [expandedRows, setExpandedRows] = useState({});
@@ -38,10 +75,13 @@ const SiparisListesi = () => {
   };
 
   const handleSiparistenGiris = () => {
-     //alert("Siparişten giriş işlemi başlatıldı!");
-     // Yönlendirme işlemi
-     history.push("/satinalma/giris-formu");
-    
+
+    const selectedOrderId = Object.keys(selected).find(key => selected[key]);
+  
+    if (selectedOrderId && isSingleSelected) {
+      history.push(`/satinalma/giris-formu/${selectedOrderId}`);
+    }
+
   };
 
   const handleYazdir = () => {
@@ -68,7 +108,7 @@ const SiparisListesi = () => {
             <FontAwesomeIcon icon={faShoppingCart} style={{ marginRight: '8px' }} />
             Sipariş Oluştur
           </CButton>
-          <CButton color="info" variant='outline' size='lg' onClick={handleSiparistenGiris}>
+          <CButton color="info" variant='outline' size='lg' disabled={!isSingleSelected} onClick={handleSiparistenGiris}>
             <FontAwesomeIcon icon={faLongArrowAltDown} style={{ marginRight: '8px' }} />
             Siparişten Giriş
           </CButton>
@@ -100,7 +140,20 @@ const SiparisListesi = () => {
         fetchArgs={{subTables: {Materials: {expand: false, subTables: {Requests: {expand: false}}}}}}
         searchTerm={searchTerm}
         searchFields={["SupplierName", "OrderID"]}
+        onFetch={processData}
         fields={[
+          {
+            key: 'checkbox',
+            label: (
+              <input
+                type="checkbox"
+                checked={allSelected}
+                onChange={(e) => handleSelectedAll(e.target.checked)}
+              />
+            ),
+            sorter: false,
+            filter: false,
+          },    
 		  {label:'', key: 'expand'},
 		  {label:'Tedarikçi', key: 'SupplierName'},
 		  {label:'Sipariş Tarihi', key: 'OrderDate'},
@@ -108,17 +161,18 @@ const SiparisListesi = () => {
 		  {label:'Teslim Tarihi', key: 'ShippingDate'},
 		  {label:'Talep NO', key: 'request_id'},
 		  {label:'Durum', key: 'order_status'},
-		  {label:'Seç', key: 'select'},
         ]}
         scopedSlots={{
           expand: (item) => (
             <td>
-              <button
-                className="expand-button"
+              <CButton
+                size="lg"
+                variant="outline"
+                color="secondary"
+                children={<FontAwesomeIcon style={{color: 'black'}} icon={expandedRows[item.RowID] ? faChevronUp : faChevronDown} ></FontAwesomeIcon>}
                 onClick={() => toggleRow(item.RowID)}
               >
-                {expandedRows[item.RowID] ? "▼" : "►"}
-              </button>
+              </CButton>
             </td>
           ),
           request_id: (item) => (
@@ -135,11 +189,13 @@ const SiparisListesi = () => {
           order_status: (item) => (
             <td>{["Siparis Verildi", "Kismen Teslim Edildi", "Teslim Edildi"][item.OrderStatus]}</td>
           ),
-          select: (item) => (
+          checkbox: (item) => (
             <td>
-              <CButton shape='square' variant='outline' color='primary' >
-                Seç
-              </CButton>
+              <input
+                type="checkbox"
+                checked={!!selected[item.OrderID]}
+                onChange={(e) => handleRowSelect(item.OrderID, e.target.checked)}
+              />
             </td>
           ),
           details: (item) => expandedRows[item.RowID] && (
@@ -174,16 +230,16 @@ const SiparisListesi = () => {
               scopedSlots={{
                 expand: (material) => (
                   <td>
-                    <button
-                      className="expand-button"
+                    <CButton
+                      size="lg"
+                      variant="outline"
+                      color="secondary"
+                      children={<FontAwesomeIcon style={{color: 'black'}} icon={expandedMaterials[`${item.RowID}-${material.OrderItemID}`] ? faChevronUp : faChevronDown} ></FontAwesomeIcon>}
                       onClick={() =>
                         toggleMaterial(item.RowID, material.OrderItemID)
                       }
                     >
-                      {expandedMaterials[`${item.RowID}-${material.OrderItemID}`]
-                        ? "▼"
-                        : "►"}
-                    </button>
+                    </CButton>
                   </td>
                 ),
                 left_ordered_amount: (item) => (

@@ -82,7 +82,7 @@ const routes = [
   { path: '/satinalma/siparis-listesi', name: 'Siparis Listesi', component: SiparisListesi },
 
   // giris formu
-  { path: '/satinalma/giris-formu', name: 'Giris Formu', component: GirisFormu },
+  { path: '/satinalma/giris-formu/:id', name: 'Giris Formu', component: GirisFormu },
   
   
   // Satin alma parametreleri
