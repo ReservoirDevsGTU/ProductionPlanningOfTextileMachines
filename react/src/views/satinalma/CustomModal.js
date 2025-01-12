@@ -1,10 +1,9 @@
-// components/CustomModal.js
 import React from 'react';
 import { CModal, CModalHeader, CModalBody, CModalFooter, CButton } from '@coreui/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faExclamationTriangle, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 
-const CustomModal = ({ show, onClose, message, type = 'warning', showExitWarning, onExit }) => {
+const CustomModal = ({ show, onClose, message, type = 'warning', showExitWarning, onExit, title }) => {
   const modalTypes = {
     warning: {
       icon: faExclamationTriangle,
@@ -17,46 +16,51 @@ const CustomModal = ({ show, onClose, message, type = 'warning', showExitWarning
       title: 'Bilgi'
     }
   };
- 
+
   const currentType = modalTypes[type];
- 
+  const modalTitle = title || currentType.title; // Eğer title parametresi verilmemişse, default başlık kullanılacak.
+  //console.log(modalTitle);
+
   const Footer = () => {
     if (showExitWarning) {
       return (
         <CModalFooter>
-          <CButton color="secondary" onClick={onClose} style={{marginRight: '10px'}}>
+          <CButton color="secondary" onClick={onClose} style={{ marginRight: '10px' }}>
             Vazgeç
           </CButton>
           <CButton color="danger" onClick={onExit}>
-            Çık
+            Onay
           </CButton>
         </CModalFooter>
       );
     }
     return (
       <CModalFooter>
-        <CButton color="secondary" onClick={onClose}>Kapat</CButton>
+        <CButton color="secondary" onClick={onClose}>
+          Kapat
+        </CButton>
       </CModalFooter>
     );
   };
- 
+
   return (
     <CModal show={show} onClose={onClose} size="md" centered>
       <CModalHeader closeButton>
-        <h5 style={{fontWeight: 'bold', fontSize:'24px'}}>{currentType.title}</h5>
+        <h5 style={{ fontWeight: 'bold', fontSize: '24px' }}>{modalTitle}</h5>
       </CModalHeader>
- 
+
       <CModalBody>
         <div className="d-flex align-items-center">
-          <div style={{color: currentType.color, marginRight: '15px'}}>
-            <FontAwesomeIcon icon={currentType.icon} size="2x"/>
+          <div style={{ color: currentType.color, marginRight: '15px' }}>
+            <FontAwesomeIcon icon={currentType.icon} size="2x" />
           </div>
           <div>{message}</div>
         </div>
       </CModalBody>
- 
+
       <Footer />
     </CModal>
   );
- };
+};
+
 export default CustomModal;

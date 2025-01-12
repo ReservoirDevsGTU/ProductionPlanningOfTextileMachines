@@ -6,6 +6,7 @@ import axios from "axios";
 import { CButton, CNav, CNavItem, CNavLink, CTabContent, CTabPane, CTabs } from '@coreui/react';
 import CustomTable from '../../CustomTable.js';
 import SearchBox from '../../SearchBox.js';
+import { useHistory } from 'react-router-dom';
 
 
 const TeklifIsteme = (props) => {
@@ -26,6 +27,8 @@ const TeklifIsteme = (props) => {
   const [users, setUsers] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedMaterialToDelete, setSelectedMaterialToDelete] = useState(null);
+
+  const history = useHistory();
 
   const editItems = props.location.editItems;
 
@@ -126,6 +129,10 @@ const TeklifIsteme = (props) => {
     };
     axios.post(baseURL + "/createOffer.php", requestData);
     alert("Teklif bilgileri kaydedildi!");
+  };
+
+  const handleCancel = () => {
+    history.push("/satinalma/teklif-siparis-liste"); // Yönlendirme işlemi
   };
 
   const handleRemoveMaterial = () => {
@@ -527,6 +534,7 @@ const TeklifIsteme = (props) => {
         <CButton
           color="danger"
           variant="outline"
+          onClick={handleCancel}
           style={{
             padding: "10px 20px",
             cursor: "pointer",

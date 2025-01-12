@@ -1,25 +1,23 @@
 import React, { useState } from "react";
 import { CButton } from "@coreui/react";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';  // FontAwesome çöp kutusu ikonu
-import CustomTable from '../../CustomTable.js';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrashAlt } from "@fortawesome/free-solid-svg-icons"; // FontAwesome çöp kutusu ikonu
+import CustomTable from "../../CustomTable.js";
+import CustomModal from "../../CustomModal.js";
+import { title } from "process";
 
 const SatinAlmaParametreleri = () => {
   const [activeMainTab, setActiveMainTab] = useState("talepteOnay");
   const [activeSubTab, setActiveSubTab] = useState("kullanicilar");
   const [searchQuery, setSearchQuery] = useState("");
-  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [modalType, setModalType] = useState("warning");
+  const [deleteTarget, setDeleteTarget] = useState(null);
+
   // Kullanıcılar tablosu sütunları
   const kullaniciFields = [
-    { key: "delete", label: "Sil", _style: { minWidth: "60px" }, render: (value, row) => (
-        <span 
-          style={{ cursor: "pointer", color: "red" }} 
-          onClick={() => handleDelete(row, "kullanici")}
-        >
-          <FontAwesomeIcon icon={faTrashAlt} />  {/* FontAwesome çöp kutusu ikonu */}
-        </span>
-      ) 
-    },
+    { key: "delete", label: "", _style: { minWidth: "60px" } },
     { key: "Adi", label: "Adı", _style: { minWidth: "100px" } },
     { key: "Soyadi", label: "Soyadı", _style: { minWidth: "100px" } },
     { key: "Sirket", label: "Şirket", _style: { minWidth: "100px" } },
@@ -28,15 +26,7 @@ const SatinAlmaParametreleri = () => {
 
   // Gruplar tablosu sütunları
   const grupFields = [
-    { key: "delete", label: "Sil", _style: { minWidth: "60px" }, render: (value, row) => (
-        <span 
-          style={{ cursor: "pointer", color: "red" }} 
-          onClick={() => handleDelete(row, "grup")}
-        >
-          <FontAwesomeIcon icon={faTrashAlt} />  {/* FontAwesome çöp kutusu ikonu */}
-        </span>
-      )
-    },
+    { key: "delete", label: "", _style: { minWidth: "60px" } },
     { key: "GrupIsmi", label: "Grup İsmi", _style: { minWidth: "120px" } },
     { key: "PersonelSayisi", label: "Personel Sayısı", _style: { minWidth: "100px" } },
     { key: "AksiyonDurumu", label: "Aksiyon Durumu", _style: { minWidth: "120px" } },
@@ -44,40 +34,58 @@ const SatinAlmaParametreleri = () => {
 
   // Dummy data
   const [kullaniciData, setKullaniciData] = useState([
-    { Adi: "XXX", Soyadi: "XXX", Sirket: "XXX", Unvan: "XXX" },
-    { Adi: "XXY", Soyadi: "XXY", Sirket: "...", Unvan: "..." },
-    { Adi: "XYY", Soyadi: "XYY", Sirket: "...", Unvan: "..." },
+    { Adi: "XXX", Soyadi: "ABC", Sirket: "XXX", Unvan: "XXX" },
+    { Adi: "XXY", Soyadi: "DEF", Sirket: "...", Unvan: "..." },
+    { Adi: "XYY", Soyadi: "GKL", Sirket: "...", Unvan: "..." },
   ]);
 
   const [grupData, setGrupData] = useState([
-    { GrupIsmi: "XXX", PersonelSayisi: "XX", AksiyonDurumu: "Aksiyoner" },
-    { GrupIsmi: "XXY", PersonelSayisi: "Y", AksiyonDurumu: "Aksiyoner Değil" },
-    { GrupIsmi: "XYY", PersonelSayisi: "...", AksiyonDurumu: "..." },
+    { GrupIsmi: "TYR", PersonelSayisi: "XX", AksiyonDurumu: "Aksiyoner" },
+    { GrupIsmi: "HGJ", PersonelSayisi: "Y", AksiyonDurumu: "Aksiyoner Değil" },
+    { GrupIsmi: "LLK", PersonelSayisi: "...", AksiyonDurumu: "..." },
   ]);
 
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
   };
 
-  const handleDelete = (row, type) => {
-    const confirmation = window.confirm("Silmek istediğinizden emin misiniz?");
-    if (confirmation) {
-      if (type === "kullanici") {
-        setKullaniciData(kullaniciData.filter((item) => item !== row));
-      } else if (type === "grup") {
-        setGrupData(grupData.filter((item) => item !== row));
-      }
-    }
+  const openModal = (message, type = "warning", target = null, title = "") => {
+    const entityName = target?.type === "kullanici" ? `${target.row.Adi} ${target.row.Soyadi}` :
+                     target?.type === "grup" ? target.row.GrupIsmi : "";
+  const customMessage = target?.type === "kullanici" 
+    ? `${entityName} isimli kullanıcıyı silmek istediğinize emin misiniz?` 
+    : target?.type === "grup" 
+    ? `${entityName} isimli grubu silmek istediğinize emin misiniz?`
+    : message;
+    setModalMessage(customMessage);
+    setModalType(type);
+    setDeleteTarget(target);
+    setIsModalOpen(true);
+  };
+  
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setDeleteTarget(null);
   };
 
-  const filteredKullaniciData = kullaniciData.filter((user) => 
-    Object.values(user).some(value => 
+  const confirmDelete = () => {
+    if (deleteTarget?.type === "kullanici") {
+      setKullaniciData(kullaniciData.filter((item) => item !== deleteTarget.row));
+    } else if (deleteTarget?.type === "grup") {
+      setGrupData(grupData.filter((item) => item !== deleteTarget.row));
+    }
+    closeModal();
+  };
+
+  const filteredKullaniciData = kullaniciData.filter((user) =>
+    Object.values(user).some((value) =>
       value.toString().toLowerCase().includes(searchQuery.toLowerCase())
     )
   );
 
-  const filteredGrupData = grupData.filter((group) => 
-    Object.values(group).some(value => 
+  const filteredGrupData = grupData.filter((group) =>
+    Object.values(group).some((value) =>
       value.toString().toLowerCase().includes(searchQuery.toLowerCase())
     )
   );
@@ -171,37 +179,78 @@ const SatinAlmaParametreleri = () => {
 
           {/* Kullanıcılar Tablosu */}
           {activeSubTab === "kullanicilar" && (
-            <>
-              <CustomTable
-                data={filteredKullaniciData}
-                fields={kullaniciFields}
-                addTableClasses="table-striped table-hover"
-                tableStyle={{
-                  tableLayout: "auto",  // Sütunlar esnek olmalı
-                  width: "100%",
-                  borderCollapse: "collapse", // Kenarları birleştirir
-                }}
-              />
-            </>
+            <CustomTable
+              data={filteredKullaniciData}
+              fields={kullaniciFields}
+              addTableClasses="table-striped table-hover"
+              tableStyle={{ tableLayout: "auto", width: "100%", borderCollapse: "collapse" }}
+              scopedSlots={{
+                delete: (item) => (
+                  <td>
+                    <CButton
+                      size="sm"
+                      color="danger"
+                      onClick={() =>
+                        openModal(
+                          "",
+                          "warning",
+                          { type: "kullanici", row: item , title:""},
+                          "Kullanıcı Silme"  // Başlık burada belirtiliyor
+                        )
+                      }
+                    >
+                      <FontAwesomeIcon icon={faTrashAlt} />
+                    </CButton>
+
+                  </td>
+                ),
+              }}
+            />
           )}
 
           {/* Gruplar Tablosu */}
           {activeSubTab === "gruplar" && (
-            <>
-              <CustomTable
-                data={filteredGrupData}
-                fields={grupFields}
-                addTableClasses="table-striped table-hover"
-                tableStyle={{
-                  tableLayout: "auto",  // Sütunlar esnek olmalı
-                  width: "100%",
-                  borderCollapse: "collapse", // Kenarları birleştirir
-                }}
-              />
-            </>
+            <CustomTable
+              data={filteredGrupData}
+              fields={grupFields}
+              addTableClasses="table-striped table-hover"
+              tableStyle={{ tableLayout: "auto", width: "100%", borderCollapse: "collapse" }}
+              scopedSlots={{
+                delete: (item) => (
+                  <td>
+                    <CButton
+                      size="sm"
+                      color="danger"
+                      onClick={() =>
+                        openModal(
+                          "",
+                          "warning",
+                          { type: "grup", row: item },
+                          "Grup Silme"  // Başlık burada belirtiliyor
+                        )
+                      }
+                    >
+                      <FontAwesomeIcon icon={faTrashAlt} />
+                    </CButton>
+
+                  </td>
+                ),
+              }}
+            />
           )}
         </>
       )}
+
+      {/* Custom Modal */}
+      <CustomModal
+        show={isModalOpen}
+        onClose={closeModal}
+        message={modalMessage}
+        type={modalType}
+        showExitWarning
+        onExit={confirmDelete}
+        title="Silme Onayı"
+      />
     </div>
   );
 };

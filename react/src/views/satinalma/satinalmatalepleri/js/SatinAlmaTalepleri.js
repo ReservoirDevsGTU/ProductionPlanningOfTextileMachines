@@ -7,8 +7,8 @@ import TalepEkleme from './TalepEkleme';
 import axios from 'axios';
 import baseURL from "../../baseURL.js";
 import CustomTable from '../../CustomTable.js';
+import CustomModal from '../../CustomModal.js'; // CustomModal.js dosyasının yolu
 import '@coreui/coreui/dist/css/coreui.min.css';
-
 
 const SatinAlmaTalepleri = () => {
   const [showModal, setShowModal] = useState(false);
@@ -35,7 +35,7 @@ const SatinAlmaTalepleri = () => {
   };
 
   const confirmDelete = () => {
-    axios.post(baseURL + '/deleteRequest.php', {RequestID: selectedItem.RequestID});
+    axios.post(baseURL + '/deleteRequest.php', { RequestID: selectedItem.RequestID });
     setShowModal(false);
   };
 
@@ -53,13 +53,14 @@ const SatinAlmaTalepleri = () => {
 
       {!showTalepEkleme ? (
         <div>
-          <div 
-          style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '20px',
-        }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '20px',
+            }}
+          >
             <CButton
               onClick={handleTalepEkleClick}
               color='primary'
@@ -87,7 +88,7 @@ const SatinAlmaTalepleri = () => {
           <CustomTable
             update={showModal === false}
             fetchAddr="/queryRequests.php"
-            fetchArgs={{subTables:{Materials: {expand:false}}}}
+            fetchArgs={{ subTables: { Materials: { expand: false } } }}
             searchTerm={searchTerm}
             searchFields={["RequestID", "UserName", "PurchaseDescription"]}
             fields={[
@@ -101,13 +102,7 @@ const SatinAlmaTalepleri = () => {
             ]}
             scopedSlots={{
               'request_status': (item) => (
-                <td>{["Taslak",
-                      "Onay Bekliyor",
-                      "Onaylandi",
-                      "Reddedildi",
-                      "Kismi Onaylandi"
-                     ][item.RequestStatus]}
-                </td>
+                <td>{["Taslak", "Onay Bekliyor", "Onaylandi", "Reddedildi", "Kismi Onaylandi"][item.RequestStatus]}</td>
               ),
               'show_materials': (item) => (
                 <td>
@@ -115,10 +110,9 @@ const SatinAlmaTalepleri = () => {
                     size='lg'
                     variant='outline'
                     color='secondary'
-                    children={<FontAwesomeIcon style={{color: 'black'}} icon={expandedRows[item.RequestID] ? faChevronUp : faChevronDown} />}
+                    children={<FontAwesomeIcon style={{ color: 'black' }} icon={expandedRows[item.RequestID] ? faChevronUp : faChevronDown} />}
                     onClick={() => toggleRow(item.RequestID)}
-                  >
-                  </CButton>
+                  />
                 </td>
               ),
               'details': (item) => (
@@ -142,22 +136,19 @@ const SatinAlmaTalepleri = () => {
                   <CButton
                     size='lg'
                     color='info'
-                    disabled={item.RequestStatus != 0}
+                    disabled={item.RequestStatus !== 0}
                     onClick={() => handleEditClick(item)}
-                    children={<FontAwesomeIcon style={{color:'white'}} icon={faEdit} />}
+                    children={<FontAwesomeIcon style={{ color: 'white' }} icon={faEdit} />}
                     style={{
                       padding: '5px 10px',
                       borderRadius: '5px',
                       marginRight: '5px',
-
                     }}
-                  >
-                    
-                  </CButton>
+                  />
                   <CButton
                     size='lg'
                     color='danger'
-                    disabled={item.RequestStatus != 0}
+                    disabled={item.RequestStatus !== 0}
                     onClick={() => handleDeleteClick(item)}
                     style={{
                       color: '#fff',
@@ -216,62 +207,16 @@ const SatinAlmaTalepleri = () => {
         <TalepEkleme />
       )}
 
-      {showModal && (
-        <div
-          style={{
-            position: 'fixed',
-            top: '0',
-            left: '0',
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#fff',
-              padding: '20px',
-              borderRadius: '5px',
-              width: '400px',
-              textAlign: 'center',
-            }}
-          >
-            <h2 style={{ marginBottom: '20px' }}>Silme Onayı</h2>
-            <div style={{ marginBottom: '20px' }}>
-              <p>
-                '{selectedItem?.RequestID}' numaralı talebi silmek istediğinizden emin misiniz?
-              </p>
-            </div>
-            <div>
-              <CButton
-                color='dark'
-                variant='outline'
-                onClick={() => setShowModal(false)}
-                style={{
-                  padding: '10px 20px',
-                  marginRight: '10px',
-                }}
-              >
-                İptal
-              </CButton>
-              <CButton
-                color='danger'
-                variant='outline'
-                onClick={confirmDelete}
-                style={{
-                  padding: '10px 20px',
-                  cursor: 'pointer',
-                }}
-              >
-                Sil
-              </CButton>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* CustomModal ile onaylama işlemi */}
+      <CustomModal
+        show={showModal}
+        onClose={() => setShowModal(false)}
+        message={`'${selectedItem?.RequestID}' numaralı talebi silmek istediğinizden emin misiniz?`}
+        type="warning"
+        showExitWarning
+        onExit={confirmDelete}
+        title="Silme Onayı"
+      />
     </div>
   );
 };
