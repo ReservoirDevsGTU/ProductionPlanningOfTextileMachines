@@ -6,7 +6,7 @@ import axios from "axios";
 import * as XLSX from "xlsx";
 import baseURL from "../../baseURL";
 import CustomTable from "../../CustomTable.js";
-import { faTimes, faArrowLeft, faSave} from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faArrowLeft, faSave, faTrash} from '@fortawesome/free-solid-svg-icons';
 import { faFileExcel, faPaperPlane } from "@fortawesome/free-regular-svg-icons";
 import CustomModal from '../../CustomModal.js';
 import SearchBox from '../../SearchBox.js';
@@ -21,9 +21,11 @@ const TalepEkleme = ({ editID }) => {
   const history = useHistory();
 
    const [isDirty, setIsDirty] = useState(false);
-   const [modals, setModals] = useState({ warning: false, info: false });
-   const [modalMessages, setModalMessages] = useState({ warning: '', info: '' });
+   const [modals, setModals] = useState({ warning: false, info: false, delete: false, select: false});
+   const [modalMessages, setModalMessages] = useState({ warning: '', info: '', delete:'', select: '' });
    const [showExitWarning, setShowExitWarning] = useState(false);
+
+   const [materialToDelete,setMaterialToDelete] = useState(null);
 
   const [requestDetails, setRequestDetails] = useState({
     date: "",
@@ -33,7 +35,7 @@ const TalepEkleme = ({ editID }) => {
   });
   
   const handleGoBack = async () => {
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 2000));
     history.push("/satinalma/talepler");
   };
 
@@ -70,13 +72,31 @@ const handleModalClose = () => {
     setSelectedMaterials((prev) => {
       if (prev.find((item) => item.MaterialID === material.MaterialID)) return prev;
       setIsDirty(true);
+      setModalMessages({
+        ...modalMessages, 
+        select: `'${material.MaterialName}' malzemesi başarıyla seçili malzemelere eklendi.`
+      });
+      setModals({...modals, select: true});
       return [...prev, { ...material, RequestedAmount: 1 }];
     });
+};
+
+  const handleRemoveMaterial = (material) => {
+    setMaterialToDelete(material);
+    setModalMessages({
+      ...modalMessages, 
+      delete: `'${material.MaterialName}' malzemesini silmek istediğinize emin misiniz?`
+    });
+    setModals({...modals, delete: true});
   };
 
-  const handleRemoveMaterial = (id) => {
-    setSelectedMaterials(selectedMaterials.filter((material) => material.MaterialID !== id));
+  const confirmDelete = () => {
+    setSelectedMaterials(prev => 
+      prev.filter(material => material.MaterialID !== materialToDelete.MaterialID)
+    );
     setIsDirty(true);
+    setModals({...modals, delete: false});
+    setMaterialToDelete(null);
   };
 
   const handleQuantityChange = (id, quantity) => {
@@ -415,17 +435,17 @@ const handleModalClose = () => {
             <td>
               {selectedButton === "secili" ? (
                 <button
-                  onClick={() => handleRemoveMaterial(item.MaterialID)}
-                  style={{
-                    backgroundColor: "#dc3545",
-                    color: "white",
+                onClick={() => handleRemoveMaterial(item)}
+                style={{
+                    backgroundColor: "transparent",
+                    color: "#dc3545",
                     border: "none",
                     padding: "5px 10px",
                     borderRadius: "4px",
                     cursor: "pointer",
                   }}
                 >
-                  Sil
+                  <FontAwesomeIcon icon={faTrash}></FontAwesomeIcon>
                 </button>
               ) : (
                 <button
@@ -448,14 +468,23 @@ const handleModalClose = () => {
       />
 
 <CustomModal 
-  show={modals.warning || modals.info}
+  show={modals.warning || modals.info || modals.delete || modals.select}
   onClose={handleModalClose}
-  message={modals.warning ? modalMessages.warning : modalMessages.info}
-  type={modals.warning ? 'warning' : 'info'}
-  showExitWarning={showExitWarning}
+  message={
+    modals.delete ? modalMessages.delete : 
+    modals.warning ? modalMessages.warning : 
+    modals.select ? modalMessages.select :
+    modalMessages.info
+  }
+  type={modals.warning || modals.delete ? 'warning' : 'info'}
+  showExitWarning={showExitWarning || modals.delete}
   onExit={() => {
-    handleModalClose();
-    history.push("/satinalma/talepler");
+    if (showExitWarning) {
+      handleModalClose();
+      history.push("/satinalma/talepler");
+    } else if (modals.delete) {
+      confirmDelete();
+    }
   }}
 />
 
