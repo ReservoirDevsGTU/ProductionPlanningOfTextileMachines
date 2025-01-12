@@ -1,7 +1,7 @@
 <?php
 include 'headers.php';
 include 'connect.php';
-
+include 'mailer.php';
 $input = json_decode(file_get_contents("php://input"), true);
 
 if($input
@@ -41,6 +41,7 @@ if($input
     }
 
     $sql[strlen($sql) - 2] = ';';
+    $sql .= "\nSELECT val AS OrderID FROM @id;";
 
     //echo $sql;
 
@@ -56,6 +57,20 @@ if($input
     ));
 
     if($stmt !== false) {
+        if(!empty($input['ContactID'])) {
+        $orderData = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+
+        if ($orderData) {
+            $orderID = $orderData['OrderID'];
+
+            $emailInput = [
+                "OrderID" => $orderID,
+                "ContactID" => $input["ContactID"] ?? []
+            ];
+
+            sendEmailsBasedOnInput($emailInput);
+        }
+    }
         sqlsrv_free_stmt($stmt);
         sqlsrv_commit($conn);
     }
@@ -64,6 +79,6 @@ if($input
         sqlsrv_rollback($conn);
     }
 }
-
+ 
 sqlsrv_close($conn);
 ?>
