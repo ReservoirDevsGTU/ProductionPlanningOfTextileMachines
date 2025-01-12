@@ -6,5 +6,4 @@ define('SMTP_USERNAME', ' batuhana@gmail.com');                 // Email usernam
 define('SMTP_PASSWORD', '16 digit app code required for gmail');// Email password
 define('SMTP_FROM_EMAIL', 'sender@prosmh.com');                 // Sender email
 define('SMTP_FROM_NAME', 'Prosmh');                             // Sender name
-define('EMAIL_SUBJECT', 'PROSMH Teklifi');                      // Default subject for emails
 ?>
