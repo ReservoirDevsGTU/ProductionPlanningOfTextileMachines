@@ -180,7 +180,7 @@ const GirisFormu = () => {
 
     console.log("Backend'e Gönderilecek Veri:", submitData);
     
-    await axios.post(baseURL + "/submitOrderEntry.php", submitData);  // baseURL eklendi
+    await axios.post(baseURL + "/orderEntry.php", submitData);  // baseURL eklendi
     history.push("/satinalma/siparis-listesi");
   } catch (error) {
     console.error("Gönderme hatası:", error);
