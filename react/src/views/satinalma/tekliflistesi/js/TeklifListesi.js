@@ -94,37 +94,64 @@ const TeklifListesi = () => {
 
   const setPaperPlaneButton = async () => {
     const selectedOfferId = Object.keys(selected).find(k => selected[k]);
-    const selectedOffer = data.find(item => item.OfferID === parseInt(selectedOfferId));
+    console.log("Selected Offer ID:", selectedOfferId);
     
-    if (!selectedOffer) return;
+    try {
+      // İlk API çağrısı için teklif detaylarını al
+      const offerResponse = await axios.post(baseURL + "/queryOffers.php", {
+        filters: { 
+          "OfferID": [selectedOfferId]
+        },
+        columns: ["OfferID", "SupplierID", "SupplierName"]
+      });
+      console.log("Offer Response:", offerResponse.data);
   
+      const selectedOffer = offerResponse.data.find(offer => offer.OfferID === parseInt(selectedOfferId));
+      console.log("Selected Offer:", selectedOffer);
   
-    const response = await axios.post(baseURL + "/querySuppliers.php", {
-      filters: { 
-        SupplierID: [`${selectedOffer.SupplierID}`]
+      if (selectedOffer) {
+        const supplierID = selectedOffer.SupplierID;
+        console.log("Found Supplier ID:", supplierID);
+        
+        // Supplier için iletişim detaylarını al
+        const supplierResponse = await axios.post(baseURL + "/querySuppliers.php", {
+          filters: {
+            "s.SupplierID": [supplierID]
+          },
+          subTables: {
+            ContactDetails: { expand: false }
+          },
+          columns: {
+            "SupplierID": "s.SupplierID",
+            "SupplierName": "s.SupplierName"
+          }
+        });
+        console.log("Supplier Response:", supplierResponse.data);
+  
+        const supplier = supplierResponse.data.find(s => s.SupplierID === supplierID);
+        
+        if (supplier) {
+          console.log("Found Supplier:", supplier);
+          
+          const formattedData = [{
+            name: supplier.SupplierName,
+            supplierId: supplier.SupplierID,
+            emails: supplier.ContactDetails?.map(contact => ({
+              contactId: contact.ContactDetailID,
+              address: contact.ContactEmail,
+              selected: true
+            })) || []
+          }];
+          console.log("Formatted Data:", formattedData);
+          
+          setSupplierData(formattedData);
+          setExpandedSuppliers({ 0: true });
+          setModal(true);
+        }
       }
-    });
-  
-  
-    // Doğru supplier'ı bul
-    const supplier = response.data.find(sup => sup.SupplierID === selectedOffer.SupplierID);
-  
-    if (!supplier) return;
-  
-    const formattedData = [{
-      name: selectedOffer.SupplierName,
-      supplierId: supplier.SupplierID,
-      emails: [{
-        contactId: supplier.SupplierID,
-        address: supplier.SupplierEmail,
-        selected: true
-      }]
-    }];
-    
-    
-    setSupplierData(formattedData);
-    setExpandedSuppliers({ 0: true });
-    setModal(true);
+    } catch (error) {
+      console.error('Error fetching supplier details:', error);
+    }
   };
   
   const processData = (newData) => {
