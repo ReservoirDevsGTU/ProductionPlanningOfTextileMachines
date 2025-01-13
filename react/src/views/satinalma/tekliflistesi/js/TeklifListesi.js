@@ -94,57 +94,54 @@ const TeklifListesi = () => {
 
   const setPaperPlaneButton = async () => {
     const selectedOfferId = Object.keys(selected).find(k => selected[k]);
-    console.log("Selected Offer ID:", selectedOfferId);
     
+    setModal(true);
+    setSupplierData([{ name: "Yükleniyor...", supplierId: "", emails: [] }]);
+    setExpandedSuppliers({ 0: true });
+  
     try {
-      // İlk API çağrısı için teklif detaylarını al
-      const offerResponse = await axios.post(baseURL + "/queryOffers.php", {
-        filters: { 
-          "OfferID": [selectedOfferId]
-        },
-        columns: ["OfferID", "SupplierID", "SupplierName"]
-      });
-      console.log("Offer Response:", offerResponse.data);
-  
-      const selectedOffer = offerResponse.data.find(offer => offer.OfferID === parseInt(selectedOfferId));
-      console.log("Selected Offer:", selectedOffer);
-  
-      if (selectedOffer) {
-        const id = selectedOffer.SupplierID;
-        console.log("Found Supplier ID:", id);
+      const id = data.find(item => item.OfferID === parseInt(selectedOfferId))?.SupplierID;
+      
+      const [offerResponse, supplierResponse] = await Promise.all([
+        axios.post(baseURL + "/queryOffers.php", {
+          filters: { 
+            "OfferID": [selectedOfferId]
+          },
+          columns: ["OfferID", "SupplierID", "SupplierName"]
+        }),
         
-        // Supplier için iletişim detaylarını al
-        const supplierResponse = await axios.post(baseURL + "/querySuppliers.php", {
-          filters: [ { SupplierID: [id] } ],
+        axios.post(baseURL + "/querySuppliers.php", {
+          filters: [{ SupplierID: [id] }],
           subTables: {
             ContactDetails: { expand: false }
           },
-        });
-        console.log("Supplier Response:", supplierResponse.data);
+        })
+      ]);
   
-        const supplier = supplierResponse.data.find(s => s.SupplierID === id);
-        
-        if (supplier) {
-          console.log("Found Supplier:", supplier);
+  
+      const selectedOffer = offerResponse.data.find(offer => offer.OfferID === parseInt(selectedOfferId));
+      if (!selectedOffer) throw new Error('Teklif bulunamadı');
+  
+      const supplier = supplierResponse.data.find(s => s.SupplierID === id);
+      if (!supplier) throw new Error('Tedarikçi bulunamadı');
           
-          const formattedData = [{
-            name: supplier.SupplierName,
-            supplierId: supplier.SupplierID,
-            emails: supplier.ContactDetails?.map(contact => ({
-              contactId: contact.ContactDetailID,
-              address: contact.ContactEmail,
-              selected: true
-            })) || []
-          }];
-          console.log("Formatted Data:", formattedData);
           
-          setSupplierData(formattedData);
-          setExpandedSuppliers({ 0: true });
-          setModal(true);
-        }
-      }
+      const formattedData = [{
+        name: supplier.SupplierName,
+        supplierId: supplier.SupplierID,
+        emails: supplier.ContactDetails?.map(contact => ({
+          contactId: contact.ContactDetailID,
+          address: contact.ContactEmail,
+          selected: true
+        })) || []
+      }];
+          
+      setSupplierData(formattedData);
+  
     } catch (error) {
-      console.error('Error fetching supplier details:', error);
+      setModal(false);
+      setModalMessages({...modalMessages, warning: error.message || 'Tedarikçi bilgileri alınamadı!'});
+      setModals({...modals, warning: true});
     }
   };
   
@@ -159,14 +156,12 @@ const TeklifListesi = () => {
           .map(email => email.contactId)  // Burada contactId zaten ContactDetailID
       );
   
-      console.log('Selected Contact Detail IDs:', selectedContactDetailIds);
   
       const postData = {
         "OfferID": parseInt(selectedOfferId),
         "ContactID": selectedContactDetailIds
       };
   
-      console.log('Post Data being sent:', postData);
   
       const response = await axios.post(baseURL + "/mailer.php", postData, {
         headers: {
@@ -178,7 +173,6 @@ const TeklifListesi = () => {
       setModalMessages({...modalMessages, info: 'Mail başarıyla gönderildi!'});
       setModals({...modals, info: true});
     } catch (error) {
-      console.error('Error details:', error?.response?.data || error.message);
       setModalMessages({...modalMessages, warning: 'Mail gönderilirken bir hata oluştu!'});
       setModals({...modals, warning: true});
     }
