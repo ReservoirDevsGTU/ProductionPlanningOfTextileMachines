@@ -110,25 +110,19 @@ const TeklifListesi = () => {
       console.log("Selected Offer:", selectedOffer);
   
       if (selectedOffer) {
-        const supplierID = selectedOffer.SupplierID;
-        console.log("Found Supplier ID:", supplierID);
+        const id = selectedOffer.SupplierID;
+        console.log("Found Supplier ID:", id);
         
         // Supplier için iletişim detaylarını al
         const supplierResponse = await axios.post(baseURL + "/querySuppliers.php", {
-          filters: {
-            "s.SupplierID": [supplierID]
-          },
+          filters: [ { SupplierID: [id] } ],
           subTables: {
             ContactDetails: { expand: false }
           },
-          columns: {
-            "SupplierID": "s.SupplierID",
-            "SupplierName": "s.SupplierName"
-          }
         });
         console.log("Supplier Response:", supplierResponse.data);
   
-        const supplier = supplierResponse.data.find(s => s.SupplierID === supplierID);
+        const supplier = supplierResponse.data.find(s => s.SupplierID === id);
         
         if (supplier) {
           console.log("Found Supplier:", supplier);
@@ -158,22 +152,33 @@ const TeklifListesi = () => {
     try {
       const selectedOfferId = Object.keys(selected).find(k => selected[k]);
       
+      // ContactDetailID'leri al
+      const selectedContactDetailIds = supplierData.flatMap(supplier => 
+        supplier.emails
+          .filter(email => email.selected)
+          .map(email => email.contactId)  // Burada contactId zaten ContactDetailID
+      );
+  
+      console.log('Selected Contact Detail IDs:', selectedContactDetailIds);
+  
       const postData = {
-        OfferID: selectedOfferId,
-        ContactID: []
+        "OfferID": parseInt(selectedOfferId),
+        "ContactID": selectedContactDetailIds
       };
   
-      console.log('Sending data to mailer.php:', postData);
+      console.log('Post Data being sent:', postData);
   
-      const response = await axios.post(baseURL + "/mailer.php", postData);
-  
-      console.log('Mail API Response:', response);
+      const response = await axios.post(baseURL + "/mailer.php", postData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
   
       handleModalClose();
       setModalMessages({...modalMessages, info: 'Mail başarıyla gönderildi!'});
       setModals({...modals, info: true});
     } catch (error) {
-      console.error('Error sending mail:', error);
+      console.error('Error details:', error?.response?.data || error.message);
       setModalMessages({...modalMessages, warning: 'Mail gönderilirken bir hata oluştu!'});
       setModals({...modals, warning: true});
     }
