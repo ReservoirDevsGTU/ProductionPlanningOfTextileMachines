@@ -56,118 +56,8 @@ const TeklifListesi = () => {
   const [sheetModal, setSheetModal] = useState(false);
 
 
-  const [supplierData, setSupplierData] = useState([
-    {
-      name: 'XXX Tedarikçi',
-      emails: [
-        { address: 'info@xxx.com', selected: true },
-        { address: 'sales.person1@xxx.com', selected: true },
-        { address: 'sales.person2@xxx.com', selected: true },
-      ],
-    },
-    {
-      name: 'XXY Tedarikçi',
-      emails: [
-        { address: 'contact@xxy.com', selected: true },
-        { address: 'sales@xxy.com', selected: true },
-      ],
-    },
-    {
-      name: 'XYY Tedarikçi',
-      emails: [
-        { address: 'support@xyy.com', selected: true },
-        { address: 'info@xyy.com', selected: true },
-      ],
-    },
-    {
-      name: 'XXX Tedarikçi',
-      emails: [
-        { address: 'info@xxx.com', selected: true },
-        { address: 'sales.person1@xxx.com', selected: true },
-        { address: 'sales.person2@xxx.com', selected: true },
-      ],
-    },
-    {
-      name: 'XXY Tedarikçi',
-      emails: [
-        { address: 'contact@xxy.com', selected: true },
-        { address: 'sales@xxy.com', selected: true },
-      ],
-    },
-    {
-      name: 'XYY Tedarikçi',
-      emails: [
-        { address: 'support@xyy.com', selected: true },
-        { address: 'info@xyy.com', selected: true },
-      ],
-    },
-    {
-      name: 'XXX Tedarikçi',
-      emails: [
-        { address: 'info@xxx.com', selected: true },
-        { address: 'sales.person1@xxx.com', selected: true },
-        { address: 'sales.person2@xxx.com', selected: true },
-      ],
-    },
-    {
-      name: 'XXY Tedarikçi',
-      emails: [
-        { address: 'contact@xxy.com', selected: true },
-        { address: 'sales@xxy.com', selected: true },
-      ],
-    },
-    {
-      name: 'XYY Tedarikçi',
-      emails: [
-        { address: 'support@xyy.com', selected: true },
-        { address: 'info@xyy.com', selected: true },
-      ],
-    },
-    {
-      name: 'XXX Tedarikçi',
-      emails: [
-        { address: 'info@xxx.com', selected: true },
-        { address: 'sales.person1@xxx.com', selected: true },
-        { address: 'sales.person2@xxx.com', selected: true },
-      ],
-    },
-    {
-      name: 'XXY Tedarikçi',
-      emails: [
-        { address: 'contact@xxy.com', selected: true },
-        { address: 'sales@xxy.com', selected: true },
-      ],
-    },
-    {
-      name: 'XYY Tedarikçi',
-      emails: [
-        { address: 'support@xyy.com', selected: true },
-        { address: 'info@xyy.com', selected: true },
-      ],
-    },
-    {
-      name: 'XXX Tedarikçi',
-      emails: [
-        { address: 'info@xxx.com', selected: true },
-        { address: 'sales.person1@xxx.com', selected: true },
-        { address: 'sales.person2@xxx.com', selected: true },
-      ],
-    },
-    {
-      name: 'XXY Tedarikçi',
-      emails: [
-        { address: 'contact@xxy.com', selected: true },
-        { address: 'sales@xxy.com', selected: true },
-      ],
-    },
-    {
-      name: 'XYY Tedarikçi',
-      emails: [
-        { address: 'support@xyy.com', selected: true },
-        { address: 'info@xyy.com', selected: true },
-      ],
-    },
-  ]);
+  const [supplierData, setSupplierData] = useState([]);
+
 
   const isSingleSelected = Object.values(selected).filter(Boolean).length === 1;
 
@@ -202,10 +92,41 @@ const TeklifListesi = () => {
     }));
   };
 
-  const setPaperPlaneButton = () => {
+  const setPaperPlaneButton = async () => {
+    const selectedOfferId = Object.keys(selected).find(k => selected[k]);
+    const selectedOffer = data.find(item => item.OfferID === parseInt(selectedOfferId));
+    
+    if (!selectedOffer) return;
+  
+  
+    const response = await axios.post(baseURL + "/querySuppliers.php", {
+      filters: { 
+        SupplierID: [`${selectedOffer.SupplierID}`]
+      }
+    });
+  
+  
+    // Doğru supplier'ı bul
+    const supplier = response.data.find(sup => sup.SupplierID === selectedOffer.SupplierID);
+  
+    if (!supplier) return;
+  
+    const formattedData = [{
+      name: selectedOffer.SupplierName,
+      supplierId: supplier.SupplierID,
+      emails: [{
+        contactId: supplier.SupplierID,
+        address: supplier.SupplierEmail,
+        selected: true
+      }]
+    }];
+    
+    
+    setSupplierData(formattedData);
+    setExpandedSuppliers({ 0: true });
     setModal(true);
   };
-
+  
   const processData = (newData) => {
     setAllSelected(!newData.find((i) => !selected[i.OfferID]));
     setData(newData);
