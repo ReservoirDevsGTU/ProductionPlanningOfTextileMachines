@@ -103,7 +103,7 @@ const TeklifSiparisListe = () => {
             color='primary'
             variant='outline'
             size='lg'
-            onClick={() => alert('Talepten Sipariş')}
+            onClick={() => history.push({pathname: '/satinalma/siparis-form', requestItems: selected})}
             style={{
               display: 'flex',
               alignItems: 'center',

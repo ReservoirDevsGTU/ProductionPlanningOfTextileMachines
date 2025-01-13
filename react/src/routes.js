@@ -71,6 +71,7 @@ const routes = [
 
   // siparis form
   { path: '/satinalma/siparis-form/:id', name: 'Siparis Form', component: SiparisForm },
+  { path: '/satinalma/siparis-form/', name: 'Siparis Form', component: SiparisForm },
 
   // teklif degerlendirme
   { path: '/satinalma/teklif-degerlendirme', name: 'Teklif Değerlendirme', component: TeklifDegerlendirme },

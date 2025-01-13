@@ -29,8 +29,9 @@ import baseURL from '../../baseURL.js';
 import { faTrash, faChevronDown, faChevronUp  } from "@fortawesome/free-solid-svg-icons";
 
 
-const SiparisForm = () => {
+const SiparisForm = (props) => {
   const { id } = useParams();
+  const requestItems = props.location.requestItems;
   const history = useHistory();
   const [activeTab, setActiveTab] = useState('siparisBilgileri');
   const [materialData, setMaterialData] = useState([]);
@@ -43,9 +44,10 @@ const SiparisForm = () => {
   const [expandedSuppliers, setExpandedSuppliers] = useState({});
 
   useEffect(() => {
-    axios.post(baseURL + "/queryOffers.php", {subTables: {Materials: {expand: false}}, filters: [{OfferID: [id]}]})
+    id && axios.post(baseURL + "/queryOffers.php", {subTables: {Materials: {expand: false}}, filters: [{OfferID: [id]}]})
       .then(response => {
         const data = response.data[0];
+        setFormData(prev => ({...prev, initialSupplier: data.SupplierID}));
         setSelectedMaterials(data.Materials.reduce((acc, cur) => {
           const exist = acc.find(m => m.MaterialID == cur.MaterialID);
           const amount = Number(cur.OfferedAmount) || Number(cur.RequestedAmount) || 0;
@@ -59,7 +61,21 @@ const SiparisForm = () => {
           }
           return acc;
         }, []));
-      });
+      })
+    || requestItems && setSelectedMaterials(requestItems.reduce((acc, cur) => {
+          const exist = acc.find(m => m.MaterialID == cur.MaterialID);
+          const amount = Number(cur.RequestedAmount) || 0;
+          const references = {RequestItemID: cur.RequestItemID, RequestedAmount: cur.RequestedAmount};
+          if(!exist) {
+            acc.push({...cur, OrderedAmount: amount, UnitPrice: 1, references: [references], final: true});
+          }
+          else {
+            exist.OrderedAmount += amount;
+            exist.references.push(references);
+          }
+          return acc;
+        }, []));
+
   }, [id]);
 
   const [supplierData, setSupplierData] = useState([

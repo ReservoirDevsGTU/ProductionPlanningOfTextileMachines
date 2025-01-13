@@ -71,7 +71,7 @@ const SiparisListesi = () => {
 
   // Buton işlemleri
   const handleSiparisOlustur = () => {
-    alert("Sipariş oluşturma işlemi başlatıldı!");
+    history.push(`/satinalma/siparis-form/`);
   };
 
   const handleSiparistenGiris = () => {

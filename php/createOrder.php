@@ -57,20 +57,20 @@ if($input
     ));
 
     if($stmt !== false) {
-        if(!empty($input['ContactID'])) {
-        $orderData = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+        if(isset($input['ContactID']) && !empty($input['ContactID'])) {
+            $orderData = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 
-        if ($orderData) {
-            $orderID = $orderData['OrderID'];
+            if ($orderData) {
+                $orderID = $orderData['OrderID'];
 
-            $emailInput = [
-                "OrderID" => $orderID,
-                "ContactID" => $input["ContactID"] ?? []
-            ];
+                $emailInput = [
+                    "OrderID" => $orderID,
+                    "ContactID" => $input["ContactID"] ?? []
+                ];
 
-            sendEmailsBasedOnInput($emailInput);
+                sendEmailsBasedOnInput($emailInput);
+            }
         }
-    }
         sqlsrv_free_stmt($stmt);
         sqlsrv_commit($conn);
     }
