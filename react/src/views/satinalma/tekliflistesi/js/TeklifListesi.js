@@ -154,6 +154,32 @@ const TeklifListesi = () => {
     }
   };
   
+  const handleSendMail = async () => {
+    try {
+      const selectedOfferId = Object.keys(selected).find(k => selected[k]);
+      
+      const postData = {
+        OfferID: selectedOfferId,
+        ContactID: []
+      };
+  
+      console.log('Sending data to mailer.php:', postData);
+  
+      const response = await axios.post(baseURL + "/mailer.php", postData);
+  
+      console.log('Mail API Response:', response);
+  
+      handleModalClose();
+      setModalMessages({...modalMessages, info: 'Mail başarıyla gönderildi!'});
+      setModals({...modals, info: true});
+    } catch (error) {
+      console.error('Error sending mail:', error);
+      setModalMessages({...modalMessages, warning: 'Mail gönderilirken bir hata oluştu!'});
+      setModals({...modals, warning: true});
+    }
+  };
+
+
   const processData = (newData) => {
     setAllSelected(!newData.find((i) => !selected[i.OfferID]));
     setData(newData);
@@ -548,7 +574,7 @@ const TeklifListesi = () => {
           <CButton color="danger"  onClick={handleModalClose}>
             Vazgeç
           </CButton>
-          <CButton color="info" >Gönder</CButton>
+          <CButton color="info" onClick={handleSendMail} >Gönder</CButton>
         </CModalFooter>
       </CModal>
 
