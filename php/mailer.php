@@ -1,8 +1,8 @@
 <?php   
 include 'headers.php';
 include 'connect.php';
-require 'config.php';
-require 'vendor/autoload.php'; /*DO NOT FORGET TO MODIFY THIS PART*/
+require 'mailConfig.php';
+require 'vendor/autoload.php';
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
