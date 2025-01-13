@@ -94,7 +94,9 @@ const TeklifListesi = () => {
 
   const setPaperPlaneButton = async () => {
     const selectedOfferId = Object.keys(selected).find(k => selected[k]);
+    console.log("Selected Offer ID:", selectedOfferId);
     
+    // Modal'ı hemen aç
     setModal(true);
     setSupplierData([{ name: "Yükleniyor...", supplierId: "", emails: [] }]);
     setExpandedSuppliers({ 0: true });
@@ -102,6 +104,7 @@ const TeklifListesi = () => {
     try {
       const id = data.find(item => item.OfferID === parseInt(selectedOfferId))?.SupplierID;
       
+      // API çağrılarını paralel yap
       const [offerResponse, supplierResponse] = await Promise.all([
         axios.post(baseURL + "/queryOffers.php", {
           filters: { 
@@ -118,6 +121,8 @@ const TeklifListesi = () => {
         })
       ]);
   
+      console.log("Offer Response:", offerResponse.data);
+      console.log("Supplier Response:", supplierResponse.data);
   
       const selectedOffer = offerResponse.data.find(offer => offer.OfferID === parseInt(selectedOfferId));
       if (!selectedOffer) throw new Error('Teklif bulunamadı');
@@ -125,6 +130,7 @@ const TeklifListesi = () => {
       const supplier = supplierResponse.data.find(s => s.SupplierID === id);
       if (!supplier) throw new Error('Tedarikçi bulunamadı');
           
+      console.log("Found Supplier:", supplier);
           
       const formattedData = [{
         name: supplier.SupplierName,
@@ -136,9 +142,11 @@ const TeklifListesi = () => {
         })) || []
       }];
           
+      console.log("Formatted Data:", formattedData);
       setSupplierData(formattedData);
   
     } catch (error) {
+      console.error('Error fetching supplier details:', error);
       setModal(false);
       setModalMessages({...modalMessages, warning: error.message || 'Tedarikçi bilgileri alınamadı!'});
       setModals({...modals, warning: true});
@@ -153,7 +161,7 @@ const TeklifListesi = () => {
       const selectedContactDetailIds = supplierData.flatMap(supplier => 
         supplier.emails
           .filter(email => email.selected)
-          .map(email => email.contactId)  // Burada contactId zaten ContactDetailID
+          .map(email => email.contactId)  
       );
   
   
