@@ -17,6 +17,9 @@ if($input
 
     $sql =  <<<SQL
 
+            SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+            SET NOCOUNT ON;
+
             DECLARE @id TABLE(val INT);
 
             INSERT INTO PurchaseOrders(CreatedBy, CreationDate, OrderStatus, IsDeleted)
@@ -57,8 +60,6 @@ if($input
     ));
 
     if($stmt !== false) {
-
-        sqlsrv_commit($conn);
         
         if(isset($input['ContactID']) && !empty($input['ContactID'])) {
             $orderData = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
@@ -74,6 +75,8 @@ if($input
                 sendEmailsBasedOnInput($emailInput);
             }
         }
+
+        sqlsrv_commit($conn);
         sqlsrv_free_stmt($stmt);
     }
     else {

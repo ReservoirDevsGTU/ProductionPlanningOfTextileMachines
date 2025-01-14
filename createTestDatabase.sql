@@ -181,7 +181,7 @@ CREATE TABLE PurchaseOfferDetails (
 CREATE TABLE PurchaseOfferItems (
     ItemID INT PRIMARY KEY IDENTITY(1, 1),
     OfferID INT,
-    RequestItemID INT,
+    RequestItemID INT NULL,
     MaterialID INT,
     OfferRequestedAmount DECIMAL(18, 2),
     OfferedAmount DECIMAL(18, 2),
@@ -219,8 +219,8 @@ CREATE TABLE PurchaseOrderDetails (
 CREATE TABLE PurchaseOrderItems (
     ItemID INT PRIMARY KEY IDENTITY(1, 1),
     OrderID INT,
-    OfferItemID INT,
-    RequestItemID INT,
+    OfferItemID INT NULL,
+    RequestItemID INT NULL,
     MaterialID INT,
     OrderedAmount DECIMAL(18, 2),
     ProvidedAmount DECIMAL(18, 2),
