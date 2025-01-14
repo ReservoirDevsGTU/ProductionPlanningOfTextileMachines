@@ -187,7 +187,7 @@ const SiparisListesi = () => {
               }, {})).join(', ') : false) || '-'}
             </td>),
           order_status: (item) => (
-            <td>{["Sipariş Verildi", "Kısmen Teslim Edildi", "Teslim Edildi"][item.OrderStatus]}</td>
+            <td>{["Siparis Verildi", "Kismen Teslim Edildi", "Teslim Edildi"][item.OrderStatus]}</td>
           ),
           checkbox: (item) => (
             <td>

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { CButton } from "@coreui/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrashAlt } from "@fortawesome/free-solid-svg-icons"; 
+import { faTrashAlt } from "@fortawesome/free-solid-svg-icons"; // FontAwesome çöp kutusu ikonu
 import CustomTable from "../../CustomTable.js";
 import CustomModal from "../../CustomModal.js";
 import { title } from "process";

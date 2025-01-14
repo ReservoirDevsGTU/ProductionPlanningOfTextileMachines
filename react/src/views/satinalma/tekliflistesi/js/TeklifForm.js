@@ -365,7 +365,7 @@ const TeklifForm = () => {
 
                      Saygilar, mehme
                   */}
-                  <h6 style={{fontSize: '16px'}}>Dosya Sürükle veya Tıkla</h6>
+                  <h6 style={{fontSize: '16px'}}>Dosya Surukle veya Tikla</h6>
               </div>
             )}
           </Dropzone>
