@@ -57,6 +57,9 @@ if($input
     ));
 
     if($stmt !== false) {
+
+        sqlsrv_commit($conn);
+        
         if(isset($input['ContactID']) && !empty($input['ContactID'])) {
             $orderData = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 
@@ -72,7 +75,6 @@ if($input
             }
         }
         sqlsrv_free_stmt($stmt);
-        sqlsrv_commit($conn);
     }
     else {
         echo json_encode(sqlsrv_errors(), true);
