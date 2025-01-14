@@ -163,6 +163,12 @@ const SiparisForm = (props) => {
     }));
   };
 
+  const handleCancel = () => {
+    
+    setShowModal(false);
+    
+  };
+
   const handleMaterialChange = (index, field, value) => {
     setMaterialData(prev => {
       const newData = [...prev];
@@ -524,7 +530,7 @@ const SiparisForm = (props) => {
       </div>
       <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
         <button
-          onClick={() => setShowModal(false)}
+          onClick={handleCancel}
           style={{
             padding: "10px 20px",
             backgroundColor: "#6c757d",

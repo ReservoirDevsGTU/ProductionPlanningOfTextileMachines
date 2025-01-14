@@ -34,6 +34,13 @@ const TeklifSiparisListe = () => {
      : prev.filter(i => i.RequestItemID !== item.RequestItemID));
   };
 
+  const handleTaleptenSiparis = () => {
+    history.push({
+      pathname: '/satinalma/siparis-form',
+      state: { from: '/satinalma/teklif-siparis-liste', requestItems: selected },
+    });
+  };
+
   const fields = [
     {
       key: 'checkbox',
@@ -103,7 +110,7 @@ const TeklifSiparisListe = () => {
             color='primary'
             variant='outline'
             size='lg'
-            onClick={() => history.push({pathname: '/satinalma/siparis-form', requestItems: selected})}
+            onClick={handleTaleptenSiparis}
             style={{
               display: 'flex',
               alignItems: 'center',
