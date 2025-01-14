@@ -23,6 +23,7 @@ const TalepEkleme = ({ editID }) => {
    const [isDirty, setIsDirty] = useState(false);
    const [modals, setModals] = useState({ warning: false, info: false, delete: false, select: false});
    const [modalMessages, setModalMessages] = useState({ warning: '', info: '', delete:'', select: '' });
+   
    const [showExitWarning, setShowExitWarning] = useState(false);
 
    const [materialToDelete,setMaterialToDelete] = useState(null);

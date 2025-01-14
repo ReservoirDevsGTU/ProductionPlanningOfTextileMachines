@@ -7,7 +7,7 @@ import TalepEkleme from './TalepEkleme';
 import axios from 'axios';
 import baseURL from "../../baseURL.js";
 import CustomTable from '../../CustomTable.js';
-import CustomModal from '../../CustomModal.js'; // CustomModal.js dosyasının yolu
+import CustomModal from '../../CustomModal.js'; 
 import '@coreui/coreui/dist/css/coreui.min.css';
 
 const SatinAlmaTalepleri = () => {
@@ -93,16 +93,16 @@ const SatinAlmaTalepleri = () => {
             searchFields={["RequestID", "UserName", "PurchaseDescription"]}
             fields={[
               { label: '', key: 'show_materials' },
-              { label: 'Duzenle', key: 'edit_buttons' },
+              { label: 'Düzenle', key: 'edit_buttons' },
               { label: 'Talep No', key: 'RequestID' },
               { label: 'Talep Eden', key: 'UserName' },
-              { label: 'Aciklama', key: 'RequestDescription' },
+              { label: 'Açıklama', key: 'RequestDescription' },
               { label: 'Durum', key: 'request_status' },
-              { label: 'Ilerleme', key: 'progress' },
+              { label: 'İlerleme', key: 'progress' },
             ]}
             scopedSlots={{
               'request_status': (item) => (
-                <td>{["Taslak", "Onay Bekliyor", "Onaylandi", "Reddedildi", "Kismi Onaylandi"][item.RequestStatus]}</td>
+                <td>{["Taslak", "Onay Bekliyor", "Onaylandı", "Reddedildi", "Kısmi Onaylandı"][item.RequestStatus]}</td>
               ),
               'show_materials': (item) => (
                 <td>
