@@ -8,6 +8,8 @@ if($input
    and isset(
     $input["OrderID"],
     $input["SupplierID"],
+    $input["WarehouseID"],
+    $input["TransactionDate"],
     $input["Materials"])
    and count($input["Materials"]) > 0
   ) {
@@ -26,8 +28,16 @@ if($input
             SET SupplierID = ?
             WHERE OrderID = $id;
 
+            DECLARE @delta DECIMAL(18, 2);
+            DECLARE @mid INT;
+            DECLARE @riid INT;
+            DECLARE @oid INT;
+            DECLARE @prevInv INT;
+
             SQL;
 
+    $td = $input["TransactionDate"];
+    $wid = $input["WarehouseID"];
     foreach($input["Materials"] as $m) {
         $oiid = $m["OrderItemID"];
         $pamt = $m["ProvidedAmount"];
@@ -36,10 +46,39 @@ if($input
         $sql .= <<<SQL
 
                 UPDATE PurchaseOrderItems
-                SET ProvidedAmount = $pamt,
+                SET @delta = $pamt - ProvidedAmount,
+                    @mid = MaterialID,
+                    @riid = RequestItemID,
+                    @oid = OrderID,
+                    ProvidedAmount = $pamt,
                     UnitPrice = $price
                 WHERE ItemID = $oiid
                 AND OrderID = $id;
+
+                INSERT INTO MaterialTransactions (TransactionDate, TransactionTypeID, WarehouseID, CreationDate, RequestID, OrderID)
+                VALUES ('$td', 4, $wid, GETDATE(),
+                        (SELECT RequestID FROM PurchaseRequestItems
+                         WHERE ItemID = @riid),
+                        @oid);
+
+                INSERT INTO MaterialTransactionDetails (TransactionID, MaterialID, Quantity, CreationDate)
+                VALUES (SCOPE_IDENTITY(), @mid, @delta, GETDATE());
+
+                SET @prevInv = (SELECT InventoryID FROM MaterialInventory
+                                WHERE LastUpdated = (SELECT MAX(LastUpdated)
+                                                     FROM MaterialInventory
+                                                     WHERE MaterialID = @mid
+                                                     AND WarehouseID = $wid)
+                                AND MaterialID = @mid
+                                AND WarehouseID = $wid);
+
+                INSERT INTO MaterialInventory (MaterialID, WarehouseID, LastUpdated, Quantity)
+                VALUES (@mid, $wid, GETDATE(),
+                        CASE WHEN @prevInv IS NULL THEN @delta
+                             ELSE (SELECT @delta + Quantity
+                                   FROM MaterialInventory
+                                   WHERE InventoryID = @prevInv)
+                             END);
 
                 SQL;
     }
