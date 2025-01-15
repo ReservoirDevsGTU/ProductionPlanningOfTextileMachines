@@ -63,7 +63,6 @@ function sendEmailsBasedOnInput($input) {
         $query = "
             SELECT 
                 p.OrderedAmount,
-                p.ProvidedAmount,
                 m.MaterialID AS MaterialNo,
                 m.MaterialName
             FROM PurchaseOrderItems p
@@ -89,6 +88,22 @@ function sendEmailsBasedOnInput($input) {
             $Deadline = $row['OrderDeadline']; // Assuming 'OrderDeadline' is available for orders as well
         }
         sqlsrv_free_stmt($stmt);
+    }
+
+        // Merge materials with the same MaterialNo
+    $mergedMaterials = [];
+    foreach ($materials as $material) {
+        $materialNo = $material['MaterialNo'];
+        if (!isset($mergedMaterials[$materialNo])) {
+            $mergedMaterials[$materialNo] = $material;
+        } else {
+            if ($isOrder) {
+                $mergedMaterials[$materialNo]['OrderedAmount'] += $material['OrderedAmount'];
+            } else {
+                $mergedMaterials[$materialNo]['OfferRequestedAmount'] += $material['OfferRequestedAmount'];
+                $mergedMaterials[$materialNo]['OfferedAmount'] += $material['OfferedAmount'];
+            }
+        }
     }
 
     $query = "
@@ -120,10 +135,9 @@ function generateXlsxFile($materials, $isOrder = false) {
         $sheet->setCellValue('A1', 'Material No')
               ->setCellValue('B1', 'Material Adı')
               ->setCellValue('C1', 'Sipariş Edilen Miktar')  // Ordered Amount
-              ->setCellValue('D1', 'Gönderilen Miktar')    // Provided Amount
-              ->setCellValue('E1', 'Birim')
-              ->setCellValue('F1', 'Birim Fiyatı')
-              ->setCellValue('G1', 'Kur');
+              ->setCellValue('D1', 'Birim')
+              ->setCellValue('E1', 'Birim Fiyatı')
+              ->setCellValue('F1', 'Kur');
     } else {
         $sheet->setCellValue('A1', 'Material No')
               ->setCellValue('B1', 'Material Adı')
@@ -143,7 +157,6 @@ function generateXlsxFile($materials, $isOrder = false) {
         if ($isOrder) {
             // For orders
             $sheet->setCellValue('C' . $row, $material['OrderedAmount'] ?? '')
-                  ->setCellValue('D' . $row, $material['ProvidedAmount'] ?? '');
         } else {
             // For offers
             $sheet->setCellValue('C' . $row, $material['OfferRequestedAmount'] ?? '')
