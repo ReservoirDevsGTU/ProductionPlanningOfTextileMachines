@@ -44,12 +44,15 @@ $orderItemTable = array("primary" => "OrderItemID",
                                            "RequestedAmount" => "pri.RequestedAmount",
                                           ),
                         "name" => "PurchaseOrderItems poi",
-                        "joins" => "JOIN (SELECT MaterialID, MAX(LastUpdated) AS LastUpdated FROM MaterialInventory GROUP BY MaterialID) mi_max
-                                    ON mi_max.MaterialID = poi.MaterialID
-                                    JOIN MaterialInventory mi
-                                    ON mi.LastUpdated = mi_max.LastUpdated AND mi.MaterialID = poi.MaterialID
-                                    JOIN Materials m
+                        "joins" => "JOIN Materials m
                                     ON m.MaterialID = poi.MaterialID
+                                    JOIN (SELECT le.MaterialID, SUM(le.Quantity) AS Quantity 
+                                          FROM (SELECT MaterialID, WarehouseID, Quantity, LastUpdated,
+                                                ROW_NUMBER() OVER (PARTITION BY MaterialID, WarehouseID ORDER BY LastUpdated DESC) AS rn
+                                                FROM MaterialInventory) le
+                                          WHERE le.rn = 1
+                                          GROUP BY le.MaterialID) mi
+                                    ON mi.MaterialID = m.MaterialID
                                     LEFT JOIN PurchaseRequestItems pri
                                     ON (poi.RequestItemID IS NOT NULL AND pri.ItemID = poi.RequestItemID)
                                     OR (poi.OfferItemID IS NOT NULL AND EXISTS (SELECT 1 FROM PurchaseOfferItems poi1 WHERE poi1.ItemID = poi.OfferItemID AND poi1.RequestItemID = pri.ItemID))

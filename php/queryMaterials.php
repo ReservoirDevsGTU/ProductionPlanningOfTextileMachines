@@ -10,10 +10,13 @@ $materialTable = array("primary" => "MaterialID",
                                           "UnitID" => "ms.UnitID",
                                          ),
                        "name" => "Materials m",
-                       "joins" => "JOIN (SELECT MaterialID, MAX(LastUpdated) AS LastUpdated FROM MaterialInventory GROUP BY MaterialID) mi_max
-                                   ON mi_max.MaterialID = m.MaterialID
-                                   JOIN MaterialInventory mi
-                                   ON mi.LastUpdated = mi_max.LastUpdated AND mi.MaterialID = m.MaterialID
+                       "joins" => "JOIN (SELECT le.MaterialID, SUM(le.Quantity) AS Quantity 
+                                         FROM (SELECT MaterialID, WarehouseID, Quantity, LastUpdated,
+                                               ROW_NUMBER() OVER (PARTITION BY MaterialID, WarehouseID ORDER BY LastUpdated DESC) AS rn
+                                               FROM MaterialInventory) le
+                                         WHERE le.rn = 1
+                                         GROUP BY le.MaterialID) mi
+                                   ON mi.MaterialID = m.MaterialID
                                    JOIN MaterialSpecs ms
                                    ON m.MaterialID = ms.MaterialID",
                        "filters" => "m.IsDeleted = 0 AND ms.IsDeleted = 0",
