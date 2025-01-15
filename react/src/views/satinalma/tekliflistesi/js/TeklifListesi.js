@@ -94,7 +94,6 @@ const TeklifListesi = () => {
 
   const setPaperPlaneButton = async () => {
     const selectedOfferId = Object.keys(selected).find(k => selected[k]);
-    console.log("Selected Offer ID:", selectedOfferId);
 
     // Modal'ı hemen aç
     setModal(true);
@@ -121,8 +120,7 @@ const TeklifListesi = () => {
         })
       ]);
 
-      console.log("Offer Response:", offerResponse.data);
-      console.log("Supplier Response:", supplierResponse.data);
+
 
       const selectedOffer = offerResponse.data.find(offer => offer.OfferID === parseInt(selectedOfferId));
       if (!selectedOffer) throw new Error('Teklif bulunamadı');
@@ -130,7 +128,6 @@ const TeklifListesi = () => {
       const supplier = supplierResponse.data.find(s => s.SupplierID === id);
       if (!supplier) throw new Error('Tedarikçi bulunamadı');
 
-      console.log("Found Supplier:", supplier);
 
       const formattedData = [{
         name: supplier.SupplierName,
@@ -142,7 +139,6 @@ const TeklifListesi = () => {
         })) || []
       }];
 
-      console.log("Formatted Data:", formattedData);
       setSupplierData(formattedData);
 
     } catch (error) {
@@ -290,6 +286,12 @@ const TeklifListesi = () => {
 
     if (selectedOffers.length === 0) {
       setModalMessages({ ...modalMessages, warning: 'Lütfen sipariş oluşturmak için teklif seçiniz!' });
+      setModals({ ...modals, warning: true });
+      return;
+    }
+
+    if (selectedOffers.length > 1) {
+      setModalMessages({ ...modalMessages, warning: 'Lütfen sipariş oluşturmak için bir adet teklif seçiniz!' });
       setModals({ ...modals, warning: true });
       return;
     }

@@ -106,7 +106,8 @@ const TeklifForm = () => {
   return (
     <div style={{ padding: '20px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h3>Teklif Formu</h3>
+      <h1>Teklif Formu</h1>
+      <hr style={{ border: '1px solid #333' }} />
         <CButton color="success" size='lg' variant="outline" onClick={()=>setSheetModal(true)}>
           <FontAwesomeIcon icon={faFileExcel} style={{ marginRight: '8px' }} />
           Teklif Aktar

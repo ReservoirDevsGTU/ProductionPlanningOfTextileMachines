@@ -27,7 +27,7 @@ import CustomTable from '../../CustomTable.js';
 import SearchBox from '../../SearchBox.js';
 import baseURL from '../../baseURL.js';
 import { faTrash, faChevronDown, faChevronUp  } from "@fortawesome/free-solid-svg-icons";
-
+import CustomModal from '../../CustomModal.js';
 
 const SiparisForm = (props) => {
   const { id } = useParams();
@@ -35,13 +35,25 @@ const SiparisForm = (props) => {
   const history = useHistory();
   const [activeTab, setActiveTab] = useState('siparisBilgileri');
   const [materialData, setMaterialData] = useState([]);
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({
+    mailgonder: true,
+  });
 
   const [selectedMaterials, setSelectedMaterials] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedMaterialToDelete, setSelectedMaterialToDelete] = useState(null);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [expandedSuppliers, setExpandedSuppliers] = useState({});
+  const [modals, setModals] = useState({
+    warning: false,
+    info: false
+  });
+  
+  const [modalMessages, setModalMessages] = useState({
+    warning: '',
+    info: ''
+  });
+
 
   useEffect(() => {
     id && axios.post(baseURL + "/queryOffers.php", {subTables: {Materials: {expand: false}}, filters: [{OfferID: [id]}]})
@@ -78,23 +90,88 @@ const SiparisForm = (props) => {
 
   }, [id]);
 
-  const [supplierData, setSupplierData] = useState([
-    {
-      name: 'XXX Tedarikçi',
-      emails: [
-        { address: 'info@xxx.com', selected: true },
-        { address: 'sales.person1@xxx.com', selected: true },
-        { address: 'sales.person2@xxx.com', selected: true },
-      ],
-    },
-    {
-      name: 'XXY Tedarikçi',
-      emails: [
-        { address: 'contact@xxy.com', selected: true },
-        { address: 'sales@xxy.com', selected: true },
-      ],
+  const [supplierData, setSupplierData] = useState([]);
+
+
+  const openmodal = async () => {
+    setShowEmailModal(true);
+    setSupplierData([{ name: "Yükleniyor...", supplierId: "", emails: [] }]);
+    setExpandedSuppliers({ 0: true });
+  
+    try {
+      const [supplierResponse] = await Promise.all([
+        axios.post(baseURL + "/querySuppliers.php", {
+          filters: [{ SupplierID: [formData.SupplierID] }],
+          subTables: {
+            ContactDetails: { expand: false }
+          },
+        })
+      ]);
+  
+      const supplier = supplierResponse.data.find(s => s.SupplierID === formData.SupplierID);
+      if (!supplier) throw new Error('Tedarikçi bulunamadı');
+  
+      const formattedData = [{
+        name: supplier.SupplierName,
+        supplierId: supplier.SupplierID,
+        emails: supplier.ContactDetails?.map(contact => ({
+          contactId: contact.ContactDetailID,
+          address: contact.ContactEmail,
+          selected: true
+        })) || []
+      }];
+  
+      setSupplierData(formattedData);
+  
+    } catch (error) {
+      console.error('Error fetching supplier details:', error);
+      setShowEmailModal(false);
     }
-  ]);
+  };
+
+
+  const handleModalClose = () => {
+    // Önce mevcut modal durumunu bir değişkende saklayalım
+    const currentModals = { ...modals };
+    
+    // Modal durumunu sıfırla
+    setModals({ warning: false, info: false });
+    
+    // Eğer bu bir başarı modalı ise yönlendir
+    if (currentModals.info) {
+      history.push('/satinalma/teklif-listesi');
+    }
+  };
+  
+  
+  const handleSendMail = async () => {
+    try {
+      const selectedContactDetailIds = supplierData.flatMap(supplier =>
+        supplier.emails
+          .filter(email => email.selected)
+          .map(email => email.contactId)
+      );
+  
+      const postData = {
+        OrderID: formData.OrderID,
+        ContactID: selectedContactDetailIds
+      };
+  
+      await axios.post(baseURL + "/mailer.php", postData);
+      setShowEmailModal(false);
+      // Başarı mesajı
+      setModalMessages({ ...modalMessages, info: 'Mail başarıyla gönderildi!' });
+      setModals({ ...modals, info: true });
+      // Mail gönderildikten sonra kısa bir süre bekleyip yönlendir
+      setTimeout(() => {
+        history.push('/satinalma/teklif-listesi');
+      }, 1500);
+    } catch (error) {
+      // Hata mesajı
+      setModalMessages({ ...modalMessages, warning: 'Mail gönderilirken bir hata oluştu!' });
+      setModals({ ...modals, warning: true });
+    }
+  };
 
 
 
@@ -122,10 +199,7 @@ const SiparisForm = (props) => {
     );
   };
 
-  const handleSubmit = () => {
-    if (formData.mailgonder) {
-      setShowEmailModal(true);
-    }
+  const handleSubmit = async () => {
     const data = {
       ...formData,
       Materials: selectedMaterials.filter(m => m.final).reduce((acc, cur) => {
@@ -151,7 +225,27 @@ const SiparisForm = (props) => {
         return acc;
       }, [])
     };
-    axios.post(baseURL + "/createOrder.php", data);
+  
+    try {
+      // Her durumda siparişi kaydet
+      const response = await axios.post(baseURL + "/createOrder.php", data);
+      
+      // Backend'den dönen sipariş ID'sini formData'ya ekle
+      setFormData(prev => ({...prev, OrderID: response.data.OrderID}));
+  
+      if (formData.mailgonder) {
+        // Email gönderme seçili ise email modalını aç
+        openmodal();
+      } else {
+        // Email gönderme seçili değilse sadece başarılı mesajını göster ve listeden çık
+        setModalMessages({ ...modalMessages, info: 'Sipariş başarıyla kaydedildi!' });
+        setModals({ ...modals, info: true });
+      }
+    } catch (error) {
+      console.error('Error creating order:', error);
+      setModalMessages({ ...modalMessages, warning: 'Sipariş kaydedilirken bir hata oluştu!' });
+      setModals({ ...modals, warning: true });
+    }
   };
 
 
@@ -264,7 +358,7 @@ const SiparisForm = (props) => {
                             type="checkbox"
                             name="mailgonder"
                             defaultChecked={true}
-                            value={formData.mailgonder}
+                            checked={formData.mailgonder}
                             onChange={handleInputChange}
                             style={{
                             width: '20px',
@@ -606,9 +700,18 @@ const SiparisForm = (props) => {
           <CButton color="danger" onClick={() => setShowEmailModal(false)}>
             Vazgeç
           </CButton>
-          <CButton color="info">Gönder</CButton>
+          <CButton color="info" onClick={handleSendMail}>Gönder</CButton>
         </CModalFooter>
       </CModal>
+
+
+<CustomModal
+  show={modals.warning || modals.info}
+  onClose={handleModalClose}
+  message={modals.warning ? modalMessages.warning : modalMessages.info}
+  type={modals.warning ? 'warning' : 'info'}
+/>
+
 
 
     </div>
