@@ -156,7 +156,7 @@ function generateXlsxFile($materials, $isOrder = false) {
         
         if ($isOrder) {
             // For orders
-            $sheet->setCellValue('C' . $row, $material['OrderedAmount'] ?? '')
+            $sheet->setCellValue('C' . $row, $material['OrderedAmount'] ?? '');
         } else {
             // For offers
             $sheet->setCellValue('C' . $row, $material['OfferRequestedAmount'] ?? '')
@@ -226,8 +226,5 @@ function sendEmails($contacts, $fileContent, $Deadline, $isOrder) {
         echo json_encode(['error' => 'Email could not be sent. Mailer Error: ' . $mail->ErrorInfo]);
     }
 }
-/*Test
-$input = json_decode(file_get_contents("php://input"), true);
-sendEmailsBasedOnInput($input);
-*/
+
 ?>

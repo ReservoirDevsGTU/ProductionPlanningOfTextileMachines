@@ -167,7 +167,7 @@ const TeklifListesi = () => {
       };
 
 
-      const response = await axios.post(baseURL + "/mailer.php", postData, {
+      const response = await axios.post(baseURL + "/mail.php", postData, {
         headers: {
           'Content-Type': 'application/json'
         }
