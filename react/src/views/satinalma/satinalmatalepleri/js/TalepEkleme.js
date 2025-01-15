@@ -175,12 +175,12 @@ const handleModalClose = () => {
       const workbook = XLSX.read(reader.result);
       const table = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
       const response = await axios.post(baseURL + "/queryMaterials.php", {
-        filters: { MaterialID: table.map((e) => e.MaterialID) },
+        filters: [{ MaterialID: table.map((e) => e.MaterialID) }],
       });
       setTemplateTable(
         response.data.map((e) => ({
           ...e,
-          RequestedAmount: table.find((r) => r.MaterialID === e.MaterialID).Quantity,
+          RequestedAmount: table.find((r) => r.MaterialID === e.MaterialID).RequestedAmount,
         }))
       );
     };
