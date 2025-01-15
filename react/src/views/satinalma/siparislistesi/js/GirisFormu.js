@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useHistory, useParams } from "react-router-dom";
 import axios from 'axios';
 import baseURL from "../../baseURL.js";
+import SearchBox from "../../SearchBox.js";
 import {
   CButton,
   CInput,
@@ -25,10 +26,8 @@ const GirisFormu = () => {
   // Form state'leri
   const [formData, setFormData] = useState({
     irsaliyeNo: "",
-    teslimTarihi: "",
     teslimEden: "",
     teslimAlan: "",
-    teslimAmbar: "",
     notlar: ""
   });
 
@@ -175,6 +174,8 @@ const GirisFormu = () => {
       const submitData = {
       OrderID: orderData.OrderID,
       SupplierID: orderData.SupplierID,
+      WarehouseID: formData.WarehouseID,
+      TransactionDate: formData.TransactionDate,
       Materials: splitMaterials
     };
 
@@ -252,8 +253,8 @@ const GirisFormu = () => {
               <CLabel>Teslim Alma Tarihi</CLabel>
               <CInput 
                 type="date"
-                value={formData.teslimTarihi}
-                onChange={(e) => handleFormChange("teslimTarihi", e.target.value)}
+                value={formData.TransactionDate}
+                onChange={(e) => handleFormChange("TransactionDate", e.target.value)}
               />
             </div>
 
@@ -290,17 +291,7 @@ const GirisFormu = () => {
 
             <div>
               <CLabel>Teslim Ambarı</CLabel>
-              <CSelect
-                value={formData.teslimAmbar}
-                onChange={(e) => handleFormChange("teslimAmbar", e.target.value)}
-              >
-                <option value="">Seçiniz</option>
-                {orderData?.Warehouses?.map(warehouse => (
-                  <option key={warehouse.WarehouseID} value={warehouse.WarehouseID}>
-                    {warehouse.WarehouseName}
-                  </option>
-                ))}
-              </CSelect>
+              <SearchBox fetchAddr="/queryWarehouses.php" label="WarehouseName" value="WarehouseID" onSelect={(v) => handleFormChange("WarehouseID", v)}/>
             </div>
           </CFormGroup>
 
