@@ -1,5 +1,6 @@
 <?php
 include 'connect.php';
+include 'headers.php';
 
 $input = json_decode(file_get_contents("php://input"), true);
 

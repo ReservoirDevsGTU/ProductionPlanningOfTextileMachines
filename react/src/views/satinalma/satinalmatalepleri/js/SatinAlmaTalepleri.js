@@ -40,7 +40,12 @@ const SatinAlmaTalepleri = () => {
   };
 
   const handleEditClick = (item) => {
-    history.push(`/satinalma/talep-duzenle/${item.RequestID}`);
+    if(item.RequestStatus == 0) {
+      history.push(`/satinalma/talep-duzenle/${item.RequestID}`);
+    }
+    else if(item.RequestStatus == 1) {
+      history.push(`/satinalma/talep-onaylama/${item.RequestID}`);
+    }
   };
 
   return (
@@ -136,7 +141,7 @@ const SatinAlmaTalepleri = () => {
                   <CButton
                     size='lg'
                     color='info'
-                    disabled={item.RequestStatus !== 0}
+                    disabled={item.RequestStatus !== 0 && item.RequestStatus !== 1}
                     onClick={() => handleEditClick(item)}
                     children={<FontAwesomeIcon style={{ color: 'white' }} icon={faEdit} />}
                     style={{
