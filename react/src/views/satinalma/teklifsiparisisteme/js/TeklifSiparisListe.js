@@ -37,7 +37,8 @@ const TeklifSiparisListe = () => {
   const handleTaleptenSiparis = () => {
     history.push({
       pathname: '/satinalma/siparis-form',
-      state: { from: '/satinalma/teklif-siparis-liste', requestItems: selected },
+      requestItems: selected,
+      state: { from: '/satinalma/teklif-siparis-liste' },
     });
   };
 
