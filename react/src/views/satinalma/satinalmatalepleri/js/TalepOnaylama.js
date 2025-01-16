@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useHistory, useParams } from "react-router-dom";
 import axios from "axios";
-import { CInput } from "@coreui/react";
+import { CButton, CInput } from "@coreui/react";
 import baseURL from "../../baseURL.js";
+import { faArrowLeft} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import CustomModal from '../../CustomModal.js';
+
 
 const TalepOnayla = () => {
   const { id } = useParams();
@@ -14,13 +18,66 @@ const TalepOnayla = () => {
     description: "",
   });
   const [searchTerm, setSearchTerm] = useState("");
+  const [modals, setModals] = useState({
+    warning: false,
+    info: false,
+    approve: false,
+    reject: false
+  });
+  
+  const [modalMessages, setModalMessages] = useState({
+    warning: '',
+    info: '',
+    approve: '',
+    reject: ''
+  });
+  
+  const [showExitWarning, setShowExitWarning] = useState(false);
+
 
   const history = useHistory();
 
   const handleGoBack = () => {
-    history.push("/satinalma/talepler");
+    setModalMessages({
+      ...modalMessages,
+      warning: 'Sayfadan çıkmak istediğinize emin misiniz?'
+    });
+    setModals({...modals, warning: true});
+    setShowExitWarning(true);
   };
 
+  const handleApproveClick = () => {
+    setModalMessages({
+      ...modalMessages,
+      approve: 'Talebi onaylamak istediğinize emin misiniz?'
+    });
+    setModals({...modals, approve: true});
+  };
+  
+  const handleRejectClick = () => {
+    setModalMessages({
+      ...modalMessages,
+      reject: 'Talebi reddetmek istediğinize emin misiniz?'
+    });
+    setModals({...modals, reject: true});
+  };
+
+  const handleModalClose = () => {
+    if (showExitWarning) {
+      setShowExitWarning(false);
+    }
+    setModals({
+      warning: false,
+      info: false,
+      approve: false,
+      reject: false
+    });
+    
+    if (modals.info) {
+      history.push("/satinalma/talepler");
+    }
+  };
+  
   useEffect(() => {
     if (id) {
       axios.post(`${baseURL}/queryRequests.php`, {filters: [{RequestID: [id]}], subTables: {Materials: {expand: false}}})
@@ -52,78 +109,84 @@ const TalepOnayla = () => {
 
   const handleApprove = () => {
     axios.post(`${baseURL}/approveRequest.php`, {
-        RequestID: id,
-        RequestStatus: 2,
-      })
-      .then(() => {
-        alert("Talep onaylandı");
-        handleGoBack();
-      })
-      .catch((error) => {
-        console.error("Error approving request:", error);
-        alert("Talep onaylanamadı, tekrar deneyin.");
-      });
+      RequestID: id,
+      RequestStatus: 2,
+    })
+    .then(() => {
+      setModalMessages({ ...modalMessages, info: 'Talep başarıyla onaylandı.' });
+      setModals({ ...modals, approve: false, info: true });
+      // 2 saniye sonra yönlendirme
+      setTimeout(() => {
+        history.push("/satinalma/talepler");
+      }, 2000);
+    })
+    .catch((error) => {
+      console.error("Error approving request:", error);
+      setModalMessages({ ...modalMessages, warning: 'Talep onaylanırken bir hata oluştu!' });
+      setModals({ ...modals, approve: false, warning: true });
+    });
   };
 
-  const handleReject = () => {
-    axios.post(`${baseURL}/approveRequest.php`, {
-        RequestID: id,
-        RequestStatus: 3,
-      })
-      .then(() => {
-        alert("Talep reddedildi");
-        handleGoBack();
-      })
-      .catch((error) => {
-        console.error("Error rejecting request:", error);
-        alert("Talep reddedilemedi, tekrar deneyin.");
-      });
-  };
+const handleReject = () => {
+  axios.post(`${baseURL}/approveRequest.php`, {
+    RequestID: id,
+    RequestStatus: 3,
+  })
+  .then(() => {
+    setModalMessages({ ...modalMessages, info: 'Talep başarıyla reddedildi.' });
+    setModals({ ...modals, reject: false, info: true });
+    // 2 saniye sonra yönlendirme
+    setTimeout(() => {
+      history.push("/satinalma/talepler");
+    }, 2000);
+  })
+  .catch((error) => {
+    console.error("Error rejecting request:", error);
+    setModalMessages({ ...modalMessages, warning: 'Talep reddedilirken bir hata oluştu!' });
+    setModals({ ...modals, reject: false, warning: true });
+  });
+};
 
   return (
     <div style={{ width: "80%", margin: "2% auto 20%", position: "relative" }}>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
-        <button
+        <CButton
           onClick={handleGoBack}
+          color="dark"
+          variant="outline"
+          size="md"
           style={{
-            fontSize: "10px",
             padding: "10px 20px",
-            backgroundColor: "black",
-            color: "white",
-            border: "none",
-            borderRadius: "5px",
             cursor: "pointer",
           }}
         >
-          &#8592; Geri
-        </button>
+          <FontAwesomeIcon icon={faArrowLeft} style={{marginRight: '8px'}}/> Geri
+        </CButton>
         <div style={{ display: "flex", gap: "10px" }}>
-          <button
-            onClick={handleApprove}
+          <CButton
+            onClick={handleApproveClick}
+            color="success"
+            size="md"
+            variant="outline"
             style={{
-              backgroundColor: "green",
-              color: "white",
               padding: "10px 20px",
-              border: "none",
-              borderRadius: "5px",
               cursor: "pointer",
             }}
           >
             Onayla
-          </button>
-          <button
-            onClick={handleReject}
+          </CButton>
+          <CButton
+            onClick={handleRejectClick}
+            color="danger"
+            size="md"
+            variant="outline"
             style={{
-              backgroundColor: "red",
-              color: "white",
               padding: "10px 20px",
-              border: "none",
-              borderRadius: "5px",
               cursor: "pointer",
             }}
           >
             Reddet
-          </button>
+          </CButton>
         </div>
       </div>
 
@@ -238,6 +301,38 @@ const TalepOnayla = () => {
           ))}
         </tbody>
       </table>
+
+      <CustomModal 
+      show={modals.approve}
+      onClose={handleModalClose}
+      message={modalMessages.approve}
+      type="warning"
+      showExitWarning={true}
+      onExit={handleApprove}
+    />
+
+    <CustomModal 
+      show={modals.reject}
+      onClose={handleModalClose}
+      message={modalMessages.reject}
+      type="warning"
+      showExitWarning={true}
+      onExit={handleReject}
+    />
+
+    {/* Bilgi/Uyarı Modalı */}
+    <CustomModal 
+      show={modals.warning || modals.info}
+      onClose={handleModalClose}
+      message={modals.warning ? modalMessages.warning : modalMessages.info}
+      type={modals.warning ? 'warning' : 'info'}
+      showExitWarning={showExitWarning}
+      onExit={() => {
+        if (showExitWarning) {
+          history.push("/satinalma/talepler");
+        }
+      }}
+    />
     </div>
   );
 };
