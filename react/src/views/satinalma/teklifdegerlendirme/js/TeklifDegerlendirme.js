@@ -152,7 +152,12 @@ const TeklifDegerlendirme = () => {
                   </CButton>
                 </td>
           ),
-          TODO: () => (<td>TO DO</td>)
+          TODO: () => (<td>TO DO</td>),
+          OfferStatus: (item) => (
+            <td>
+              {item.OfferStatus === 3 ? "Değerlendiriliyor" : item.OfferStatus}
+            </td>
+          )
         }}
       />
     </div>
