@@ -21,8 +21,8 @@ const TalepEkleme = ({ editID }) => {
   const history = useHistory();
 
    const [isDirty, setIsDirty] = useState(false);
-   const [modals, setModals] = useState({ warning: false, info: false, delete: false, select: false});
-   const [modalMessages, setModalMessages] = useState({ warning: '', info: '', delete:'', select: '' });
+   const [modals, setModals] = useState({ warning: false, info: false, delete: false, select: false, template: false, fileWarning: false, templateCancel: false});
+   const [modalMessages, setModalMessages] = useState({ warning: '', info: '', delete:'', select: '', template: '', fileWarning: '', templateCancel: ''});  
    
    const [showExitWarning, setShowExitWarning] = useState(false);
 
@@ -50,17 +50,25 @@ const handleGoBackButton = () => {
  }
 };
 
+const closeTemplateModal = () => {
+  setTemplateModal(false);
+  setTemplateTable([]);
+};
+
 const handleModalClose = () => {
   if (showExitWarning) {
     setShowExitWarning(false);
-    setModals({warning: false, info: false});
+    setModals({...modals, warning: false});
   } 
   else if (modals.info) {
-    setModals({warning: false, info: false});
+    setModals({...modals, info: false});
     history.push("/satinalma/talepler");
   }
+  else if (modals.templateCancel) {
+    setModals({...modals, templateCancel: false});
+  }
   else {
-    setModals({warning: false, info: false});
+    setModals({warning: false, info: false, templateCancel: false});
   }
 };
 
@@ -91,12 +99,22 @@ const handleModalClose = () => {
     setModals({...modals, delete: true});
   };
 
-  const confirmDelete = () => {
-    setSelectedMaterials(prev => 
-      prev.filter(material => material.MaterialID !== materialToDelete.MaterialID)
-    );
-    setIsDirty(true);
-    setModals({...modals, delete: false});
+  const confirmDelete = (type) => {
+    // Template içinden silme
+    if (type === 'template') {
+      setTemplateTable(prev =>
+        prev.filter(material => material.MaterialID !== materialToDelete.MaterialID)
+      );
+      setModals({...modals, template: false});
+    } 
+    // Ana listeden silme
+    else {
+      setSelectedMaterials(prev => 
+        prev.filter(material => material.MaterialID !== materialToDelete.MaterialID)
+      );
+      setIsDirty(true);
+      setModals({...modals, delete: false});
+    }
     setMaterialToDelete(null);
   };
 
@@ -187,8 +205,27 @@ const handleModalClose = () => {
     reader.readAsArrayBuffer(file);
   };
 
-  const handleFileInput = (event) => processFile(event.target.files[0]);
-
+  const handleFileInput = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+  
+    // Dosya uzantısını kontrol et
+    const fileExtension = file.name.split('.').pop().toLowerCase();
+    const validExtensions = ['xlsx', 'xls'];
+  
+    // Eğer dosya Excel değilse uyarı göster
+    if (!validExtensions.includes(fileExtension)) {
+      setModalMessages({
+        ...modalMessages,
+        fileWarning: 'Lütfen sadece Excel formatında (.xlsx veya .xls) dosya yükleyiniz.'
+      });
+      setModals({...modals, fileWarning: true});
+      event.target.value = ''; // Input'u temizle
+      return;
+    }
+  
+    processFile(file);
+  };
   const addTemplateData = () => {
     const template = templateTable;
     const selected = selectedMaterials;
@@ -202,7 +239,7 @@ const handleModalClose = () => {
       }
     });
     setSelectedMaterials(selected);
-    setTemplateModal(false);
+    closeTemplateModal(); 
   };
 
   return (
@@ -469,22 +506,30 @@ const handleModalClose = () => {
       />
 
 <CustomModal 
-  show={modals.warning || modals.info || modals.delete || modals.select}
+  show={modals.warning || modals.info || modals.delete || modals.select || modals.template || modals.fileWarning || modals.templateCancel}
   onClose={handleModalClose}
   message={
     modals.delete ? modalMessages.delete : 
     modals.warning ? modalMessages.warning : 
     modals.select ? modalMessages.select :
+    modals.template ? modalMessages.template :
+    modals.fileWarning ? modalMessages.fileWarning :
+    modals.templateCancel ? modalMessages.templateCancel :
     modalMessages.info
   }
-  type={modals.warning || modals.delete ? 'warning' : 'info'}
-  showExitWarning={showExitWarning || modals.delete}
+  type="warning"
+  showExitWarning={showExitWarning || modals.delete || modals.template || modals.templateCancel}
   onExit={() => {
     if (showExitWarning) {
       handleModalClose();
       history.push("/satinalma/talepler");
     } else if (modals.delete) {
-      confirmDelete();
+      confirmDelete('main');
+    } else if (modals.template) {
+      confirmDelete('template');
+    } else if (modals.templateCancel) {
+      closeTemplateModal();
+      setModals({...modals, templateCancel: false});
     }
   }}
 />
@@ -526,7 +571,17 @@ const handleModalClose = () => {
               <CButton
                 color="danger"
                 variant='outline'
-                onClick={() => setTemplateModal(false)}
+                onClick={() => {
+                  if (templateTable.length > 0) {
+                    setModalMessages({
+                      ...modalMessages,
+                      templateCancel: 'Şablondan aktarma işlemini iptal etmek istediğinize emin misiniz? Yaptığınız değişiklikler kaybolacaktır.'
+                    });
+                    setModals({...modals, templateCancel: true});
+                  } else {
+                    closeTemplateModal();
+                  }
+                }}  
                 style={{
                   padding: "5px 10px",
                   borderRadius: "4px",
@@ -672,23 +727,26 @@ const handleModalClose = () => {
                           padding: "10px",
                         }}
                       >
-                        <button
-                          onClick={() =>
-                            setTemplateTable(
-                              templateTable.filter((m) => m.MaterialID !== material.MaterialID)
-                            )
-                          }
-                          style={{
-                            backgroundColor: "#dc3545",
-                            color: "white",
-                            border: "none",
-                            padding: "5px 10px",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                          }}
-                        >
-                          Sil
-                        </button>
+                      <button
+                        onClick={() => {
+                          setModalMessages({
+                            ...modalMessages,
+                            template: `'${material.MaterialName}' malzemesini listeden çıkarmak istediğinize emin misiniz?`
+                          });
+                          setModals({...modals, template: true});
+                          setMaterialToDelete(material);
+                        }}
+                        style={{
+                          backgroundColor: "#dc3545",
+                          color: "white",
+                          border: "none",
+                          padding: "5px 10px",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Sil
+                      </button>
                       </td>
                     </tr>
                   ))}
@@ -722,33 +780,45 @@ const handleModalClose = () => {
                   marginTop: "20px",
                 }}
               >
-                <button
-                  onClick={() => setTemplateModal(false)}
-                  style={{
-                    backgroundColor: "#6c757d",
-                    color: "white",
-                    border: "none",
-                    padding: "5px 10px",
-                    borderRadius: "4px",
-                    marginRight: "10px",
-                    cursor: "pointer",
-                  }}
-                >
-                  İptal
-                </button>
-                <button
-                  onClick={addTemplateData}
-                  style={{
-                    backgroundColor: "#007bff",
-                    color: "white",
-                    border: "none",
-                    padding: "5px 10px",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                  }}
-                >
-                  Ekle
-                </button>
+                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "20px" }}>
+  <button
+    onClick={() => {
+      if (templateTable.length > 0) {
+        setModalMessages({
+          ...modalMessages,
+          templateCancel: 'Şablondan aktarma işlemini iptal etmek istediğinize emin misiniz? Yaptığınız değişiklikler kaybolacaktır.'
+        });
+        setModals({...modals, templateCancel: true});
+      } else {
+        closeTemplateModal();
+      }
+    }}
+    style={{
+      backgroundColor: "#6c757d",
+      color: "white",
+      border: "none",
+      padding: "5px 10px",
+      borderRadius: "4px",
+      marginRight: "10px",
+      cursor: "pointer",
+    }}
+  >
+    İptal
+  </button>
+  <button
+    onClick={addTemplateData}
+    style={{
+      backgroundColor: "#007bff",
+      color: "white",
+      border: "none",
+      padding: "5px 10px",
+      borderRadius: "4px",
+      cursor: "pointer",
+    }}
+  >
+    Ekle
+  </button>
+</div>
               </div>
             )}
           </div>
