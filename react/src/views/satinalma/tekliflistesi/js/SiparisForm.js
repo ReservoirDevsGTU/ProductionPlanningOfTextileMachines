@@ -497,7 +497,7 @@ const handleEmailSubmit = async () => {
             {label: "", key: "select"},
             {label: "Malzeme No", key: "MaterialNo"},
             {label: "Malzeme Adi", key: "MaterialName"},
-            {label: "Miktar", key: "offeredAmount"},
+            {label: "Miktar", key: "orderedAmount"},
             {label: "Toplam Stok", key: "Quantity"},
             {label: "Birim", key: "UnitID"},
           ]}
@@ -510,23 +510,23 @@ const handleEmailSubmit = async () => {
                           checked={selectedMaterials.find(m => m.MaterialID === material.MaterialID) !== undefined}
                           onChange={(e) =>
                             setSelectedMaterials((prev) =>
-                              e.target.checked ? prev.concat([{...material, OfferedAmount: 1, RequestItemID: 0}])
+                              e.target.checked ? prev.concat([{...material, OrderedAmount: 1}])
                               : prev.filter(m => m.MaterialID !== material.MaterialID))
                           }
                         />
                       </td>
             ),
-            offeredAmount: (material) => (
+            orderedAmount: (material) => (
                       <td>
                         <input
                           type="number"
                           disabled={selectedMaterials.find(m => m.MaterialID === material.MaterialID)?.final !== undefined}
-                          value={selectedMaterials.find(m => m.MaterialID === material.MaterialID)?.OfferedAmount || ""}
+                          value={selectedMaterials.find(m => m.MaterialID === material.MaterialID)?.OrderedAmount || ""}
                           onChange={(e) =>
                             setSelectedMaterials((prev) =>
                               prev.map((m) =>
                                 m.MaterialID === material.MaterialID
-                                  ? { ...m, OfferedAmount: Number(e.target.value) }
+                                  ? { ...m, OrderedAmount: Number(e.target.value) }
                                   : m
                               )
                             )
