@@ -12,6 +12,7 @@ import {
   CSelect,
   CTextarea,
 } from "@coreui/react";
+import CustomModal from "../../CustomModal.js";
 
 const GirisFormu = () => {
   const history = useHistory();
@@ -31,8 +32,18 @@ const GirisFormu = () => {
     notlar: ""
   });
 
-  console.log("URL'den alınan OrderID:", id);
-
+  const [modals, setModals] = useState({
+    exit: false,      // İptal / Vazgeç
+    fillError: false, // Gerekli alanlar boşsa
+    success: false,   // Kaydet sonrası başarı
+    warning: false,   // 0 veya negatif değer girme
+  });
+  const [modalMessages, setModalMessages] = useState({
+    exit: "",
+    fillError: "",
+    success: "",
+    warning: "",
+  });
 
   // Veri çekme - Sipariş detayları
   useEffect(() => {
@@ -123,10 +134,24 @@ const GirisFormu = () => {
 
   // Malzeme input değişikliklerini handle et
   const handleInputChange = (materialId, field, value) => {
+    const val = value === "" ? "" : Number(value);
+
+    if (val !== "" && val <= 0) {
+      setModalMessages({
+        ...modalMessages,
+        warning: "Lütfen 0'dan büyük bir değer giriniz!"
+      });
+      setModals({
+        ...modals,
+        warning: true
+      });
+      return;
+    }
+
     setMaterials(prevMaterials => 
       prevMaterials.map(m => 
-        m.MaterialID === materialId 
-          ? { ...m, [field]: Number(value) }
+        m.MaterialID === materialId
+          ? { ...m, [field]: val }
           : m
       )
     );
@@ -142,6 +167,20 @@ const GirisFormu = () => {
 
   // Kaydet - Form submit
   const handleSubmit = async () => {
+
+    if (!formData.TransactionDate || !formData.WarehouseID || !formData.teslimEden || !formData.irsaliyeNo || !formData.notlar  ) { 
+      setModalMessages({
+        ...modalMessages,
+        fillError: "Lütfen gerekli alanları doldurunuz!"
+      });
+      setModals({
+        ...modals,
+        fillError: true
+      });
+      return;
+    }
+
+
     try {
       console.log("Gönderim Öncesi Malzeme Durumu:", materials);
   
@@ -182,10 +221,32 @@ const GirisFormu = () => {
     console.log("Backend'e Gönderilecek Veri:", submitData);
     
     await axios.post(baseURL + "/orderEntry.php", submitData);  // baseURL eklendi
-    history.push("/satinalma/siparis-listesi");
+    setModalMessages({
+      ...modalMessages,
+      success: "Giriş işlemi başarıyla kaydedildi."
+    });
+    setModals({
+      ...modals,
+      success: true
+    });
+    setTimeout(() => {
+      setModals(prev => ({ ...prev, success: false }));
+      history.push("/satinalma/siparis-listesi");
+    }, 1500);
   } catch (error) {
     console.error("Gönderme hatası:", error);
   }
+  };
+
+  const handleCancel = () => {
+    setModalMessages({
+      ...modalMessages,
+      exit: "Yaptığınız değişiklikler kaybolacak. Çıkmak istediğinize emin misiniz?"
+    });
+    setModals({
+      ...modals,
+      exit: true
+    });
   };
 
 /*  if (loading) {
@@ -361,7 +422,7 @@ const GirisFormu = () => {
       }}>
         <CButton
           color="danger"
-          onClick={() => history.push("/satinalma/siparis-listesi")}
+          onClick={handleCancel}
         >
           İptal
         </CButton>
@@ -372,6 +433,44 @@ const GirisFormu = () => {
           Kaydet
         </CButton>
       </div>
+
+      <CustomModal
+        show={modals.exit || modals.fillError || modals.success || modals.warning}
+        onClose={() => {
+          if (modals.success) {
+            history.push("/satinalma/siparis-listesi");
+          }
+          setModals({
+            exit: false,
+            fillError: false,
+            success: false,
+            warning: false,
+          });
+        }}
+        message={
+          modals.exit
+            ? modalMessages.exit
+            : modals.fillError
+            ? modalMessages.fillError
+            : modals.warning
+            ? modalMessages.warning
+            : modals.success
+            ? modalMessages.success
+            : ""
+        }
+        type={
+          modals.exit || modals.fillError || modals.warning
+            ? "warning"
+            : "info"
+        }
+        showExitWarning={modals.exit}
+        onExit={() => {
+          if (modals.exit) {
+            history.push("/satinalma/siparis-listesi");
+          }
+        }}
+      />
+
     </div>
   );
 };

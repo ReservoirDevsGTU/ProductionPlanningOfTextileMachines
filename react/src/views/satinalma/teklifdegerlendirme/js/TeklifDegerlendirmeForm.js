@@ -6,6 +6,8 @@ import {CButton} from '@coreui/react';
 import baseURL from '../../baseURL.js';
 import { faPrint } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import CustomModal from '../../CustomModal.js';
+
 
 const TeklifDegerlendirmeForm = (props) => {
   const history = useHistory();
@@ -16,6 +18,18 @@ const TeklifDegerlendirmeForm = (props) => {
   const [totalPrice, setTotalPrice] = useState(0);
   const [offerItems, setOfferItems] = useState([]);
   const [allSuppliers, setAllSuppliers] = useState([]);
+
+  const [modals, setModals] = useState({ exit: false, save: false, noneSelected: false});
+  const [modalMessages, setModalMessages] = useState({ exit: '', save: '', noneSelected: '' });  
+     
+   const handleExit = () => {
+    setModalMessages({
+      ...modalMessages,
+      exit: 'Yaptığınız değişiklikler kaybolacak. Çıkmak istediğinize emin misiniz?'
+    });
+    setModals({...modals, exit: true});
+  };
+
 
   const OfferGroupID = props.location.OfferGroupID;
 
@@ -96,6 +110,39 @@ const TeklifDegerlendirmeForm = (props) => {
     else getOffers();
   }, []);
 
+  const handleSave = () => {
+    const anySelected = offerItems.some(
+      material => material.Suppliers.some(s => s.selected)
+    );
+  
+
+    if (!anySelected) {
+      setModalMessages({
+        ...modalMessages,
+        noneSelected: "Lütfen en az bir malzeme seçiniz!"
+      });
+      setModals({ ...modals, noneSelected: true });
+  
+      return; 
+    }
+  
+
+    submit(); 
+  
+    setModalMessages({
+      ...modalMessages,
+      save: "Başarıyla kaydedildi."
+    });
+    setModals({ ...modals, save: true });
+  
+
+    setTimeout(() => {
+      setModals(prev => ({ ...prev, save: false }));
+      history.push("/satinalma/teklif-degerlendirme");
+    }, 1500);
+  };
+  
+
   const submit = async () => {
     const data = {
         OfferGroupID: OfferGroupID,
@@ -116,8 +163,8 @@ const TeklifDegerlendirmeForm = (props) => {
         <CButton color="info" variant='outline' size='lg'>
             <FontAwesomeIcon icon={faPrint} />
           </CButton>
-          <CButton color="info" variant="outline" size="lg" onClick={submit}>Kaydet</CButton>
-          <CButton color="danger" variant="outline" size="lg" onClick={() => history.goBack()}>
+          <CButton color="info" variant="outline" size="lg" onClick={handleSave}>Kaydet</CButton>
+          <CButton color="danger" variant="outline" size="lg" onClick={handleExit}>
             Vazgeç
           </CButton>
         </div>
@@ -218,6 +265,40 @@ const TeklifDegerlendirmeForm = (props) => {
           </tbody>
         </table>
       </div>
+      <CustomModal
+  show={modals.exit || modals.noneSelected || modals.save}
+  onClose={() => {
+
+    if (modals.save) {
+      history.push("/satinalma/teklif-degerlendirme");
+    }
+    setModals({ exit: false, noneSelected: false, save: false });
+  }}
+  message={
+    modals.exit
+      ? modalMessages.exit
+      : modals.noneSelected
+      ? modalMessages.noneSelected
+      : modals.save
+      ? modalMessages.save
+      : ''
+  }
+  type={
+    modals.exit || modals.noneSelected
+      ? 'warning'
+      : 'info'
+  }
+  showExitWarning={modals.exit}
+  onExit={() => {
+    if (modals.exit) {
+      history.push("/satinalma/teklif-degerlendirme");    }
+
+  }}
+/>
+
+
+
+      
     </div>
   );
 };

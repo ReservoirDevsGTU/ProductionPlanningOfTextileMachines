@@ -29,6 +29,8 @@ import baseURL from '../../baseURL.js';
 import * as XLSX from 'xlsx';
 import Dropzone from 'react-dropzone';
 import searchTables from '../../util.js';
+import CustomModal from '../../CustomModal.js';  
+
 
 const TeklifForm = () => {
   const OfferID = useParams().id;
@@ -46,6 +48,17 @@ const TeklifForm = () => {
     OfferDescription: ''
   });
   const [sheetModal, setSheetModal] = useState(false);
+  const [modals, setModals] = useState({
+    exit: false, fillError: false,success: false, warning: false   
+  });
+
+  const [modalMessages, setModalMessages] = useState({
+    exit: '',
+    fillError: '',
+    success: '',
+    warning: ''
+  });
+
 
   if(!OfferID) history.goBack();
 
@@ -100,6 +113,72 @@ const TeklifForm = () => {
       const newData = [...prev];
       newData[index][field] = value;
       return newData;
+    });
+  };
+
+
+  const handleSave = () => {
+    // Hangi alanlar zorunlu? (dilediğiniz gibi genişletebilirsiniz)
+    const requiredFields = [
+      "SupplierID",
+      "OfferDate",
+      "teklifGecerlilikTarihi",
+      "OfferDeadline",
+      "OfferGroupID",
+      "firmaSorumlusu",
+      "OfferStatus",
+      "OfferDescription"
+    ];
+
+    // Boş alan var mı?
+    const hasEmptyField = requiredFields.some(field =>
+      !formData[field] || formData[field].toString().trim() === ''
+    );
+
+    // 1) Eksik alan varsa fillError modal'ı göster
+    if (hasEmptyField) {
+      setModalMessages({
+        ...modalMessages,
+        fillError: "Lütfen bütün alanları doldurun!"
+      });
+      setModals({
+        ...modals,
+        fillError: true
+      });
+
+
+      
+      return;
+    }
+
+    // 2) Her şey doluysa formu gönder
+    submitForm();
+
+    // Başarılı mesaj
+    setModalMessages({
+      ...modalMessages,
+      success: "Başarıyla kaydedildi!"
+    });
+    setModals({
+      ...modals,
+      success: true
+    });
+
+    // 1.5 saniye sonra otomatik kapat + sayfadan çık
+    setTimeout(() => {
+      setModals(prev => ({ ...prev, success: false }));
+      history.push('/satinalma/teklif-listesi');
+    }, 1500);
+  };
+
+  const handleCancel = () => {
+    setModalMessages({
+      ...modalMessages,
+      exit: 'Yaptığınız değişiklikler kaybolacak. Çıkmak istediğinize emin misiniz?'
+    });
+    setModals({
+      ...modals,
+      exit: true
     });
   };
 
@@ -222,11 +301,11 @@ const TeklifForm = () => {
                 <CButton 
                   color="danger" 
                   variant="outline"
-                  onClick={() => history.push('/satinalma/teklif-listesi')}
+                  onClick={handleCancel}
                 >
                   İptal
                 </CButton>
-                <CButton color="success" type="button" onClick={submitForm}>
+                <CButton color="success" type="button" onClick={handleSave}>
                   Kaydet
                 </CButton>
               </div>
@@ -266,7 +345,23 @@ const TeklifForm = () => {
                             type="number"
                             value={item.OfferedAmount}
                             disabled={formData.OfferStatus != 2}
-                            onChange={e => handleMaterialChange(index, 'OfferedAmount', e.target.value)}
+                            onChange={e => {
+                                   const val = e.target.value === '' ? '' : Number(e.target.value);
+                                   // Eğer val boş değilse ve 0'dan küçük veya eşitse uyarı ver
+                                   if (val !== '' && val <= 0) {
+                                     setModalMessages({
+                                       ...modalMessages,
+                                       warning: 'Lütfen miktarı sıfırdan büyük bir sayı giriniz!'
+                                     });
+                                     setModals({
+                                       ...modals,
+                                       warning: true
+                                     });
+                                     return; // Değer değiştirilmesini engelle
+                                  }
+                                   // Aksi halde normal şekilde kaydet
+                                   handleMaterialChange(index, 'OfferedAmount', val);
+                                 }}
                           />
                         </td>
                         <td style={{ padding: '12px' }}>{item.UnitID}</td>
@@ -275,7 +370,21 @@ const TeklifForm = () => {
                             type="number"
                             value={item.UnitPrice}
                             disabled={formData.OfferStatus != 2}
-                            onChange={e => handleMaterialChange(index, 'UnitPrice', e.target.value)}
+                            onChange={e => {
+                                   const val = e.target.value === '' ? '' : Number(e.target.value);
+                                   if (val !== '' && val <= 0) {
+                                     setModalMessages({
+                                       ...modalMessages,
+                                       warning: 'Lütfen birim fiyatı sıfırdan büyük bir sayı giriniz!'
+                                     });
+                                     setModals({
+                                       ...modals,
+                                       warning: true
+                                     });
+                                     return;
+                                   }
+                                   handleMaterialChange(index, 'UnitPrice', val);
+                                 }}
                           />
                         </td>
                         <td style={{ padding: '12px' }}>
@@ -374,7 +483,48 @@ const TeklifForm = () => {
         <CModalFooter>
         </CModalFooter>
       </CModal>
+
+      <CustomModal
+       show={modals.exit || modals.fillError || modals.success || modals.warning}
+
+        onClose={() => {
+          if (modals.success) {
+            history.push('/satinalma/teklif-listesi');
+          }
+          setModals({ exit: false, fillError: false, success: false,warning: false });
+        }}
+
+        message={
+             modals.warning 
+     ? modalMessages.warning
+          :modals.exit
+            ? modalMessages.exit
+            : modals.fillError
+            ? modalMessages.fillError
+            : modals.success
+            ? modalMessages.success
+            : ''
+        }
+
+         type={
+             modals.warning || modals.exit || modals.fillError
+               ? 'warning'
+               : 'info'
+           }
+
+        showExitWarning={modals.exit}
+
+        onExit={() => {
+          if (modals.exit) {
+            history.push('/satinalma/teklif-listesi');
+          }
+        }}
+      />
+
     </div>
+
+
+
   );
 };
 
