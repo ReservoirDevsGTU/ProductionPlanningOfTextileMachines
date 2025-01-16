@@ -314,7 +314,7 @@ const TeklifListesi = () => {
 
   const printSelectedOffer = async () => {
     const offerID = Object.keys(selected).find(k => selected[k]);
-    axios.post(baseURL + "/queryOffers.php", { subTables: { Materials: { expand: false } }, filters: { OfferID: [offerID] } })
+    axios.post(baseURL + "/queryOffers.php", { subTables: { Materials: { expand: false } }, filters: [{ OfferID: [offerID] }] })
       .then(response => {
         const data = response.data[0];
         const printDetails = [
