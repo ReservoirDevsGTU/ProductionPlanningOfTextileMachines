@@ -67,7 +67,7 @@ const TeklifSiparisListe = () => {
     <div style={{ padding: '20px' }}>
       <div style={{ marginBottom: '20px' }}>
         <h1>
-          Teklif Sipariş İsteme Listesi
+          Teklif / Sipariş İsteme Listesi
         </h1>
         <hr style={{ border: '1px solid #333' }} />
       </div>

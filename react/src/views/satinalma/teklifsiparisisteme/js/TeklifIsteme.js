@@ -7,6 +7,7 @@ import { CButton, CNav, CNavItem, CNavLink, CTabContent, CTabPane, CTabs } from 
 import CustomTable from '../../CustomTable.js';
 import SearchBox from '../../SearchBox.js';
 import { useHistory } from 'react-router-dom';
+import CustomModal from '../../CustomModal.js';
 
 
 const TeklifIsteme = (props) => {
@@ -31,6 +32,15 @@ const TeklifIsteme = (props) => {
   const history = useHistory();
 
   const editItems = props.location.editItems;
+
+   const [modals, setModals] = useState({ warning: false, info: false,   materialDelete: false, supplierDelete: false, select: false, cancel: false, save: false});
+   const [modalMessages, setModalMessages] = useState({ warning: '', info: '', materialDelete:'',supplierDelete: '', select: '', cancel: '', save: ''});    
+   const [materialToDelete, setMaterialToDelete] = useState(null);
+   const [supplierToDelete, setSupplierToDelete] = useState(null);
+
+
+
+  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -77,13 +87,25 @@ const TeklifIsteme = (props) => {
       prev.map(s => ({ ...s, final: true })));
   };
 
-  const handleRemoveSupplier = (supplierId) => {
-    setSelectedSuppliers((prevSelected) =>
-      prevSelected.filter((s) => s.SupplierID !== supplierId)
+  const handleRemoveSupplier = () => {
+    setSelectedSuppliers((prev) =>
+      prev.filter((s) => s.SupplierID !== supplierToDelete.SupplierID)
     );
+    setModals({...modals, supplierDelete: false});
+    setSupplierToDelete(null);
   };
 
   const handleSaveButton = () => {
+
+    if (!quoteDate || !deadlineDate || requester === -1) {
+      setModalMessages({
+        ...modalMessages,
+        warning: 'Lütfen tüm zorunlu alanları doldurun!'
+      });
+      setModals({...modals, warning: true});
+      return;
+    }
+
     const requestData = {
       OfferGroupID: quoteGroupNo,
       CreatedBy: requester,
@@ -128,18 +150,28 @@ const TeklifIsteme = (props) => {
       }, [])
     };
     axios.post(baseURL + "/createOffer.php", requestData);
-    alert("Teklif bilgileri kaydedildi!");
+    setModalMessages({...modalMessages, save: 'Teklif bilgileri başarıyla kaydedildi.'});
+    setModals({...modals, save: true});
+    setTimeout(() => {
+      history.push("/satinalma/teklif-siparis-liste");
+    }, 1500);
+
   };
 
   const handleCancel = () => {
-    history.push("/satinalma/teklif-siparis-liste"); // Yönlendirme işlemi
+    setModalMessages({
+      ...modalMessages,
+      cancel: 'Yaptığınız değişiklikler kaybolacak. Çıkmak istediğinize emin misiniz?'
+    });
+    setModals({...modals, cancel: true});
   };
 
   const handleRemoveMaterial = () => {
     setSelectedMaterials((prev) =>
-      prev.filter((m) => m.MaterialID !== selectedMaterialToDelete.MaterialID)
+      prev.filter((m) => m.MaterialID !== materialToDelete.MaterialID)
     );
-    setShowModal(false);
+    setModals({...modals, materialDelete: false});
+    setMaterialToDelete(null);
   };
 
   return (
@@ -279,7 +311,14 @@ const TeklifIsteme = (props) => {
                           delete: (supplier) => (
                             <td>
                               <button
-                                onClick={() => setSelectedSuppliers((prev) => prev.filter(s => s.SupplierID !== supplier.SupplierID))}
+                                onClick={() => {
+                                  setSupplierToDelete(supplier);
+                                  setModalMessages({
+                                    ...modalMessages,
+                                    supplierDelete: `'${supplier.SupplierName}' tedarikçisini silmek istediğinizden emin misiniz?`
+                                  });
+                                  setModals({...modals, supplierDelete: true});
+                                }}
                                 style={{
                                   backgroundColor: "transparent",
                                   border: "none",
@@ -334,18 +373,28 @@ const TeklifIsteme = (props) => {
 
                         {/* Buton Sağ Alt Köşede ve Hafif Sola Kaydırılmış */}
                         <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "20px" }}>
-                          <CButton
-                            color="info"
-                            variant="outline"
-                            onClick={handleAddSelectedSuppliers}
-                            style={{
-                              padding: "10px 20px",
-                              cursor: "pointer",
-                              marginRight: "120px", // Butonu hafif sola kaydırır
-                            }}
-                          >
-                            Listeye Ekle
-                          </CButton>
+                        <CButton
+  color="info"
+  variant="outline"
+  onClick={() => {
+    const selectedCount = selectedSuppliers.filter(s => !s.final).length;
+    if (selectedCount === 0) {
+      setModalMessages({...modalMessages, warning: 'Lütfen önce tedarikçi seçiniz.'});
+      setModals({...modals, warning: true});
+      return;
+    }
+    handleAddSelectedSuppliers();
+    setModalMessages({...modalMessages, info: 'Tedarikçiler başarıyla listeye eklendi.'});
+    setModals({...modals, info: true});
+  }}
+  style={{
+    padding: "10px 20px",
+    cursor: "pointer",
+    marginRight: "120px",
+  }}
+>
+  Listeye Ekle
+</CButton>
                         </div>
                       </div>
                     </CTabPane>
@@ -393,8 +442,12 @@ const TeklifIsteme = (props) => {
                           <td>
                             <button
                               onClick={() => {
-                                setShowModal(true);
-                                setSelectedMaterialToDelete(material);
+                                setMaterialToDelete(material);
+                                setModalMessages({
+                                  ...modalMessages,
+                                  materialDelete: `'${material.MaterialName}' malzemesini silmek istediğinizden emin misiniz?`
+                                });
+                                setModals({...modals, materialDelete: true});
                               }}
                               style={{
                                 backgroundColor: "transparent",
@@ -491,18 +544,28 @@ const TeklifIsteme = (props) => {
                       />
 
                       <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "20px" }}>
-                        <CButton
-                          color="info"
-                          variant="outline"
-                          onClick={() => setSelectedMaterials((prev) => prev.map(m => ({ ...m, RequestedAmount: m.OfferRequestedAmount, final: true })))}
-                          style={{
-                            padding: "10px 20px",
-                            cursor: "pointer",
-                            marginRight: "100px",
-                          }}
-                        >
-                          Listeye Ekle
-                        </CButton>
+                      <CButton
+  color="info"
+  variant="outline"
+  onClick={() => {
+    const selectedCount = selectedMaterials.filter(m => !m.final).length;
+    if (selectedCount === 0) {
+      setModalMessages({...modalMessages, warning: 'Lütfen önce malzeme seçiniz.'});
+      setModals({...modals, warning: true});
+      return;
+    }
+    setSelectedMaterials((prev) => prev.map(m => ({ ...m, RequestedAmount: m.OfferRequestedAmount, final: true })));
+    setModalMessages({...modalMessages, info: 'Malzemeler başarıyla listeye eklendi.'});
+    setModals({...modals, info: true});
+  }}
+  style={{
+    padding: "10px 20px",
+    cursor: "pointer",
+    marginRight: "100px",
+  }}
+>
+  Listeye Ekle
+</CButton>
                       </div>
                     </div>
                   </CTabPane>
@@ -546,76 +609,45 @@ const TeklifIsteme = (props) => {
       </div>
 
       {/* Modal */}
-      {showModal && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 1000,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "white",
-              padding: "20px",
-              borderRadius: "8px",
-              boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
-              textAlign: "center",
-              width: "400px",
-            }}
-          >
-            <h2 style={{ marginBottom: "20px" }}>Silme Onayı</h2>
-            <div
-              style={{
-                backgroundColor: "#f8d7da",
-                padding: "15px",
-                borderRadius: "5px",
-                marginBottom: "20px",
-              }}
-            >
-              <p>
-                '{selectedMaterialToDelete?.MaterialName}' malzemesini silmek
-                istediğinizden emin misiniz?
-              </p>
-            </div>
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
-              <button
-                onClick={() => setShowModal(false)}
-                style={{
-                  padding: "10px 20px",
-                  backgroundColor: "#6c757d",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "5px",
-                  cursor: "pointer",
-                }}
-              >
-                İptal
-              </button>
-              <button
-                onClick={handleRemoveMaterial}
-                style={{
-                  padding: "10px 20px",
-                  backgroundColor: "#dc3545",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "5px",
-                  cursor: "pointer",
-                }}
-              >
-                Sil
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <CustomModal 
+  show={modals.warning || modals.info || modals.materialDelete || modals.supplierDelete || modals.select || modals.cancel || modals.save}
+  onClose={() => {
+      if (modals.save) {
+    history.push("/satinalma/teklif-siparis-liste");
+  }
+    setModals({
+      warning: false, 
+      info: false, 
+      materialDelete: false, 
+      supplierDelete: false, 
+      select: false,
+      cancel: false,
+      save: false
+    });
+    setMaterialToDelete(null);
+    setSupplierToDelete(null);
+  }}
+  message={
+    modals.materialDelete ? modalMessages.materialDelete : 
+    modals.supplierDelete ? modalMessages.supplierDelete :
+    modals.warning ? modalMessages.warning : 
+    modals.select ? modalMessages.select :
+    modals.cancel ? modalMessages.cancel :
+    modals.save ? modalMessages.save :
+    modalMessages.info
+  }
+  type={modals.warning || modals.materialDelete || modals.supplierDelete || modals.cancel ? 'warning' : 'info'}
+  showExitWarning={modals.materialDelete || modals.supplierDelete || modals.cancel}
+  onExit={() => {
+    if (modals.materialDelete) {
+      handleRemoveMaterial();
+    } else if (modals.supplierDelete) {
+      handleRemoveSupplier();
+    } else if (modals.cancel) {
+      history.push("/satinalma/teklif-siparis-liste");
+    }
+  }}
+/>
 
 
 
