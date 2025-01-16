@@ -119,12 +119,40 @@ const handleModalClose = () => {
   };
 
   const handleQuantityChange = (id, quantity) => {
+    const value = quantity === '' ? '' : Number(quantity);
+    // Sadece sayı girildiğinde ve 0 veya negatif olduğunda kontrol et
+    if (value !== '' && value <= 0) {
+      setModalMessages({
+        ...modalMessages,
+        warning: 'Lütfen miktarı sıfırdan büyük bir sayı giriniz!'
+      });
+      setModals({...modals, warning: true});
+      return;
+    }
     setSelectedMaterials((prev) =>
       prev.map((material) =>
-        material.MaterialID === id ? { ...material, RequestedAmount: quantity } : material
+        material.MaterialID === id ? { ...material, RequestedAmount: value } : material
       )
     );
     setIsDirty(true);
+  };
+
+  const validateMaterials = () => {
+    const invalidMaterials = selectedMaterials.filter(m => 
+      m.RequestedAmount === '' || 
+      m.RequestedAmount === undefined || 
+      (typeof m.RequestedAmount === 'number' && m.RequestedAmount <= 0)
+    );
+    
+    if (invalidMaterials.length > 0) {
+      setModalMessages({
+        ...modalMessages,
+        warning: 'Tüm malzemeler için geçerli bir miktar girilmelidir!'
+      });
+      setModals({...modals, warning: true});
+      return false;
+    }
+    return true;
   };
 
   const handleInputChange = (e) => {
@@ -150,11 +178,17 @@ const handleModalClose = () => {
       setModals({...modals, warning: true});
       return;
     }
+  
+    if (!validateMaterials()) {
+      return;
+    }
+  
     axios.post(baseURL + (!editID ? "/addRequest.php" : "/editRequest.php"), { ...getSubmitData(), RequestStatus: 0, RequestID: editID});
     setModalMessages({...modalMessages, info: 'Talebiniz başarıyla kaydedildi.'});
     setModals({...modals, info: true});
     handleGoBack();
   };
+
 
   const handleOnayaGonder = () => {
     if (!requestDetails.date || !requestDetails.requester) {
@@ -162,11 +196,15 @@ const handleModalClose = () => {
       setModals({...modals, warning: true});
       return;
     }
+  
+    if (!validateMaterials()) {
+      return;
+    }
+  
     axios.post(baseURL + (!editID ? "/addRequest.php" : "/editRequest.php"), { ...getSubmitData(), RequestStatus: 1, RequestID: editID});
     setModalMessages({...modalMessages, info: 'Talebiniz onaya gönderildi.'});
     setModals({...modals, info: true});
     handleGoBack();
-
   };
 
   useEffect(() => {
@@ -187,6 +225,8 @@ const handleModalClose = () => {
     }
   }, [editID]);
 
+
+  
   const processFile = (file) => {
     const reader = new FileReader();
     reader.onload = async () => {
@@ -227,6 +267,22 @@ const handleModalClose = () => {
     processFile(file);
   };
   const addTemplateData = () => {
+    // Miktar kontrolü
+    const invalidMaterials = templateTable.filter(m => 
+      m.RequestedAmount === '' || 
+      m.RequestedAmount === undefined || 
+      (typeof m.RequestedAmount === 'number' && m.RequestedAmount <= 0)
+    );
+    
+    if (invalidMaterials.length > 0) {
+      setModalMessages({
+        ...modalMessages,
+        warning: 'Tüm malzemeler için geçerli bir miktar girilmelidir!'
+      });
+      setModals({...modals, warning: true});
+      return;
+    }
+  
     const template = templateTable;
     const selected = selectedMaterials;
     template.forEach((e) => {
@@ -239,7 +295,7 @@ const handleModalClose = () => {
       }
     });
     setSelectedMaterials(selected);
-    closeTemplateModal(); 
+    closeTemplateModal();
   };
 
   return (
@@ -517,7 +573,7 @@ const handleModalClose = () => {
     modals.templateCancel ? modalMessages.templateCancel :
     modalMessages.info
   }
-  type="warning"
+  type={modals.warning || modals.delete || modals.template || modals.templateCancel || modals.fileWarning ? 'warning' : 'info'}
   showExitWarning={showExitWarning || modals.delete || modals.template || modals.templateCancel}
   onExit={() => {
     if (showExitWarning) {
@@ -701,25 +757,35 @@ const handleModalClose = () => {
                         }}
                       >
                         <input
-                          type="number"
-                          value={material.RequestedAmount}
-                          onChange={(e) =>
-                            setTemplateTable(
-                              templateTable.map((m) =>
-                                m.MaterialID === material.MaterialID
-                                  ? { ...m, RequestedAmount: e.target.value }
-                                  : m
-                              )
-                            )
-                          }
-                          style={{
-                            width: "80px",
-                            padding: "5px",
-                            border: "1px solid #ccc",
-                            borderRadius: "4px",
-                          }}
-                          min="1"
-                        />
+  type="number"
+  min="1"
+  value={material.RequestedAmount}
+  onChange={(e) => {
+    const value = e.target.value === '' ? '' : Number(e.target.value);
+    // Sadece sayı girildiğinde ve 0 veya negatif olduğunda kontrol et
+    if (value !== '' && value <= 0) {
+      setModalMessages({
+        ...modalMessages,
+        warning: 'Lütfen miktarı sıfırdan büyük bir sayı giriniz!'
+      });
+      setModals({...modals, warning: true});
+      return;
+    }
+    setTemplateTable(
+      templateTable.map((m) =>
+        m.MaterialID === material.MaterialID
+          ? { ...m, RequestedAmount: value }
+          : m
+      )
+    );
+  }}
+  style={{
+    width: "80px",
+    padding: "5px",
+    border: "1px solid #ccc",
+    borderRadius: "4px",
+  }}
+/>
                       </td>
                       <td
                         style={{

@@ -106,6 +106,43 @@ const TeklifIsteme = (props) => {
       return;
     }
 
+        if (selectedSuppliers.filter(s => s.final).length === 0) {
+      setModalMessages({
+        ...modalMessages,
+        warning: 'Lütfen en az bir tedarikçi seçiniz!'
+      });
+      setModals({...modals, warning: true});
+      return;
+    }
+
+    if (selectedMaterials.filter(m => m.final).length === 0) {
+      setModalMessages({
+        ...modalMessages,
+        warning: 'Lütfen en az bir malzeme seçiniz!'
+      });
+      setModals({...modals, warning: true});
+      return;
+    }
+
+
+    const materialsWithEmptyAmount = selectedMaterials.filter(m => 
+      m.final && (
+        m.OfferRequestedAmount === '' || 
+        m.OfferRequestedAmount === undefined || 
+        (typeof m.OfferRequestedAmount === 'number' && m.OfferRequestedAmount <= 0)
+      )
+    );
+  
+    if (materialsWithEmptyAmount.length > 0) {
+      setModalMessages({
+        ...modalMessages,
+        warning: 'Tüm malzemeler için geçerli bir teklif miktarı girilmelidir!'
+      });
+      setModals({...modals, warning: true});
+      return;
+    }
+
+
     const requestData = {
       OfferGroupID: quoteGroupNo,
       CreatedBy: requester,
@@ -464,16 +501,27 @@ const TeklifIsteme = (props) => {
                           <td>
                             <input
                               type="number"
+                              min="1"
                               value={material.OfferRequestedAmount}
-                              onChange={(e) =>
+                              onChange={(e) => {
+                                const value = e.target.value === '' ? '' : Number(e.target.value);
+                                // Sadece negatif sayı kontrolü yapılıyor, boş değer kontrolü kaldırıldı
+                                if (value !== '' && value <= 0) {
+                                  setModalMessages({
+                                    ...modalMessages,
+                                    warning: 'Lütfen teklif miktarını sıfırdan büyük bir sayı giriniz!'
+                                  });
+                                  setModals({...modals, warning: true});
+                                  return;
+                                }
                                 setSelectedMaterials((prev) =>
                                   prev.map((m) =>
                                     m.MaterialID === material.MaterialID
-                                      ? { ...m, OfferRequestedAmount: Number(e.target.value), RequestedAmount: m.RequestItemID === 0 ? Number(e.target.value) : m.RequestedAmount }
+                                      ? { ...m, OfferRequestedAmount: value, RequestedAmount: m.RequestItemID === 0 ? value : m.RequestedAmount }
                                       : m
                                   )
                                 )
-                              }
+                              }}
                               style={{
                                 padding: "5px",
                                 border: "1px solid #ccc",
@@ -520,17 +568,28 @@ const TeklifIsteme = (props) => {
                             <td>
                               <input
                                 type="number"
+                                min="1"
                                 disabled={selectedMaterials.find(m => m.MaterialID === material.MaterialID)?.final !== undefined}
                                 value={selectedMaterials.find(m => m.MaterialID === material.MaterialID)?.OfferRequestedAmount || ""}
-                                onChange={(e) =>
+                                onChange={(e) => {
+                                  const value = e.target.value === '' ? '' : Number(e.target.value);
+                                  // Sadece negatif sayı kontrolü yapılıyor, boş değer kontrolü kaldırıldı
+                                  if (value !== '' && value <= 0) {
+                                    setModalMessages({
+                                      ...modalMessages,
+                                      warning: 'Lütfen miktarı sıfırdan büyük bir sayı giriniz!'
+                                    });
+                                    setModals({...modals, warning: true});
+                                    return;
+                                  }
                                   setSelectedMaterials((prev) =>
                                     prev.map((m) =>
                                       m.MaterialID === material.MaterialID
-                                        ? { ...m, OfferRequestedAmount: Number(e.target.value) }
+                                        ? { ...m, OfferRequestedAmount: value }
                                         : m
                                     )
                                   )
-                                }
+                                }}
                                 style={{
                                   padding: "5px",
                                   border: "1px solid #ccc",
@@ -554,6 +613,25 @@ const TeklifIsteme = (props) => {
       setModals({...modals, warning: true});
       return;
     }
+    
+    // Boş veya geçersiz miktarların kontrolü
+    const invalidMaterials = selectedMaterials.filter(m => 
+      !m.final && (
+        m.OfferRequestedAmount === '' || 
+        m.OfferRequestedAmount === undefined || 
+        (typeof m.OfferRequestedAmount === 'number' && m.OfferRequestedAmount <= 0)
+      )
+    );
+    
+    if (invalidMaterials.length > 0) {
+      setModalMessages({
+        ...modalMessages,
+        warning: 'Tüm malzemeler için geçerli bir miktar girilmelidir!'
+      });
+      setModals({...modals, warning: true});
+      return;
+    }
+    
     setSelectedMaterials((prev) => prev.map(m => ({ ...m, RequestedAmount: m.OfferRequestedAmount, final: true })));
     setModalMessages({...modalMessages, info: 'Malzemeler başarıyla listeye eklendi.'});
     setModals({...modals, info: true});
