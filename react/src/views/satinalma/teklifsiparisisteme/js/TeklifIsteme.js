@@ -33,6 +33,20 @@ const TeklifIsteme = (props) => {
 
   const editItems = props.location.editItems;
 
+  useEffect(() => {
+    const unblock = history.block((location, action) => {
+      if (action === 'POP') {
+        handleCancel();
+        return false;
+      }
+    });
+
+    return () => {
+      unblock();
+    };
+  }, [history]);
+
+  
    const [modals, setModals] = useState({ warning: false, info: false,   materialDelete: false, supplierDelete: false, select: false, cancel: false, save: false});
    const [modalMessages, setModalMessages] = useState({ warning: '', info: '', materialDelete:'',supplierDelete: '', select: '', cancel: '', save: ''});    
    const [materialToDelete, setMaterialToDelete] = useState(null);

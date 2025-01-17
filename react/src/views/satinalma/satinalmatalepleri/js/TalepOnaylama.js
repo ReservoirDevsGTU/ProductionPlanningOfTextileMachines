@@ -12,6 +12,7 @@ const TalepOnayla = () => {
   const { id } = useParams();
   const [selectedMaterials, setSelectedMaterials] = useState([]);
   const [users, setUsers] = useState([]);
+  const history = useHistory();
   const [requestDetails, setRequestDetails] = useState({
     date: "",
     requester: "",
@@ -32,10 +33,23 @@ const TalepOnayla = () => {
     reject: ''
   });
   
+  useEffect(() => {
+    const unblock = history.block((location, action) => {
+      if (action === 'POP') {
+        handleGoBack();
+        return false;
+      }
+    });
+
+    return () => {
+      unblock();
+    };
+  }, [history]);
+  
   const [showExitWarning, setShowExitWarning] = useState(false);
 
 
-  const history = useHistory();
+
 
   const handleGoBack = () => {
     setModalMessages({

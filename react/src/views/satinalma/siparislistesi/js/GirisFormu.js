@@ -32,6 +32,19 @@ const GirisFormu = () => {
     notlar: ""
   });
 
+  useEffect(() => {
+    const unblock = history.block((location, action) => {
+      if (action === 'POP') {
+        handleCancel();
+        return false;
+      }
+    });
+
+    return () => {
+      unblock();
+    };
+  }, [history]);
+
   const [modals, setModals] = useState({
     exit: false,      // İptal / Vazgeç
     fillError: false, // Gerekli alanlar boşsa

@@ -62,6 +62,20 @@ const TeklifForm = () => {
   const [filteredMaterialData, setFilteredMaterialData] = useState([]);
 
   useEffect(() => {
+    const unblock = history.block((location, action) => {
+      if (action === 'POP') {
+        handleCancel();
+        return false;
+      }
+    });
+
+    return () => {
+      unblock();
+    };
+  }, [history]);
+
+
+  useEffect(() => {
     // Arama sorgusuna göre malzemeleri filtrele  
     const filtered = materialData.filter(item => {
       const query = searchQuery.toLowerCase();

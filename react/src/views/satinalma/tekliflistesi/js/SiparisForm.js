@@ -47,6 +47,19 @@ const SiparisForm = (props) => {
   const [expandedSuppliers, setExpandedSuppliers] = useState({});
   const [supplierData, setSupplierData] = useState([]);
 
+  useEffect(() => {
+    const unblock = history.block((location, action) => {
+      if (action === 'POP') {
+        handleCancelAll();
+        return false;
+      }
+    });
+
+    return () => {
+      unblock();
+    };
+  }, [history]);
+
   const [modals, setModals] = useState({
     exit: false,      // İptal butonu -> "Emin misiniz?"
     warning: false,   // 0 veya negatif değer

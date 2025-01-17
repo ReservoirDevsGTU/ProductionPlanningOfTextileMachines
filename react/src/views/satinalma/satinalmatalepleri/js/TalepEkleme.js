@@ -35,6 +35,19 @@ const TalepEkleme = ({ editID }) => {
     description: "",
   });
   
+  useEffect(() => {
+    const unblock = history.block((location, action) => {
+      if (action === 'POP' && isDirty) {
+        handleGoBackButton();
+        return false;
+      }
+    });
+
+    return () => {
+      unblock();
+    };
+  }, [history, isDirty]);
+
   const handleGoBack = async () => {
     await new Promise(resolve => setTimeout(resolve, 2000));
     history.push("/satinalma/talepler");

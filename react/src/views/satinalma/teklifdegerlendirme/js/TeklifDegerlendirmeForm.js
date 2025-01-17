@@ -30,6 +30,18 @@ const TeklifDegerlendirmeForm = (props) => {
     setModals({...modals, exit: true});
   };
 
+  useEffect(() => {
+    const unblock = history.block((location, action) => {
+      if (action === 'POP') {
+        handleExit();
+        return false;
+      }
+    });
+
+    return () => {
+      unblock();
+    };
+  }, [history]);
 
   const OfferGroupID = props.location.OfferGroupID;
 
