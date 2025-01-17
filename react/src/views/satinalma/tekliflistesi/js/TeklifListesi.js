@@ -38,12 +38,16 @@ const TeklifListesi = () => {
 
   const [modals, setModals] = useState({
     warning: false,
-    info: false
+    info: false,
+    evaluationExit: false,
+    evaluationConfirm: false
   });
 
   const [modalMessages, setModalMessages] = useState({
     warning: '',
-    info: ''
+    info: '',
+    evaluationExit: '',
+    evaluationConfirm: ''
   });
 
 
@@ -120,8 +124,6 @@ const TeklifListesi = () => {
         })
       ]);
 
-
-
       const selectedOffer = offerResponse.data.find(offer => offer.OfferID === parseInt(selectedOfferId));
       if (!selectedOffer) throw new Error('Teklif bulunamadı');
 
@@ -148,6 +150,43 @@ const TeklifListesi = () => {
       setModals({ ...modals, warning: true });
     }
   };
+
+
+  const handleEvaluationExitClick = () => {
+    // 1) Değerlendirme modal'ını kapat
+    setEvaluationModal(false);
+  
+    // 2) Ardından, isterseniz info veya warning modal açmak için setTimeout
+    setTimeout(() => {
+      // Mesela "Değerlendirme iptal edilsin mi?" diye bir CustomModal açabilirsiniz
+      setModalMessages(prev => ({
+        ...prev,
+        evaluationExit: "Değerlendirme formunu kapatmak istediğinizden emin misiniz?"
+      }));
+      setModals(prev => ({
+        ...prev,
+        evaluationExit: true
+      }));
+    }, 200);
+  };
+  
+
+  const handleEvaluationConfirmClick = () => {
+    // 1) Önce evaluationModal'ı kapat
+    setEvaluationModal(false);
+  
+    setTimeout(() => {
+      setModalMessages(prev => ({
+        ...prev,
+        evaluationConfirm: "Teklifi değerlendirmeye almayı onaylıyor musunuz?"
+      }));
+      setModals(prev => ({
+        ...prev,
+        evaluationConfirm: true
+      }));
+    }, 200);
+  };
+  
 
   const handleSendMail = async () => {
     try {
@@ -522,7 +561,7 @@ const TeklifListesi = () => {
                         'unit_price': (item) => (<td>{item.OfferedPrice ?
                           Math.round(Number.EPSILON + 100 * item.OfferedPrice / item.OfferedAmount) / 100
                           : '?'}</td>),
-                        'exchange_rate': () => (<td>TRY (placeholder)</td>)
+                        'exchange_rate': () => (<td>TRY</td>)
                       }}
                     />
                   </CCardBody>
@@ -589,14 +628,64 @@ const TeklifListesi = () => {
 
 
       <CustomModal
-        show={modals.warning || modals.info}
-        onClose={() => setModals({ warning: false, info: false })}
-        message={modals.warning ? modalMessages.warning : modalMessages.info}
-        type={modals.warning ? 'warning' : 'info'}
-      />
+  show={
+    modals.warning ||
+    modals.info ||
+   modals.evaluationExit ||
+   modals.evaluationConfirm
+  }
+
+  onClose={() => {
+    // eğer evaluationExit açıksa, kullanıcı "Kapat" (X) derse iptal
+    if (modals.evaluationExit) {
+      setModals(prev => ({ ...prev, evaluationExit: false }));
+      return;
+    }
+    // eğer evaluationConfirm açıksa, kullanıcı "Kapat" derse iptal
+    if (modals.evaluationConfirm) {
+      setModals(prev => ({ ...prev, evaluationConfirm: false }));
+      return;
+    }
+    // info veya warning'de kapatınca da sadece modal'ı resetleyin
+    setModals({ warning: false, info: false, evaluationExit: false, evaluationConfirm: false });
+  }}
+  message={
+ modals.evaluationExit
+    ? modalMessages.evaluationExit
+    : modals.evaluationConfirm
+     ? modalMessages.evaluationConfirm
+      : modals.warning
+      ? modalMessages.warning
+      : modalMessages.info
+  }
+  type={
+    modals.warning ||
+   modals.evaluationExit ||
+   modals.evaluationConfirm
+      ? 'warning'
+      : 'info'
+  }
+  showExitWarning={
+    // "Evet/Hayır" butonlarını hangi durumlarda göstereceğiz?
+   modals.evaluationExit || modals.evaluationConfirm
+  }
+  onExit={() => {
+    if (modals.evaluationExit) {
+      // Kullanıcı "Evet" derse, gerçekten evaluationModal'ı kapatalım
+      setEvaluationModal(false);
+      setModals(prev => ({ ...prev, evaluationExit: false }));
+    }
+    else if (modals.evaluationConfirm) {
+      sendToEvaluation();
+      // Modal'ları kapatalım
+      setEvaluationModal(false);
+      setModals(prev => ({ ...prev, evaluationConfirm: false }));
+    }
+  }}
+/>
 
 
-      <CModal show={evaluationModal} onClose={() => setEvaluationModal(false)} size="md" centered>
+      <CModal show={evaluationModal} onClose={() => setEvaluationModal(false)} size="md" centered  >
         <CModalHeader closeButton>
           <h5 style={{ fontWeight: 'bold', fontSize: '24px' }}>Değerlendirmeye Alma Formu</h5>
         </CModalHeader>
@@ -606,6 +695,7 @@ const TeklifListesi = () => {
             <label className="form-label">Değerlendiren:</label>
             <select className="form-select"
               style={{
+  
                 padding: '8px 12px',
                 fontSize: '16px',
                 border: '1px solid #ced4da',
@@ -651,10 +741,10 @@ const TeklifListesi = () => {
         </CModalBody>
 
         <CModalFooter>
-          <CButton color="danger" onClick={() => setEvaluationModal(false)}>
+          <CButton color="danger" onClick={handleEvaluationExitClick}>
             Vazgeç
           </CButton>
-          <CButton color="primary" onClick={sendToEvaluation}>Gönder</CButton>
+          <CButton color="primary" onClick={handleEvaluationConfirmClick}>Gönder</CButton>
         </CModalFooter>
       </CModal>
 

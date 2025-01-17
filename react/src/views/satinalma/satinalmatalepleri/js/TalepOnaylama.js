@@ -302,7 +302,7 @@ const handleReject = () => {
         </tbody>
       </table>
 
-      <CustomModal 
+  <CustomModal 
       show={modals.approve}
       onClose={handleModalClose}
       message={modalMessages.approve}

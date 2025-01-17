@@ -422,6 +422,7 @@ const GirisFormu = () => {
       }}>
         <CButton
           color="danger"
+          variant="outline"
           onClick={handleCancel}
         >
           İptal

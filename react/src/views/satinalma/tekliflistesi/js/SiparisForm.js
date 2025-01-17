@@ -48,13 +48,17 @@ const SiparisForm = (props) => {
   const [supplierData, setSupplierData] = useState([]);
 
   const [modals, setModals] = useState({
-    warning: false,
-    info: false
+    exit: false,      // İptal butonu -> "Emin misiniz?"
+    warning: false,   // 0 veya negatif değer
+    info: false,      // Başarılı işlem veya genel info
+    fillError: false, // Zorunlu alanlar boşsa
   });
   
   const [modalMessages, setModalMessages] = useState({
+    exit: '',
     warning: '',
-    info: ''
+    info: '',
+    fillError: '',
   });
 
   useEffect(() => {
@@ -93,14 +97,29 @@ const SiparisForm = (props) => {
   }, [id]);
 
   const handleModalClose = () => {
-    const currentModals = { ...modals };
-    setModals({ warning: false, info: false });
-    
-    if (currentModals.info) {
+    if (modals.info) {
+      history.push('/satinalma/teklif-listesi');
+    }
+    // Modal state reset
+    setModals({
+      exit: false,
+      warning: false,
+      info: false,
+      fillError: false,
+    });
+  };
+  const handleModalExit = () => {
+    if (modals.exit) {
       history.push('/satinalma/teklif-listesi');
     }
   };
-
+  const handleCancelAll = () => {
+    setModalMessages(prev => ({
+      ...prev,
+      exit: "Yaptığınız değişiklikler kaybolacak. Çıkmak istediğinize emin misiniz?"
+    }));
+    setModals(prev => ({ ...prev, exit: true }));
+  };
 
   const openmodal = async () => {
     setShowEmailModal(true);
@@ -211,16 +230,37 @@ const SiparisForm = (props) => {
     }
   };
 
- const handleSubmit = async () => {
-  if (formData.mailgonder) {
-    // Email gönderme seçili ise önce email bilgilerini getir
-    await openmodal();
-  } else {
-    // Mail gönderme seçili değilse direkt kaydet
-    saveOrder([]);
-  }
-};
+  const handleSubmit = async () => {
+    // a) Zorunlu alanlar kontrol (örnek)
+    if (!formData.ShippingDate || !formData.OrderDate || !formData.SupplierID || !formData.OrderNotes) {
+      setModalMessages(prev => ({
+        ...prev,
+        fillError: "Lütfen tüm alanları doldurunuz!"
+      }));
+      setModals(prev => ({ ...prev, fillError: true }));
+      return;
+    }
 
+    // b) Malzemelerde 0 veya negatif var mı?
+    const invalidMaterial = selectedMaterials.find(
+      m => m.final && (m.OrderedAmount <= 0 || m.UnitPrice <= 0)
+    );
+    if (invalidMaterial) {
+      setModalMessages(prev => ({
+        ...prev,
+        warning: "Tüm malzemeler için geçerli bir miktar ve birim fiyat girilmelidir!"
+      }));
+      setModals(prev => ({ ...prev, warning: true }));
+      return;
+    }
+
+    // c) Eğer mailgonder true ise mail modal aç, değilse doğrudan kaydet
+    if (formData.mailgonder) {
+      await openmodal();
+    } else {
+      saveOrder([]); 
+    }
+  };
 
 const handleEmailSubmit = async () => {
   const selectedContactDetailIds = supplierData.flatMap(supplier =>
@@ -254,12 +294,56 @@ const handleEmailSubmit = async () => {
     });
   };
 
+  const checkPositiveValue = (val) => {
+    if (val !== '' && val <= 0) {
+      setModalMessages(prev => ({
+        ...prev,
+        warning: 'Lütfen 0’dan büyük bir değer giriniz!'
+      }));
+      setModals(prev => ({
+        ...prev,
+        warning: true
+      }));
+      return false;
+    }
+    return true;
+  };
+
+  const handleMaterialUpdate = (materialID, field, newValue) => {
+    // 1) newValue -> sayıya çevir
+    const val = newValue === '' ? '' : Number(newValue);
+
+    // 2) 0 veya negatif ise warning modal aç, değişiklik engelle
+    if (val !== '' && val <= 0) {
+      setModalMessages(prev => ({
+        ...prev,
+        warning: 'Lütfen 0’dan büyük bir değer giriniz!'
+      }));
+      setModals(prev => ({
+        ...prev,
+        warning: true
+      }));
+      return;
+    }
+
+    // 3) Güncelle
+    setSelectedMaterials(prev =>
+      prev.map((m) => {
+        if (m.MaterialID === materialID) {
+          return { ...m, [field]: val };
+        }
+        return m;
+      })
+    );
+  };
+
   const handleRemoveMaterial = () => {
     setSelectedMaterials((prev) =>
       prev.filter((m) => m.MaterialID !== selectedMaterialToDelete.MaterialID)
     );
     setShowModal(false);
   };
+
 
   return (
     <div style={{ padding: '20px' }}>
@@ -376,7 +460,7 @@ const handleEmailSubmit = async () => {
                 <CButton 
                   color="danger" 
                   variant="outline"
-                  onClick={() => history.push('/satinalma/teklif-listesi')}
+                  onClick={handleCancelAll}
                 >
                   İptal
                 </CButton>
@@ -418,7 +502,7 @@ const handleEmailSubmit = async () => {
             {label: "Kur", key: "currency"},
           ]}
           scopedSlots={{
-            currency: () => (<td>TRY (placeholder)</td>),
+            currency: () => (<td>TRY</td>),
             delete: (material) => (
                       <td>
                         <button
@@ -443,13 +527,7 @@ const handleEmailSubmit = async () => {
                           type="number"
                           value={material.OrderedAmount}
                           onChange={(e) =>
-                            setSelectedMaterials((prev) =>
-                              prev.map((m) =>
-                                m.MaterialID === material.MaterialID
-                                  ? { ...m, OrderedAmount: Number(e.target.value)}
-                                  : m
-                              )
-                            )
+                            handleMaterialUpdate(material.MaterialID, "OrderedAmount", e.target.value)
                           }
                           style={{
                             padding: "5px",
@@ -466,14 +544,7 @@ const handleEmailSubmit = async () => {
                     type="number"
                     value={material.UnitPrice}
                           onChange={(e) =>
-                            setSelectedMaterials((prev) =>
-                              prev.map((m) =>
-                                m.MaterialID === material.MaterialID
-                                  ? { ...m, UnitPrice: Number(e.target.value)}
-                                  : m
-                              )
-                            )
-                          }
+                            handleMaterialUpdate(material.MaterialID, "UnitPrice", e.target.value)}
                     style={{
                       padding: "5px",
                       border: "1px solid #ccc",
@@ -522,15 +593,21 @@ const handleEmailSubmit = async () => {
                           type="number"
                           disabled={selectedMaterials.find(m => m.MaterialID === material.MaterialID)?.final !== undefined}
                           value={selectedMaterials.find(m => m.MaterialID === material.MaterialID)?.OrderedAmount || ""}
-                          onChange={(e) =>
+                          onChange={(e) => {
+                            const val = e.target.value === '' ? '' : Number(e.target.value);
+                            // Kontrol: 0 veya negatifse modal açıp değişikliği engelle
+                            if (!checkPositiveValue(val)) {
+                              return;
+                            }
+                            // Geçerliyse state güncelle
                             setSelectedMaterials((prev) =>
                               prev.map((m) =>
                                 m.MaterialID === material.MaterialID
-                                  ? { ...m, OrderedAmount: Number(e.target.value) }
+                                  ? { ...m, OrderedAmount: val }
                                   : m
                               )
-                            )
-                          }
+                            );
+                          }}
                           style={{
                             padding: "5px",
                             border: "1px solid #ccc",
@@ -688,11 +765,29 @@ const handleEmailSubmit = async () => {
       </CModal>
 
       <CustomModal
-  show={modals.warning || modals.info}
-  onClose={handleModalClose}
-  message={modals.warning ? modalMessages.warning : modalMessages.info}
-  type={modals.warning ? 'warning' : 'info'}
-/>
+        show={modals.exit || modals.warning || modals.info || modals.fillError}
+        onClose={handleModalClose}
+        message={
+          modals.exit
+            ? modalMessages.exit
+            : modals.fillError
+            ? modalMessages.fillError
+            : modals.warning
+            ? modalMessages.warning
+            : modals.info
+            ? modalMessages.info
+            : ''
+        }
+        type={
+          // exit, fillError, warning -> "warning" tipi, info -> "info"
+          modals.exit || modals.fillError || modals.warning
+            ? 'warning'
+            : 'info'
+        }
+        // "exit" durumunda onay butonu (Evet/Hayır)
+        showExitWarning={modals.exit}
+        onExit={handleModalExit}
+      />
 
 
     </div>
