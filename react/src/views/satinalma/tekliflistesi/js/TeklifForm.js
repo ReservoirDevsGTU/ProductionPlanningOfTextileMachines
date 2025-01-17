@@ -58,6 +58,18 @@ const TeklifForm = () => {
     success: '',
     warning: ''
   });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredMaterialData, setFilteredMaterialData] = useState([]);
+
+  useEffect(() => {
+    // Arama sorgusuna göre malzemeleri filtrele  
+    const filtered = materialData.filter(item => {
+      const query = searchQuery.toLowerCase();
+      return item.MaterialNo.toLowerCase().includes(query) ||
+             item.MaterialName.toLowerCase().includes(query);
+    });
+    setFilteredMaterialData(filtered);
+  }, [searchQuery, materialData]);
 
 
   if(!OfferID) history.goBack();
@@ -316,11 +328,13 @@ const TeklifForm = () => {
             <CCard>
               <CCardBody>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-                  <CInput
-                    type="text"
-                    placeholder="Arama Yapın..."
-                    style={{ width: '200px' }}
-                  />
+                <CInput
+  type="text"
+  placeholder="Malzeme No veya Adı ile Arama Yapın..."
+  style={{ width: '300px' }}
+  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)}
+/>
                 </div>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
@@ -335,7 +349,7 @@ const TeklifForm = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {materialData.map((item, index) => (
+                    {filteredMaterialData.map((item, index) => (
                       <tr key={index} style={{ borderBottom: '1px solid #dee2e6' }}>
                         <td style={{ padding: '12px' }}>{item.MaterialNo}</td>
                         <td style={{ padding: '12px' }}>{item.MaterialName}</td>
