@@ -469,6 +469,7 @@ const TeklifListesi = () => {
       <div>
         {filteredData.length > 0 ? (
           <CustomTable
+            update={!modals.evaluationConfirm}
             fetchAddr="/queryOffers.php"
             fetchArgs={{ subTables: { Materials: { expand: false } } }}
             searchTerm={searchTerm}

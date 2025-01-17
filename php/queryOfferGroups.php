@@ -82,7 +82,7 @@ $offerGroupTable = array("primary" => "OfferGroupID",
                                      FROM PurchaseOffers po
                                      JOIN PurchaseOfferDetails pod
                                      ON pod.OfferID = po.OfferID
-                                     JOIN Users u
+                                     LEFT JOIN Users u
                                      ON pod.EvaluatedBy = u.UserID
                                      WHERE po.IsDeleted = 0) pog",
                          "joins" => "",

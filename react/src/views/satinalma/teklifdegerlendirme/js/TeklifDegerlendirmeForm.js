@@ -127,16 +127,6 @@ const TeklifDegerlendirmeForm = (props) => {
       material => material.Suppliers.some(s => s.selected)
     );
   
-
-    if (!anySelected) {
-      setModalMessages({
-        ...modalMessages,
-        noneSelected: "Lütfen en az bir malzeme seçiniz!"
-      });
-      setModals({ ...modals, noneSelected: true });
-  
-      return; 
-    }
   
 
     submit(); 
